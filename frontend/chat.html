@@ -8,6 +8,21 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 
+<button id="startButton">Begin working on the team</button>
+
+<script>
+    document.getElementById('startButton').addEventListener('click', function () {
+        fetch('/start')
+            .then(response => response.json())
+            .then(data => {
+                // Display the initial responses in your chat
+                data.responses.forEach(response => {
+                    appendMessage(`${response.role}: ${response.content}`);
+                });
+            });
+    });
+</script>
+
 <body>
     <div class="chat-container">
         <h1>Team Chat Room</h1>
