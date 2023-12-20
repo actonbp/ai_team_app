@@ -8,29 +8,30 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 
-<button id="startButton">Begin working on the team</button>
-
-<script>
-    document.getElementById('startButton').addEventListener('click', function () {
-        fetch('/start')
-            .then(response => response.json())
-            .then(data => {
-                // Display the initial responses in your chat
-                data.responses.forEach(response => {
-                    appendMessage(`${response.role}: ${response.content}`);
-                });
-            });
-    });
-</script>
-
 <body>
-    <div class="chat-container">
-        <h1>Team Chat Room</h1>
-        <div id="chatWindow"></div>
-        <form id="send-container">
-            <input type="text" id="messageInput" placeholder="Type your message here...">
-            <button id="sendMessageButton">Send</button>
-        </form>
+    <div id="app">
+        <aside class="sidebar">
+            <!-- Navigation buttons -->
+            <button class="nav-button">Teams</button>
+            <button class="nav-button">Calendar</button>
+            <button class="nav-button">Files</button>
+            <button class="nav-button">Settings</button>
+            <button class="nav-button">Help</button>
+            <button class="nav-button">Logout</button>
+        </aside>
+        <section class="chat-container">
+            <header class="chat-header">
+                <h1>Team Chat</h1>
+            </header>
+            <div class="chat-area" id="chatWindow">
+                <!-- Chat messages will be added here -->
+            </div>
+            <div class="input-area">
+                <button id="raiseHandButton">Raise Hand to Participate</button>
+                <input type="text" id="messageInput" placeholder="Type a message...">
+                <button id="sendMessageButton">Send</button>
+            </div>
+        </section>
     </div>
     <script src="js/chat.js"></script>
 </body>
