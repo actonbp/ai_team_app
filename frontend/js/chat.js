@@ -40,37 +40,14 @@ window.onload = function () {
             typingElement.remove();
 
             fetch('/start')
-                .then(response => response.json())
-                .then(data => {
-                    // Display the initial responses in your chat and add them to the conversation history
-                    data.responses.forEach(response => {
-                    appendMessage(`${response.role}: ${response.content}`, false, 'images/avatar_1.png', response.role.toLowerCase().replace(' ', '-'));                   
-                 });
-                    // Start the automatic chat
-                    chatInterval = setInterval(() => {
-                        fetch('/ask-openai', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                firstName,
-                                badgeName,
-                                message: generateRandomMessage() // Assuming you have a function to generate a random message
-                            })
-                        })
-                            .then(response => response.json())
-                            .then(data => {
-                                // Display the responses in your chat and add them to the conversation history
-                                data.responses.forEach(response => {
-                                    appendMessage(`${response.role}: ${response.content}`, false, 'images/avatar_1.png', response.role.toLowerCase());
-                                    conversationHistory.push(`${response.role}: ${response.content}`);
-                                });
-                            })
-                            .catch(error => {
-                                console.error('Fetch error:', error);
-                            });
-                    }, 20000); // Fetch new responses every 20 seconds
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .catch(error => {
+                    console.error('Fetch error:', error);
                 });
         }, 10000); // Long delay
     }, 5000); // Short delay
@@ -138,7 +115,12 @@ sendMessageButton.addEventListener('click', () => {
             },
             body: JSON.stringify({ firstName, badgeName, message: message })
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
             // Now remove the "typing..." message
             messageContainer.removeChild(messageContainer.lastChild);
@@ -205,7 +187,12 @@ function simulateChat() {
                 },
                 body: JSON.stringify({ firstName, badgeName, message: generateRandomMessage() })
             })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     if (data && data.responses) {
                         // Display the responses in your chat and add them to the conversation history

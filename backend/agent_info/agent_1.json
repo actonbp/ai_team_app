@@ -1,0 +1,25 @@
+{
+    "East Point Mall": {
+        "At least 50 parking spaces": "Y",
+        "Larger than 2000 square feet": "N",
+        "Substantial foot traffic": "Y",
+        "Large tourist population": "N",
+        "Large student population": "Y",
+        "Quick access to waste disposal": "Y",
+        "Large population of employable individuals": "Y"
+    },
+    "Starlight Valley": {
+        "At least 50 parking spaces": "Y",
+        "Large student population": "N",
+        "Quick access to waste disposal": "Y",
+        "Large population of employable individuals": "N"
+    },
+    "Cape James Beach": {
+        "At least 50 parking spaces": "N",
+        "No more than 2 direct competitors in vicinity": "Y",
+        "Large tourist population": "Y",
+        "Large student population": "N",
+        "Quick access to waste disposal": "N",
+        "Large population of employable individuals": "Y"
+    }
+}
