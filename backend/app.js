@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
 const path = require('path');
+const fs = require('fs').promises;
 const app = express();
 const port = process.env.PORT || 1000;
 const conversationHistories = {};
@@ -10,18 +11,79 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, '../frontend')));
 
 const agents = ['Agent 1', 'Agent 2', 'Agent 3'];
-const agentInformation = {
-    'Agent 1': 'I am Agent 1. My unique information is: East Point Mall has at least 50 parking spaces. Our task is to evaluate three locations for a new restaurant: East Point Mall, Starlight Valley, and Cape James Beach. Rank these locations from most to least desirable.',
-    'Agent 2': 'I am Agent 2. My unique information is: Starlight Valley is larger than 2,000 square feet. Our task is to evaluate three locations for a new restaurant: East Point Mall, Starlight Valley, and Cape James Beach. Rank these locations from most to least desirable.',
-    'Agent 3': 'I am Agent 3. My unique information is: Cape James Beach has a purchasing cost of less than $1MM. Our task is to evaluate three locations for a new restaurant: East Point Mall, Starlight Valley, and Cape James Beach. Rank these locations from most to least desirable.'
+let agentInformation = {
+  "Agent 1": `Your name is Agent 1 (only refer to yourself as that). 
+  Here is your unique info:
+  - East Point Mall: 
+    - At least 50 parking spaces - Y
+    - Larger than 2000 square feet - N
+    - Substantial foot traffic - Y
+    - Large tourist population - N
+    - Large student population - Y
+    - Quick access to waste disposal - Y
+    - Large population of employable individuals - Y
+  - Starlight Valley: 
+    - At least 50 parking spaces - Y
+    - Large student population - N
+    - Quick access to waste disposal - Y
+    - Large population of employable individuals - N
+  - Cape James Beach: 
+    - At least 50 parking spaces - N
+    - No more than 2 direct competitors in vicinity - Y
+    - Large tourist population - Y
+    - Large student population - N
+    - Quick access to waste disposal - N
+    - Large population of employable individuals - Y`,
+  "Agent 2": `Your name is Agent 2. (only refer to yourself as that). 
+  Here is your unique info:
+  - East Point Mall: 
+    - At least 50 parking spaces - Y
+    - Purchasing cost of less than 1MM - N
+    - Substantial foot traffic - Y
+    - Large tourist population - N
+    - Large student population - Y
+    - Quick access to waste disposal - Y
+    - Large population of employable individuals - Y
+  - Starlight Valley: 
+    - Larger than 2000 square feet - Y
+    - Substantial foot traffic - Y
+    - Large tourist population - Y
+    - Large student population - N
+    - Large population of employable individuals - N
+  - Cape James Beach: 
+    - At least 50 parking spaces - N
+    - Purchasing cost of less than 1MM - Y
+    - No more than 2 direct competitors in vicinity - Y
+    - Substantial foot traffic - Y
+    - Large tourist population - Y`,
+  "Agent 3": `Your name is Agent 3. (only refer to yourself as that).
+  Here is your unique info:
+  - East Point Mall: 
+    - At least 50 parking spaces - Y
+    - Substantial foot traffic - Y
+    - Low maintenance costs - N
+    - Large tourist population - N
+    - Large student population - Y
+    - Quick access to waste disposal - Y
+    - Large population of employable individuals - Y
+  - Starlight Valley: 
+    - Purchasing cost of less than 1MM - Y
+    - No more than 2 direct competitors in vicinity - Y
+    - Large student population - N
+    - Large population of employable individuals - N
+  - Cape James Beach: 
+    - Substantial foot traffic - Y
+    - Low maintenance costs - Y
+    - Large tourist population - Y
+    - Quick access to waste disposal - N
+    - Large population of employable individuals - Y`
 };
-
 let lastSelectedAgentIndex = null;
 
 // Integrate the provided function into the existing code
 async function callOpenAI(messages, role = 'user') {
   const response = await axios.post('https://api.openai.com/v1/chat/completions', {
-    model: 'gpt-3.5-turbo',
+      model: 'gpt-4-0125-preview',
     messages: [
       {
         role: 'system',
@@ -29,7 +91,15 @@ async function callOpenAI(messages, role = 'user') {
                   Your team is evaluating three potential locations for a new restaurant: 
                   East Point Mall, Starlight Valley, and Cape James Beach. 
                   Discuss with your team members and rank these locations from most to least desirable 
-                  based on the fulfillment of the following ten criteria: 
+                  based on the fulfillment of the following ten criteria below.
+
+                  - Keep you messages short and concise, and take any strategy you want to communicate with team members. Messages should be 1 or 2 lines max.
+                  - You can ask specfic team members for their input, or respond to others directly.
+                  - You should first introduce yourself if you have no prior chat information. 
+                  - Always use the previous chat information to make decisions. 
+                  - This task should take multiple messages back and forth between team members. You should not come to a conclusion from your first message. Learn all of the team member's info first. 
+
+                  CRITERIA: 
                   (1) at least 50 parking spaces, 
                   (2) larger than 2,000 square feet, 
                   (3) purchasing cost of less than $1MM, 
@@ -43,9 +113,14 @@ async function callOpenAI(messages, role = 'user') {
                   Each criterion is equally important. 
                   Share your list of criteria met for each location with the team, 
                   but do not directly show your list. 
-                  Only use shorter, brief messages, like a person in a chat would. 
-                  Always use the past conversation history in your messages, and you if you don't have any past text, say "I don't have any prior info".
-                Keep working until the group can come to a decision`
+
+                  IMPORTANT:
+                  - "Y" means yes and "N" means no, for a location feature. 
+                  - DO NO just paste the info into the chat. Act like a human and type out brief info in your messages 
+                  - Work through it with your teamates over multiple messages to come to the final answer
+                  - Only use shorter, brief messages, like a person in a chat would. 
+                  - lways use the past conversation history in your messages, and you if you don't have any past text, say "I don't have any prior info".
+                  - Keep working until the group can come to a decision`
       },
       ...messages.map(entry => ({ role, content: entry.content }))
     ]
@@ -76,10 +151,10 @@ app.post('/ask-openai', async (req, res) => {
             content: entry.content
         }));
 
-        // Include the agent's information in the messages array
+        // Include the agent's information in the messages array in plain text format
         messages.push({
-            role: 'system',
-            content: agentInformation[agentName]
+            role: 'agentName',
+            content: `responseContent`
         });
 
         // Call OpenAI with the updated history
@@ -87,7 +162,7 @@ app.post('/ask-openai', async (req, res) => {
 
         // Append the new AI message to the conversation history
         conversationHistory.push({
-            role: 'assistant',
+            role: agentName,
             content: responseContent
         });
 
@@ -96,8 +171,8 @@ app.post('/ask-openai', async (req, res) => {
 
         res.json({
             responses: [
-                { role: agentName, content: agentInformation[agentName] },
-                { role: 'assistant', content: responseContent }
+                //{ role: agentName, content: `Agent ${selectedAgentIndex + 1} information: ${agentInformation[agentName]}` },
+                { role: agentName, content: responseContent }
             ]
         });
     } catch (error) {
