@@ -6,15 +6,27 @@ const fs = require('fs').promises;
 const app = express();
 const port = process.env.PORT || 1000;
 const conversationHistories = {};
+const crypto = require('crypto'); // Add this line to use the crypto module for generating unique IDs
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../frontend')));
+
+function generateConversationId() {
+  return crypto.randomUUID();
+}
+
+app.post('/start-chat', (req, res) => {
+  const conversationId = generateConversationId(); // This function now generates a unique ID
+  conversationHistories[conversationId] = []; // Initialize conversation history
+
+  res.json({ conversationId }); // Send the conversationId back to the frontend
+});
+
 
 app.post('/decide-agents', async (req, res) => {
   const { conversationId } = req.body;
   const conversationHistory = conversationHistories[conversationId] || [];
 
-  // Extract the last message from the conversation history
   const lastMessage = conversationHistory[conversationHistory.length - 1];
 
   try {
@@ -135,25 +147,37 @@ function determineRelevantAgents(lastMessage, agentInformation) {
   }
   const messageContent = lastMessage.content.toLowerCase();
 
-// Add this function right after the determineRelevantAgents function
+}
+
 async function callOpenAIForAgentSelection(messages) {
+  // Ensure the last message exists before proceeding
+  if (messages.length === 0) {
+    console.error('No messages provided for agent selection.');
+    return [];
+  }
+
   const lastMessage = messages[messages.length - 1].content;
-  const agentSelectionResponse = await axios.post('https://api.openai.com/v1/completions', {
-    model: 'gpt-4-0125-preview',
-    prompt: `Given the last message: "${lastMessage}", and the information for each agent, determine a relevance vector indicating which agents should respond. Use 1 for relevant and 0 for not relevant. Agents: ${Object.keys(agentInformation).join(', ')}.`,
-    temperature: 0,
-    max_tokens: 60,
-  }, {
-    headers: {
-      'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
-    }
-  });
 
-  // Extract the relevance vector from the response
-  // Assuming the response format is a string of 1s and 0s separated by commas
-  const relevanceVector = agentSelectionResponse.data.choices[0].text.split(',').map(num => parseInt(num.trim()));
+  try {
+    const agentSelectionResponse = await axios.post('https://api.openai.com/v1/completions', {
+      model: 'gpt-3.5-turbo-instruct', // Adjusted to a more generic and currently available model
+      prompt: `Given the last message: "${lastMessage}", and the information for each agent, determine a relevance vector indicating which agents should respond. Use 1 for relevant and 0 for not relevant. Agents: ${Object.keys(agentInformation).join(', ')}.`,
+      temperature: 0, // Keeps the response deterministic
+      max_tokens: 60, // Adjust according to the expected length of your output
+    }, {
+      headers: {
+        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+      }
+    });
 
-  return relevanceVector;
+    // Assuming the response format is a string of 1s and 0s separated by commas
+    const relevanceVector = agentSelectionResponse.data.choices[0].text.split(',').map(num => parseInt(num.trim(), 10));
+
+    return relevanceVector;
+  } catch (error) {
+    console.error('Error calling OpenAI for agent selection:', error);
+    throw new Error('Failed to call OpenAI for agent selection');
+  }
 }
 
 async function callOpenAI(messages, role = 'user') {
@@ -253,5 +277,6 @@ app.post('/ask-openai', async (req, res) => {
 });
 
 app.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}`);
-}); // Corrected the syntax error by adding the missing closing parenthesis and semicolon
+  console.log(`Server running on http://localhost:${port}`);
+});
+

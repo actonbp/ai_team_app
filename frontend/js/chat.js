@@ -9,188 +9,114 @@ const sendMessageButton = document.getElementById('sendMessageButton');
 const raiseHandButton = document.getElementById('raiseHandButton');
 const messageContainer = document.getElementById('chatWindow');
 const typingIndicator = document.createElement('div');
-const message = messageInput.value;
 typingIndicator.innerText = 'Agent is typing...';
 
-// Disable the message input field and the send message button initially
-messageInput.disabled = true;
-sendMessageButton.disabled = true;
-
-// Initialize an empty array to store the conversation history
-let conversationHistory = [];
-
-// Define chatInterval outside of window.onload
-let chatInterval;
-
-typingDelay = 10000
-
-const agents = ['Agent 1', 'Agent 2', 'Agent 3']; // Add this line to your chat.js file
-
-function appendMessage(messageText, isAgent = false) {
-    const messageElement = document.createElement('div');
-    messageElement.classList.add('message');
-    const avatarElement = document.createElement('img');
-    avatarElement.classList.add('avatar');
-    avatarElement.src = 'images/avatar_1.png'; // Set the avatar image source for all messages
-    const textElement = document.createElement('div');
-    textElement.innerText = messageText;
-    textElement.classList.add('text');
-    messageElement.appendChild(avatarElement);
-    messageElement.appendChild(textElement);
-    messageContainer.append(messageElement);
-    if (isAgent) {
-        // If the message is from an agent, add it to the conversation history
-        conversationHistory.push({ role: 'agent', content: messageText });
-    } else {
-        // If the message is from the user, show the user's badge name and add it to the conversation history
-        conversationHistory.push({ role: badgeName, content: messageText });
+class ChatSession {
+    constructor() {
+        this.conversationHistory = [];
+        this.typingDelay = 10000;
+        this.conversationId = localStorage.getItem('conversationId');
+        this.init();
     }
-    return messageElement;
-}
 
-function showTypingIndicator(agentName) {
-    typingIndicator.innerText = `${agentName} is typing...`;
-    messageContainer.appendChild(typingIndicator);
-}
-
-function hideTypingIndicator() {
-    if (typingIndicator.parentNode === messageContainer) {
-        messageContainer.removeChild(typingIndicator);
+    init() {
+        this.startChatSession();
+        messageInput.disabled = true;
+        sendMessageButton.disabled = true;
+        this.attachEventListeners();
     }
-}
 
-const eventSource = new EventSource('/events');
+    startChatSession() {
+        fetch('/start-chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                this.conversationId = data.conversationId;
+                localStorage.setItem('conversationId', this.conversationId);
+            })
+            .catch(error => console.error('Error starting chat session:', error));
+    }
 
-eventSource.addEventListener('typing', (event) => {
-    showTypingIndicator(event.data);
-});
-
-function simulateTyping(agentName, message) {
-    showTypingIndicator(agentName);
-    setTimeout(() => {
-        appendMessage(message, true);
-    }, 2000); // Adjust this delay as needed
-}
-
-eventSource.addEventListener('message', (event) => {
-    appendMessage(event.data);
-});
-
-window.onload = function () {
-    simulateChat();
-};
-
-// Event listener for the "Raise Hand to Participate" button
-raiseHandButton.addEventListener('click', () => {
-    // Enable the message input field and the send message button
-    messageInput.disabled = false;
-    sendMessageButton.disabled = false;
-    // Stop the automatic chat
-    clearInterval(chatInterval);
-});
-
-// Event listener for the send message button
-sendMessageButton.addEventListener('click', () => {
-    // Simulate user typing similar to agent's typing mechanism
-    showTypingIndicator(badgeName); // Show the user's badge name as the name for the text bubble
-
-    // Wait for a specified delay, then make a request to the '/ask-openai' endpoint
-    setTimeout(() => {
-        // Append the user's message immediately after the typing indicator
-        appendMessage(messageInput.value, false); // Use the user's badge name as the agentRole parameter
-        conversationHistory.push({ role: badgeName, content: messageInput.value }); // Add the user's message to the conversation history
+    sendMessageToOpenAI(message) {
+        if (!this.conversationId) {
+            console.error('Conversation ID is missing.');
+            return;
+        }
 
         fetch('/ask-openai', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ firstName, badgeName, message: messageInput.value, conversationHistory }) // Pass the message from the input field
-        })
-        .then(response => response.json())
-        .then(data => {
-            // Now remove the "typing..." message
-            hideTypingIndicator();
-
-            // Check if data.responses exists and is not empty
-            if (data.responses && data.responses.length > 0) {
-                // Then append the actual message after the delay
-                data.responses.forEach((response) => {
-                    setTimeout(() => {
-                        appendMessage(`${response.role}: ${response.content}`, true);
-                    }, response.delay); // Use the delay provided by the backend for each message
-                });
-            } else {
-                console.error('Unexpected response structure:', data);
-                // Handle the case where data.responses is not as expected
-                // For example, display a default message or log an error
-            }
-        })
-        .catch(error => {
-            console.error('Error fetching data:', error);
-            // Handle any errors that occurred during the fetch
-        });
-    }, typingDelay); // typingDelay is the time you show the typing indicator for
-});
-
-let messageIndex = 0;
-const messages = [
-    "Hello everyone!",
-    "Let's get started."
-];
-
-// Function to generate a random message
-function generateRandomMessage() {
-    const message = messages[messageIndex];
-    messageIndex = (messageIndex + 1) % messages.length; // Cycle through the messages array
-    return message;
-}
-
-let lastAgentIndex = null;
-
-function simulateChat() {
-    let message = ""; // may need to change this
-    let agentIndex;
-    do {
-        agentIndex = Math.floor(Math.random() * agents.length);
-    } while (agents.length > 1 && agentIndex === lastAgentIndex);
-    lastAgentIndex = agentIndex;
-
-    const agent = agents[agentIndex];
-
-    clearInterval(chatInterval); // Clear the previous interval
-
-    // Short delay before showing "Typing"
-    setTimeout(() => {
-        let messageElement = appendMessage(`${agent} is typing...`, true);
-
-        // Long delay before sending the actual message
-        setTimeout(() => {
-            fetch('/ask-openai', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ firstName, badgeName, conversationHistory }) // Pass the conversationHistory here
+            body: JSON.stringify({
+                conversationId: this.conversationId,
+                message: message,
+                conversationHistory: this.conversationHistory
             })
+        })
             .then(response => response.json())
             .then(data => {
-                if (data && data.responses) {
-                    // Replace the "typing..." message with the actual message
-                    data.responses.forEach(response => {
-                        let textElement = messageElement.querySelector('.text');
-                        textElement.textContent = `${response.role}: ${response.content}`; // Use textContent instead of innerText
-                        conversationHistory.push({ role: response.role, content: response.content });
+                if (data.responses && data.responses.length > 0) {
+                    data.responses.forEach((response) => {
+                        setTimeout(() => {
+                            this.appendMessage(`${response.role}: ${response.content}`, true);
+                        }, response.delay);
                     });
-
-                    // Call simulateChat again to keep the messages going
-                    simulateChat();
                 } else {
-                    console.error('Unexpected response data:', data);
+                    console.error('Unexpected response structure:', data);
                 }
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
             });
-        }, 10000); // Long delay
-    }, 5000);
+    }
+
+    appendMessage(messageText, isAgent = false) {
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message');
+        const avatarElement = document.createElement('img');
+        avatarElement.classList.add('avatar');
+        avatarElement.src = 'images/avatar_1.png';
+        const textElement = document.createElement('div');
+        textElement.innerText = messageText;
+        textElement.classList.add('text');
+        messageElement.appendChild(avatarElement);
+        messageElement.appendChild(textElement);
+        messageContainer.append(messageElement);
+        this.conversationHistory.push({ role: isAgent ? 'agent' : badgeName, content: messageText });
+        return messageElement;
+    }
+
+    attachEventListeners() {
+        sendMessageButton.addEventListener('click', () => {
+            const message = messageInput.value;
+            this.showTypingIndicator(badgeName);
+            setTimeout(() => {
+                this.appendMessage(message, false);
+                this.sendMessageToOpenAI(message);
+            }, this.typingDelay);
+        });
+
+        raiseHandButton.addEventListener('click', () => {
+            messageInput.disabled = false;
+            sendMessageButton.disabled = false;
+        });
+    }
+
+    showTypingIndicator(agentName) {
+        typingIndicator.innerText = `${agentName} is typing...`;
+        messageContainer.appendChild(typingIndicator);
+    }
+
+    hideTypingIndicator() {
+        if (typingIndicator.parentNode === messageContainer) {
+            messageContainer.removeChild(typingIndicator);
+        }
+    }
 }
-// Start the automatic chat
-chatInterval = setInterval(simulateChat, 5000); // 30 seconds interval
+
+const chatSession = new ChatSession();
