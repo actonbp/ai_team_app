@@ -10,75 +10,151 @@ const conversationHistories = {};
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../frontend')));
 
+app.post('/decide-agents', async (req, res) => {
+  const { conversationId } = req.body;
+  const conversationHistory = conversationHistories[conversationId] || [];
+
+  // Extract the last message from the conversation history
+  const lastMessage = conversationHistory[conversationHistory.length - 1];
+
+  try {
+    // Call OpenAI to get a relevance vector for agent selection
+    const relevanceVector = await callOpenAIForAgentSelection([lastMessage]);
+
+    // Determine the relevant agents based on the relevance vector
+    const relevantAgents = determineRelevantAgentsBasedOnVector(relevanceVector, agentInformation);
+
+    // Respond with the names of the relevant agents
+    res.json({ relevantAgents });
+  } catch (error) {
+    console.error('Error determining relevant agents:', error);
+    res.status(500).json({ error: 'Failed to determine relevant agents' });
+  }
+});
+
+// This function should be added right after the existing callOpenAIForAgentSelection function
+function determineRelevantAgentsBasedOnVector(vector, agentInformation) {
+  const relevantAgents = [];
+  Object.keys(agentInformation).forEach((agentName, index) => {
+    // Assuming the vector is an array of 1s and 0s indicating relevance
+    if (vector[index] === 1) {
+      relevantAgents.push(agentName);
+    }
+  });
+  return relevantAgents;
+}
+
 const agents = ['Agent 1', 'Agent 2', 'Agent 3'];
 let agentInformation = {
-  "Agent 1": `Your name is Agent 1. Keep msgs short, like in a quick chat. 
-  Here's your info:
-  - East Point Mall: 
-    - At least 50 parking spaces - Y
-    - Larger than 2000 sqft - N
-    - Substantial foot traffic - Y
-    - Large tourist population - N
-    - Large student population - Y
-    - Quick access to waste disposal - Y
-    - Large population of employable individuals - Y
-  - Starlight Valley: 
-    - At least 50 parking spaces - Y
-    - Large student population - N
-    - Quick access to waste disposal - Y
-    - Large population of employable individuals - N
-  - Cape James Beach: 
-    - At least 50 parking spaces - N
-    - No more than 2 direct competitors in vicinity - Y
-    - Large tourist population - Y
-    - Large student population - N
-    - Quick access to waste disposal - N
-    - Large population of employable individuals - Y`,
-  "Agent 2": ` Your Name's Agent 2. Use short msgs, typos r ok. 
-  Ur info:
-  - East Point Mall: 
-    - At least 50 parking spaces - Y
-    - Purchasing cost of less than 1MM - N
-    - Substantial foot traffic - Y
-    - Large tourist population - N
-    - Large student population - Y
-    - Quick access to waste disposal - Y
-    - Large population of employable individuals - Y
-  - Starlight Valley: 
-    - Larger than 2000 square feet - Y
-    - Substantial foot traffic - Y
-    - Large tourist population - Y
-    - Large student population - N
-    - Large population of employable individuals - N
-  - Cape James Beach: 
-    - At least 50 parking spaces - N
-    - Purchasing cost of less than 1MM - Y
-    - No more than 2 direct competitors in vicinity - Y
-    - Substantial foot traffic - Y
-    - Large tourist population - Y`,
-  "Agent 3": `Your name is Agent 3. Keep it brief, casual chat style. 
-  Quick info:
-  - East Point Mall: 
-    - At least 50 parking spaces - Y
-    - Substantial foot traffic - Y
-    - Low maintenance costs - N
-    - Large tourist population - N
-    - Large student population - Y
-    - Quick access to waste disposal - Y
-    - Large population of employable individuals - Y
-  - Starlight Valley: 
-    - Purchasing cost of less than 1MM - Y
-    - No more than 2 direct competitors in vicinity - Y
-    - Large student population - N
-    - Large population of employable individuals - N
-  - Cape James Beach: 
-    - Substantial foot traffic - Y
-    - Low maintenance costs - Y
-    - Large tourist population - Y
-    - Quick access to waste disposal - N
-    - Large population of employable individuals - Y`
+  "Agent 1": {
+    description: `Your name is Agent 1. KEEP MESSAGES SHORT UNDER 100 CHARACTERS. Don't worry about grammar or spelling...treat it like a chat.
+    Here's your info:
+    - East Point Mall: 
+      - At least 50 parking spaces - Y
+      - Larger than 2000 sqft - N
+      - Substantial foot traffic - Y
+      - Large tourist population - N
+      - Large student population - Y
+      - Quick access to waste disposal - Y
+      - Large population of employable individuals - Y
+    - Starlight Valley: 
+      - At least 50 parking spaces - Y
+      - Large student population - N
+      - Quick access to waste disposal - Y
+      - Large population of employable individuals - N
+    - Cape James Beach: 
+      - At least 50 parking spaces - N
+      - No more than 2 direct competitors in vicinity - Y
+      - Large tourist population - Y
+      - Large student population - N
+      - Quick access to waste disposal - N
+      - Large population of employable individuals - Y`,
+    keywords: ['parking spaces', 'larger than 2000 sqft', 'foot traffic', 'tourist population', 'student population', 'waste disposal', 'employable individuals', 'direct competitors']
+  },
+  "Agent 2": {
+    description: ` Your Name's Agent 2. KEEP MESSAGES SHORT UNDER 100 CHARACTERS. Don't worry about grammar or spelling...treat it like a chat.
+    Ur info:
+    - East Point Mall: 
+      - At least 50 parking spaces - Y
+      - Purchasing cost of less than 1MM - N
+      - Substantial foot traffic - Y
+      - Large tourist population - N
+      - Large student population - Y
+      - Quick access to waste disposal - Y
+      - Large population of employable individuals - Y
+    - Starlight Valley: 
+      - Larger than 2000 square feet - Y
+      - Substantial foot traffic - Y
+      - Large tourist population - Y
+      - Large student population - N
+      - Large population of employable individuals - N
+    - Cape James Beach: 
+      - At least 50 parking spaces - N
+      - Purchasing cost of less than 1MM - Y
+      - No more than 2 direct competitors in vicinity - Y
+      - Substantial foot traffic - Y
+      - Large tourist population - Y`,
+    keywords: ['purchasing cost', 'direct competitors', 'square feet', 'parking spaces', 'foot traffic', 'tourist population', 'student population', 'waste disposal', 'employable individuals']
+  },
+  "Agent 3": {
+    description: `Your name is Agent 3. KEEP MESSAGES SHORT UNDER 100 CHARACTERS. Don't worry about grammar or spelling...treat it like a chat. 
+    Quick info:
+    - East Point Mall: 
+      - At least 50 parking spaces - Y
+      - Substantial foot traffic - Y
+      - Low maintenance costs - N
+      - Large tourist population - N
+      - Large student population - Y
+      - Quick access to waste disposal - Y
+      - Large population of employable individuals - Y
+    - Starlight Valley: 
+      - Purchasing cost of less than 1MM - Y
+      - No more than 2 direct competitors in vicinity - Y
+      - Large student population - N
+      - Large population of employable individuals - N
+    - Cape James Beach: 
+      - Substantial foot traffic - Y
+      - Low maintenance costs - Y
+      - Large tourist population - Y
+      - Quick access to waste disposal - N
+      - Large population of employable individuals - Y`,
+    keywords: ['maintenance costs', 'parking spaces', 'foot traffic', 'tourist population', 'student population', 'waste disposal', 'employable individuals', 'direct competitors', 'purchasing cost']
+  }
 };
 let lastSelectedAgentIndex = null;
+
+// Add this function right after the agentInformation object
+function determineRelevantAgents(lastMessage, agentInformation) {
+  const relevantAgents = [];
+  // Check if lastMessage is not provided
+  if (!lastMessage) {
+    // If there is no lastMessage at all, select a random agent
+    const randomIndex = Math.floor(Math.random() * agents.length);
+    relevantAgents.push(agents[randomIndex]);
+    return relevantAgents;
+  }
+  const messageContent = lastMessage.content.toLowerCase();
+
+// Add this function right after the determineRelevantAgents function
+async function callOpenAIForAgentSelection(messages) {
+  const lastMessage = messages[messages.length - 1].content;
+  const agentSelectionResponse = await axios.post('https://api.openai.com/v1/completions', {
+    model: 'gpt-4-0125-preview',
+    prompt: `Given the last message: "${lastMessage}", and the information for each agent, determine a relevance vector indicating which agents should respond. Use 1 for relevant and 0 for not relevant. Agents: ${Object.keys(agentInformation).join(', ')}.`,
+    temperature: 0,
+    max_tokens: 60,
+  }, {
+    headers: {
+      'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+    }
+  });
+
+  // Extract the relevance vector from the response
+  // Assuming the response format is a string of 1s and 0s separated by commas
+  const relevanceVector = agentSelectionResponse.data.choices[0].text.split(',').map(num => parseInt(num.trim()));
+
+  return relevanceVector;
+}
 
 async function callOpenAI(messages, role = 'user') {
   const response = await axios.post('https://api.openai.com/v1/chat/completions', {
@@ -86,7 +162,7 @@ async function callOpenAI(messages, role = 'user') {
     messages: [
       {
         role: 'system',
-        content: `You are an AI assisting a team of purchasing executives for Big Restaurant in a chat-based discussion. 
+        content: `Pretend you are an human assisting a new team of purchasing executives for Big Restaurant in a chat-based discussion. 
                   The team is evaluating three potential locations for a new restaurant: 
                   East Point Mall, Starlight Valley, and Cape James Beach. 
                   Your role is to help the team rank these locations from most to least desirable 
@@ -134,75 +210,48 @@ async function callOpenAI(messages, role = 'user') {
 }
 
 app.post('/ask-openai', async (req, res) => {
-    try {
-        const { firstName, badgeName, message, conversationId } = req.body;
+  const { conversationId, message } = req.body;
+  const conversationHistory = conversationHistories[conversationId] || [];
 
-        // Select a different agent for each message
-        let selectedAgentIndex;
-        do {
-            selectedAgentIndex = Math.floor(Math.random() * agents.length);
-        } while (selectedAgentIndex === lastSelectedAgentIndex);
-        lastSelectedAgentIndex = selectedAgentIndex;
+  // Add the new message to the conversation history
+  if (message) {
+    conversationHistory.push({ role: 'user', content: message });
+  }
 
-        const agentName = agents[selectedAgentIndex];
-        const agentInfo = agentInformation[agentName];
-        const conversationHistory = conversationHistories[conversationId] || [];
+  // Determine the relevant agents based on the last message
+  const lastMessage = conversationHistory[conversationHistory.length - 1];
+  const relevantAgents = determineRelevantAgents(lastMessage, agentInformation);
 
-        // Add the user's message to the conversation history
-        if (message) {
-            conversationHistory.push({
-                role: 'user',
-                content: message
-            });
-        }
+  // Make the call to OpenAI using each relevant agent's information
+  try {
+    const agentResponses = await Promise.all(relevantAgents.map(async (agentName) => {
+      // Construct a new message array including the agent's information
+      const messagesWithAgentInfo = [...conversationHistory, {
+        role: 'system',
+        content: agentInformation[agentName].description
+      }];
 
-        // Prepare the messages for the OpenAI API, including the agent's information
-        const messages = conversationHistory.map(entry => ({
-            role: entry.role,
-            content: entry.content
-        }));
+      // Call OpenAI with the updated messages
+      const openAIResponse = await callOpenAI(messagesWithAgentInfo, agentName);
+      return { agent: agentName, response: openAIResponse };
+    }));
 
-        // Insert the agent's information as the latest message from the agent
-        messages.push({
-            role: 'system',
-            content: agentInfo
-        });
+    // Add all agent responses to the conversation history
+    agentResponses.forEach(({ agent, response }) => {
+      conversationHistory.push({ role: agent, content: response });
+    });
 
-        // Call OpenAI with the updated history
-        const responseContent = await callOpenAI(messages, 'user');
+    // Save the updated conversation history
+    conversationHistories[conversationId] = conversationHistory;
 
-        // Simulate typing delay
-        const typingDelay = 1000; // 1 second delay
-        const messageDelay = 2000; // 2 seconds delay between messages
-
-        setTimeout(() => {
-            // Append the new AI message to the conversation history
-            conversationHistory.push({
-                role: agentName,
-                content: responseContent
-            });
-
-            // Update the stored conversation history
-            conversationHistories[conversationId] = conversationHistory;
-
-            // Send the response after the delay
-            res.json({
-                responses: [
-                    { role: agentName, content: responseContent }
-                ]
-            });
-        }, typingDelay + messageDelay);
-
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: error.toString() });
-    }
-});
-
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/login.html'));
+    // Respond with all agent responses
+    res.json({ responses: agentResponses.map(({ response }) => response) });
+  } catch (error) {
+    console.error('Error calling OpenAI:', error);
+    res.status(500).json({ error: 'Failed to call OpenAI' });
+  }
 });
 
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
-});
+}); // Corrected the syntax error by adding the missing closing parenthesis and semicolon
