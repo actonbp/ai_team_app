@@ -3,25 +3,23 @@ const express = require('express');
 const axios = require('axios');
 const path = require('path');
 const fs = require('fs').promises;
-// Import the necessary AWS SDK v3 packages
-const { SSMClient, GetParameterCommand } = require("@aws-sdk/client-ssm");
+const AWS = require('aws-sdk');
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.use(express.json());
-app.use(express.static(path.join(__dirname, '../frontend')));
+// Configure the AWS region
+AWS.config.update({ region: 'us-east-1' });
 
-// Create a new SSM client instance
-const ssmClient = new SSMClient({ region: 'us-east-1' });
+const ssm = new AWS.SSM();
+
 
 async function getParameter(parameterName) {
-  const command = new GetParameterCommand({
+  const params = {
     Name: parameterName,
     WithDecryption: true,
-  });
-
+  };
   try {
-    const response = await ssmClient.send(command);
+    const response = await ssm.getParameter(params).promise();
     return response.Parameter.Value;
   } catch (error) {
     console.error(error);
@@ -32,32 +30,34 @@ async function getParameter(parameterName) {
 // Async function to initialize your application
 async function initializeApp() {
   const port = process.env.PORT || 3000;
-  let OPENAI_API_KEY;
-
-  // Check if running on EC2 instance
-  if (process.env.IS_EC2_INSTANCE === 'true') {
-    OPENAI_API_KEY = await getParameter('/myapp/OPENAI_API_KEY');
-  } else {
-    OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-  }
+  const OPENAI_API_KEY = await getParameter('/myapp/OPENAI_API_KEY');
 
   // Ensure the API key is retrieved before proceeding
   if (!OPENAI_API_KEY) {
-    console.error('Failed to retrieve OPENAI_API_KEY');
+    console.error('Failed to retrieve OPENAI_API_KEY from Parameter Store');
     process.exit(1); // Exit the application if the API key is not available
   }
 
+  app.use(express.json());
+  app.use(express.static(path.join(__dirname, '../frontend')));
+
   // Your existing app setup and routes go here
   // Make sure to use OPENAI_API_KEY where needed
+
+  app.listen(port, () => {
+    console.log(`Server running on http://localhost:${port}`);
+  });
 }
 
 // Call the initializeApp function to start the app
 initializeApp().catch(console.error);
+
 // Existing code below this line remains unchanged
 const conversationHistories = {};
-const agents = ['James', 'Sophia', 'Ethan'];
+const agents = ['Agent 1', 'Agent 2', 'Agent 3'];
 let agentInformation = {
-  "James": `Your name is JAMES, youre a go-to guy for quick, witty responses. You are extraverted, confident, and in positive. 
+  "Agent 1": `Your name is Agent 1. Keep msgs short, like in a quick chat. 
+  Here's your info:
   - East Point Mall: 
     - At least 50 parking spaces - Y
     - Larger than 2000 sqft - N
@@ -78,7 +78,8 @@ let agentInformation = {
     - Large student population - N
     - Quick access to waste disposal - N
     - Large population of employable individuals - Y`,
-  "Sophia": `Your name is SOPHIA, youre always ready to provide detailed, thoughtful insights. Here's what you need to know. You are highly agreeable, seek to work with others and are friendly.
+  "Agent 2": ` Your Name's Agent 2. Use short msgs, typos r ok. 
+  Ur info:
   - East Point Mall: 
     - At least 50 parking spaces - Y
     - Purchasing cost of less than 1MM - N
@@ -99,8 +100,8 @@ let agentInformation = {
     - No more than 2 direct competitors in vicinity - Y
     - Substantial foot traffic - Y
     - Large tourist population - Y`,
-  "Ethan": `Your name is ETHAN, youre a analytical expert with a knack for numbers--known for short responses. 
-  You are short, and often rude. You are high on neuroticism and low on agreeableness. 
+  "Agent 3": `Your name is Agent 3. Keep it brief, casual chat style. 
+  Quick info:
   - East Point Mall: 
     - At least 50 parking spaces - Y
     - Substantial foot traffic - Y
@@ -129,7 +130,7 @@ async function callOpenAI(messages, role = 'user') {
     messages: [
       {
         role: 'system',
-        content: `You are an AI impersonating a human, who is on a new team of purchasing executives for Big Restaurant in a chat-based discussion. 
+        content: `You are an AI assisting a team of purchasing executives for Big Restaurant in a chat-based discussion. 
                   The team is evaluating three potential locations for a new restaurant: 
                   East Point Mall, Starlight Valley, and Cape James Beach. 
                   Your role is to help the team rank these locations from most to least desirable 
@@ -148,7 +149,6 @@ async function callOpenAI(messages, role = 'user') {
                   - If you lack past conversation history, indicate that you are ready to assist with the information at hand.
                   - Continue the discussion until the team reaches a consensus on the ranking of the locations.
                   - DO NOT give away that you are a single AI Bot. Pretend you are a real person in a team chat.
-                  - Introduce yourself by your name in your first message if you can and alway know who you are
 
                   CRITERIA: 
                   (1) at least 50 parking spaces, 
@@ -163,10 +163,8 @@ async function callOpenAI(messages, role = 'user') {
                   (10) large employable population. 
                   Each criterion is equally important.
 
-                  Please keep responses under 100-200 characters if you can, similar to quick text messages.
-                  You can ask specfic other team members questions if you have not heard from someone. Always use the prior chat for context.
-                  IMPORTANT: When you believe the task is fully completed, please say 'task-complete' on a message BY ITSELF (nothing else).
-                  DO NOT stop until you complete the task. And seek to have multiple shorter messages. Wait to finish your point on the next message where possible`
+                  Please keep responses brief, similar to quick text messages. Aim for one to two sentences max per message.
+                  You can ask specfic other team members questions if you have not heard from someone. Always use the prior chat for context.`
       },
       ...messages.map(entry => ({ role, content: entry.content }))
     ]
@@ -190,8 +188,8 @@ app.post('/ask-openai', async (req, res) => {
         } while (selectedAgentIndex === lastSelectedAgentIndex);
         lastSelectedAgentIndex = selectedAgentIndex;
 
-        const currentAgentName = agents[selectedAgentIndex]; // This is your currentAgentName
-        const agentInfo = agentInformation[currentAgentName];
+        const agentName = agents[selectedAgentIndex];
+        const agentInfo = agentInformation[agentName];
         const conversationHistory = conversationHistories[conversationId] || [];
 
         // Add the user's message to the conversation history
@@ -218,13 +216,13 @@ app.post('/ask-openai', async (req, res) => {
         const responseContent = await callOpenAI(messages, 'user');
 
         // Simulate typing delay
-        const typingDelay = 3000; // Simulate a typing delay
-        const messageDelay = 6000; // Simulate a delay between messages
+        const typingDelay = 1000; // 1 second delay
+        const messageDelay = 2000; // 2 seconds delay between messages
 
         setTimeout(() => {
             // Append the new AI message to the conversation history
             conversationHistory.push({
-                role: currentAgentName, // Use currentAgentName here
+                role: agentName,
                 content: responseContent
             });
 
@@ -234,9 +232,8 @@ app.post('/ask-openai', async (req, res) => {
             // Send the response after the delay
             res.json({
                 responses: [
-                    { role: currentAgentName, content: responseContent } // Include currentAgentName in the response
-                ],
-                currentAgentName // Optionally, explicitly send the currentAgentName back to the client
+                    { role: agentName, content: responseContent }
+                ]
             });
         }, typingDelay + messageDelay);
 
@@ -253,3 +250,5 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
 });
+
+
