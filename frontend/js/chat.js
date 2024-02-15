@@ -137,8 +137,7 @@ sendMessageButton.addEventListener('click', () => {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ firstName, badgeName, message: messageText, conversationHistory }) // Pass the message from the input field
-        })
+            body: JSON.stringify({ firstName, badgeName, message: messageText, conversationId: 'your_unique_conversation_id', conversationHistory })        })
             .then(response => response.json())
             .then(data => {
                 // Now remove the "typing..." message

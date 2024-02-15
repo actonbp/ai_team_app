@@ -168,7 +168,7 @@ async function callOpenAI(messages, role = 'user') {
                   IMPORTANT: When you believe the task is fully completed, please say 'task-complete' on a message BY ITSELF (nothing else).
                   DO NOT stop until you complete the task. And seek to have multiple shorter messages. Wait to finish your point on the next message where possible`
       },
-      ...messages.map(entry => ({ role, content: entry.content }))
+      ...messages.map(entry => ({ role: entry.role, content: entry.content }))
     ]
   }, {
     headers: {
