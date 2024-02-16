@@ -1,26 +1,20 @@
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #f3f2f1;
-    background-image: linear-gradient(to right, #f3f2f1, #e6e4e3); /* Smooth gradient background */
 }
 
 #app {
     display: flex;
     height: 100vh;
-    justify-content: center; /* Center the app container */
-    align-items: center; /* Vertically align the app container */
 }
 
 .sidebar {
-    width: 250px; /* Adjust the width as needed */
+    width: 20%;
     background-color: #6264a7;
     color: white;
     padding: 20px;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add shadow for depth */
-    border-radius: 10px; /* Rounded corners for a modern look */
-    overflow-y: auto; /* Enable scrolling if the content is too long */
 }
 
 .sidebar button {
@@ -29,123 +23,34 @@ body {
     padding: 10px 0;
     color: white;
     background-color: transparent;
-    border: 1px solid white; /* Add border to buttons */
+    border: none;
     text-align: left;
     font-size: 1em;
-    transition: background-color 0.3s; /* Smooth transition for hover effect */
-}
-
-.sidebar button:hover {
-    background-color: rgba(255, 255, 255, 0.2); /* Hover effect for buttons */
-}
-
-.unique-information {
-    margin-top: 20px; /* Add some space between the navigation buttons and the table */
-    width: 100%; /* Make the table fit the sidebar width */
-    box-sizing: border-box; /* Include padding and border in the element's width */
-}
-
-.unique-information h2 {
-    font-size: 1em; /* Adjust the heading size to fit the sidebar */
-    margin-bottom: 10px;
-}
-
-.unique-information table {
-    width: 100%; /* Make the table use all available width */
-    font-size: 0.8em; /* Adjust font size to fit the sidebar */
-    /* Other table styles */
-}
-
-.unique-information th, .unique-information td {
-    padding: 5px; /* Reduce padding to save space */
-    /* Other styles */
 }
 
 .chat-area {
     width: 80%;
     display: flex;
     flex-direction: column;
-    max-height: 500px; /* Adjust this value based on your needs */
-    overflow-y: auto; /* Enables vertical scrolling */
 }
 
 .chat-header {
     background-color: #edebe9;
     padding: 10px;
     border-bottom: 1px solid #8a8886;
-    border-radius: 10px 10px 0 0; /* Rounded corners at the top */
 }
 
 #chatWindow {
     flex-grow: 1;
-    width: 800px;
-    height: 600px;
-    background-color: rgb(211, 211, 211); /* Added missing semicolon */
+    background-color: rgb(211, 211, 211)
     padding: 20px;
     overflow-y: auto;
-    border-radius: 0 0 10px 10px; /* Rounded corners at the bottom */
-}
-
-#chatWindow,
-.location-analysis {
-    width: 800px;
-    height: 600px;
-    /* Adjust based on your needs */
-    margin: auto;
-    /* Centers the elements */
-    overflow-y: auto;
-        /* Add scroll if needed */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.location-analysis table {
-    width: 100%;
-    /* Make the table use all available width */
-    border-collapse: collapse;
-    /* Collapse borders for a cleaner look */
-}
-
-.location-analysis th,
-.location-analysis td {
-    text-align: left;
-    /* Align text to the left for readability */
-    padding: 8px;
-    /* Add padding for spacing */
-    border-bottom: 1px solid #ddd;
-    /* Add a bottom border to each cell */
-}
-
-.location-analysis th {
-    background-color: #f3f2f1;
-    /* Light background for the header */
-    color: #333;
-    /* Dark text for contrast */
-}
-
-/* ... existing styles ... */
-
-.task-instructions button {
-    padding: 10px 20px;
-    margin-top: 20px;
-    font-size: 1em;
-    color: white;
-    background-color: #4CAF50;
-    /* Use a color that fits your design */
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.task-instructions button:hover {
-    background-color: #367c39;
-    /* Darker shade for hover effect */
 }
 
 .input-area {
     display: flex;
     padding: 10px;
     border-top: 1px solid #8a8886;
-    background-color: #f3f2f1; /* Match the body background for a seamless look */
 }
 
 #messageInput {
@@ -153,29 +58,21 @@ body {
     padding: 10px;
     border-radius: 5px;
     border: 1px solid #8a8886;
-    background-color: #ffffff; /* Bright input field for contrast */
 }
 
 #sendMessageButton,
 #raiseHandButton {
-    width: 10%; /* Adjusted width */
+    width: 15%;
     padding: 10px;
     background-color: #6264a7;
     color: white;
     border: none;
-    margin-left: 5px; /* Adjusted margin for alignment */
-    cursor: pointer; /* Indicate clickable buttons */
-    transition: background-color 0.3s; /* Smooth transition for hover effect */
-}
-
-#sendMessageButton:hover,
-#raiseHandButton:hover {
-    background-color: #484b7a; /* Darken button color on hover for feedback */
+    margin-left: 10px;
 }
 
 /* Styles for message bubbles with different colors for each agent */
 #chatWindow .agent-1 {
-    background-color: yellowgreen;
+    background-color: yellowgreen
 }
 #chatWindow .agent-2 {
     background-color: #3582b1;
@@ -195,7 +92,6 @@ body {
     color: white;
     max-width: 80%;
     word-wrap: break-word;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Add shadow for depth */
 }
 
 /* Styling for the typing indicator */
@@ -212,41 +108,10 @@ body {
 }
 
 .avatar {
-    width: 60px; /* Increased size */
-    height: 80px; /* Increased size */
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     margin-right: 10px;
-}
-
-#avatarGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(1000px, 1fr)); /* Adjust size as needed */
-    gap: 10px;
-    justify-items: center;
-    padding: 20px;
-}
-
-.analysis-area {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    /* ... other styles to match chat area ... */
-}
-
-.nav-button.active {
-    background-color: #484b7a;
-    /* Darker shade for active state */
-}
-
-.avatarOption {
-    width: 100px; /* Uniform size */
-    height: 100px; /* Uniform size */
-    cursor: pointer;
-    border: 2px solid transparent; /* For highlighting */
-}
-
-.avatarOption.selected {
-    border-color: #6264a7; /* Highlight color */
 }
 
 .text {
@@ -256,71 +121,4 @@ body {
     display: inline-block;
 }
 
-
-/* Message bubble styling */
-.message {
-    background-color: #e1f3fb;
-    /* Light blue background for the message bubble */
-    border-radius: 15px;
-    /* Rounded corners */
-    padding: 10px;
-    margin-bottom: 10px;
-    max-width: 60%;
-    word-wrap: break-word;
-}
-
-.message.sent {
-    background-color: #d1e7dd;
-    /* Different color for sent messages */
-    margin-left: auto;
-    /* Align sent messages to the right */
-}
-
-.message.received {
-    background-color: #f8d7da;
-    /* Different color for received messages */
-    /* Received messages are left-aligned by default */
-}
-
-border: 10px solid transparent;
-border-left-color: #d1e7dd;
-/* Match the background of sent messages */
-border-right: 0;
-border-bottom: 0;
-margin-top: 5px;
-filter: drop-shadow(2px 2px 2px rgba(0, 0, 0, 0.1));
-/* Optional: Adds shadow to the tail */
-}
-
-.message.sent {
-    background-color: #d1e7dd;
-    /* Different color for sent messages */
-    margin-left: auto;
-    /* Align sent messages to the right */
-}
-
-.message.received {
-    background-color: #f8d7da;
-    /* Different color for received messages */
-    /* Received messages are left-aligned by default */
-}
-
-.message.received::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: -10px;
-    /* Adjust based on bubble size */
-    width: 0;
-    height: 0;
-    border: 10px solid transparent;
-    border-right-color: #f8d7da;
-    /* Match the background of received messages */
-    border-left: 0;
-    border-bottom: 0;
-    margin-top: 5px;
-    filter: drop-shadow(-2px 2px 2px rgba(0, 0, 0, 0.1));
-    /* Optional: Adds shadow to the tail */
-}
 /* Additional global styles can go here */
-```

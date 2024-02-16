@@ -1,0 +1,92 @@
+/* General Styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+#app {
+    display: flex;
+    height: 100vh;
+}
+
+.sidebar {
+    width: 20%;
+    background-color: #6264a7;
+    color: white;
+    padding: 20px;
+}
+
+.sidebar button {
+    width: 100%;
+    margin-bottom: 10px;
+    color: white;
+    background-color: transparent;
+    border: none;
+}
+
+.chat-area {
+    width: 80%;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-header {
+    background-color: #edebe9;
+    padding: 10px;
+    border-bottom: 1px solid #8a8886;
+}
+
+#chatWindow {
+    flex-grow: 1;
+    background-color: #f3f2f1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.input-area {
+    display: flex;
+    padding: 10px;
+    border-top: 1px solid #8a8886;
+}
+
+#messageInput {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid #8a8886;
+    margin-right: 10px;
+}
+
+#sendMessageButton,
+#raiseHandButton {
+    background-color: #6264a7;
+    color: white;
+    border: none;
+    padding: 10px;
+}
+
+/* Message bubble styling */
+.message {
+    background-color: #e1f3fb;
+    /* Light blue background for the message bubble */
+    border-radius: 15px;
+    /* Rounded corners */
+    padding: 10px;
+    margin-bottom: 10px;
+    max-width: 60%;
+    word-wrap: break-word;
+}
+
+.message.sent {
+    background-color: #d1e7dd;
+    /* Different color for sent messages */
+    margin-left: auto;
+    /* Align sent messages to the right */
+}
+
+.message.received {
+    background-color: #f8d7da;
+    /* Different color for received messages */
+    /* Received messages are left-aligned by default */
+}
