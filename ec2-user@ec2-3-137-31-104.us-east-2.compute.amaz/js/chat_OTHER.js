@@ -10,7 +10,6 @@ const raiseHandButton = document.getElementById('raiseHandButton');
 const messageContainer = document.getElementById('chatWindow');
 const typingIndicator = document.createElement('div');
 const message = messageInput.value;
-const conversationId = localStorage.getItem('currentConversationId'); // Retrieve the stored ID
 typingIndicator.innerText = 'Agent is typing...';
 
 // Disable the message input field and the send message button initially
@@ -153,15 +152,17 @@ sendMessageButton.addEventListener('click', () => {
     // Append the user's message immediately after the typing indicator
     appendMessage(messageText, false, badgeName); // Use false for isAgent and badgeName for the participant's name
 
+    // Removed duplicate addition of the user's message to the conversation history
+    let currentConversationId = localStorage.getItem('currentConversationId');
+
     // Wait for a specified delay, then make a request to the '/ask-openai' endpoint
     setTimeout(() => {
-        console.log('Current conversationId is again:', currentConversationId); // Print the current conversationId for verification
         fetch('/ask-openai', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ firstName, badgeName, message: messageText, conversationHistory, conversationId: currentConversationId}) // Pass the message from the input field
+            body: JSON.stringify({ firstName, badgeName, message: messageText, conversationHistory, conversationId: currentConversationId }) // Pass the message from the input field
         })
             .then(response => response.json())
             .then(data => {

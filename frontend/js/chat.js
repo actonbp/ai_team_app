@@ -32,6 +32,23 @@ const agents = {
     'Agent 2': { agentName: 'Sophia', avatar: 'avatars/avatar_3.png', isAgent: true, typingSpeed: 180 },
     'Agent 3': { agentName: 'Ethan', avatar: 'avatars/avatar_6.png', isAgent: true, typingSpeed: 220 }
 }; // Corrected avatar paths to be consistent with the appendMessage function and added typingSpeed for each agent
+// This function is called to initiate a new chat session
+
+function startNewChat() {
+    fetch('/start-chat', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            // Store the conversationId received from the server in localStorage
+            localStorage.setItem('currentConversationId', data.conversationId);
+            console.log(`OH YEAH, New chat started with ID: ${data.conversationId}`);
+        })
+        .catch(error => console.error('Error starting new chat:', error));
+}
 
 function appendMessageAfterTyping(messageText, isAgent = false, agentName) {
     // Default typing speed for participants
@@ -58,16 +75,35 @@ function appendMessageAfterTyping(messageText, isAgent = false, agentName) {
 function appendMessage(messageText, isAgent = false, agentName) {
     const messageElement = document.createElement('div');
     messageElement.classList.add('message');
+
     const avatarElement = document.createElement('img');
     avatarElement.classList.add('avatar');
-    // Determine the avatar image source based on the agent's name
-    const agent = Object.values(agents).find(agent => agent.agentName === agentName); // Find the agent object by name
-    if (agent) {
-        avatarElement.src = agent.avatar; // Use the avatar from the agent object
+
+    // Determine the avatar image source based on the agent's name or if it's the participant
+    let avatarSrc;
+    if (isAgent) {
+        const agent = Object.values(agents).find(agent => agent.agentName === agentName);
+        avatarSrc = agent ? agent.avatar : 'default_agent_avatar.png'; // Fallback to a default agent avatar if not found
+    } else {
+        avatarSrc = localStorage.getItem('selectedAvatar'); // Use the participant's selected avatar
     }
+    avatarElement.src = avatarSrc;
+
     const textElement = document.createElement('div');
-    textElement.innerText = `${messageText}`;
     textElement.classList.add('text');
+
+    // Prepend the badge name to the participant's message or use the agent's name
+    if (!isAgent) {
+        const badgeName = localStorage.getItem('badgeName');
+        textElement.innerText = `${badgeName}: ${messageText}`;
+        // Add the participant's message to the conversation history with their badge name
+        conversationHistory.push({ role: badgeName, content: messageText });
+    } else {
+        textElement.innerText = `${agentName}: ${messageText}`;
+        // If the message is from an agent, add it to the conversation history with the agent's name
+        conversationHistory.push({ role: agentName, content: messageText });
+    }
+
     messageElement.appendChild(avatarElement);
     messageElement.appendChild(textElement);
     messageContainer.append(messageElement);
@@ -77,16 +113,9 @@ function appendMessage(messageText, isAgent = false, agentName) {
 
     // Redirect if there are 3 or more "task-complete" messages
     if (taskCompleteMessages >= 3) {
-        window.location.href = 'simulation_end.html'; // Replace 'next_page.html' with the actual path
+        window.location.href = 'simulation_end.html'; // Replace 'simulation_end.html' with the actual path if different
     }
-    // Adjusted to always treat messages as from an agent unless it's the participant typing in the chatbox
-    if (!isAgent) {
-        // If the message is from the user, show the user's badge name and add it to the conversation history
-        conversationHistory.push({ role: badgeName, content: messageText });
-    } else {
-        // If the message is from an agent, add it to the conversation history with the agent's name
-        conversationHistory.push({ role: agentName, content: messageText });
-    }
+
     messageContainer.scrollTop = messageContainer.scrollHeight; // Scrolls to the bottom
     return messageElement;
 }
@@ -143,6 +172,7 @@ function simulateTyping(agentName, message) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+    startNewChat(); // This will trigger the startNewChat function as soon as the DOM is fully loaded
     var chatWindow = document.getElementById("chatWindow");
     var analysisWindow = document.getElementById("locationAnalysis");
     var helpButton = document.getElementById("helpButton");
@@ -173,12 +203,14 @@ sendMessageButton.addEventListener('click', () => {
 
     // Wait for a specified delay, then make a request to the '/ask-openai' endpoint
     setTimeout(() => {
+        const currentConversationId = localStorage.getItem('currentConversationId'); // Correct place to get it
+
         fetch('/ask-openai', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ firstName, badgeName, message: messageText, conversationHistory }) // Pass the message from the input field
+            body: JSON.stringify({ firstName, badgeName, message: messageText, conversationHistory, conversationId: currentConversationId }) // Pass the message from the input field
         })
             .then(response => response.json())
             .then(data => {
@@ -193,7 +225,7 @@ sendMessageButton.addEventListener('click', () => {
                     data.responses.forEach((response, index) => {
                         // Use appendMessageAfterTyping to simulate typing and display the message
                         appendMessageAfterTyping(response.content, true, response.role); // Display the message
-                        conversationHistory.push({ role: response.role, content: response.content }); // Add to conversation history
+                        conversationHistory.push({ rolexf: response.role, content: response.content }); // Add to conversation history
                     });
                 } else {
                     console.error('Unexpected response structure:', data);
@@ -224,6 +256,7 @@ let lastAgentIndex = null;
 function simulateChat() {
     // Clear the previous interval
     clearInterval(chatInterval);
+    const currentConversationId = localStorage.getItem('currentConversationId'); // Retrieve the stored ID
 
     // Check if it's the first call to simulateChat by checking the length of conversationHistory
     if (conversationHistory.length === 0) {
@@ -258,13 +291,19 @@ function fetchResponses() {
         // Still processing messages, exit early
         return;
     }
+    const currentConversationId = localStorage.getItem('currentConversationId');
     fetch('/ask-openai', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ firstName, badgeName, conversationHistory })
-    })
+            body: JSON.stringify({
+                firstName,
+                badgeName,
+                conversationHistory,
+                conversationId: currentConversationId // Include this line
+            })
+        })
         .then(response => response.json())
         .then(data => {
             if (data && data.responses) {
@@ -277,7 +316,7 @@ function fetchResponses() {
                 // Call simulateChat again to keep the messages going
                 simulateChat();
             } else {
-                console.error('Unexpected response data:', data);
+                simulateChat(); // no responses, so runs again
             }
         })
         .catch(error => {

@@ -10,7 +10,6 @@ const raiseHandButton = document.getElementById('raiseHandButton');
 const messageContainer = document.getElementById('chatWindow');
 const typingIndicator = document.createElement('div');
 const message = messageInput.value;
-const conversationId = localStorage.getItem('currentConversationId'); // Retrieve the stored ID
 typingIndicator.innerText = 'Agent is typing...';
 
 // Disable the message input field and the send message button initially
@@ -19,40 +18,60 @@ sendMessageButton.disabled = true;
 
 // Initialize an empty array to store the conversation history
 let conversationHistory = [];
-// Ensure you have a variable that holds the current conversationId
-let currentConversationId = "your_conversation_id_here"; // Replace with actual logic to obtain or set this ID
-
 
 let taskCompleteCount = 0;
+
+let activeMessages = 0;
+
+const conversationId = localStorage.getItem('currentConversationId');
 
 // Define chatInterval outside of window.onload
 let chatInterval;
 
-// Call this function when starting a new chat
-function startNewChat() {
-  fetch('/start-chat', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  })
-  .then(response => response.json())
-  .then(data => {
-    // Store the conversationId received from the server and log it
-    const currentConversationId = data.conversationId;
-    localStorage.setItem('currentConversationId', currentConversationId);
-    console.log(`New chat started with ID: ${currentConversationId}`);
-  })
-  .catch(error => console.error('Error starting new chat:', error));
-}
-
 typingDelay = 10000
 const agents = {
-    'Agent 1': { agentName: 'James', avatar: 'avatars/avatar_2.png', isAgent: true },
-    'Agent 2': { agentName: 'Sophia', avatar: 'avatars/avatar_3.png', isAgent: true },
-    'Agent 3': { agentName: 'Ethan', avatar: 'avatars/avatar_6.png', isAgent: true }
-}; // Corrected avatar paths to be consistent with the appendMessage function
+    'Agent 1': { agentName: 'James', avatar: 'avatars/avatar_2.png', isAgent: true, typingSpeed: 200 },
+    'Agent 2': { agentName: 'Sophia', avatar: 'avatars/avatar_3.png', isAgent: true, typingSpeed: 180 },
+    'Agent 3': { agentName: 'Ethan', avatar: 'avatars/avatar_6.png', isAgent: true, typingSpeed: 220 }
+}; // Corrected avatar paths to be consistent with the appendMessage function and added typingSpeed for each agent
+// This function is called to initiate a new chat session
+function startNewChat() {
+    fetch('/start-chat', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            // The conversationId received from the server is stored
+            localStorage.setItem('currentConversationId', data.conversationId);
+            // Print out that a new conversation has started
+            console.log('A new conversation has started with ID:', data.conversationId);
+        })
+        .catch(error => console.error('Error starting new chat:', error));
+}
+function appendMessageAfterTyping(messageText, isAgent = false, agentName) {
+    // Default typing speed for participants
+    let typingSpeed = 200;
 
+    // If it's an agent's message, find the agent and use their typing speed
+    if (isAgent && agentName && agents.hasOwnProperty(agentName)) {
+        const agent = agents[agentName];
+        if (agent) {
+            typingSpeed = agent.typingSpeed;
+        }
+    }
+
+    const typingDuration = (messageText.length / typingSpeed) * 1000; // Calculate pause based on message length
+
+    // Show typing indicator for the calculated duration
+    showTypingIndicator(agentName);
+    setTimeout(() => {
+        hideTypingIndicator(agentName); // Hide typing indicator when message is ready to appear
+        appendMessage(messageText, isAgent, agentName); // Append the message after the typing indicator ends
+    }, typingDuration);
+}
 
 function appendMessage(messageText, isAgent = false, agentName) {
     const messageElement = document.createElement('div');
@@ -91,13 +110,23 @@ function appendMessage(messageText, isAgent = false, agentName) {
 }
 
 function showTypingIndicator(agentName) {
+    activeMessages++; // Increment
+    let typingIndicator = document.createElement('div');
     typingIndicator.innerText = `${agentName} is typing...`;
+    typingIndicator.id = `typing-${agentName}`; // Unique ID for each agent's typing indicator
     messageContainer.appendChild(typingIndicator);
+    // Removed the setTimeout here as the delay is now handled in appendMessageAfterTyping
 }
 
-function hideTypingIndicator() {
-    if (typingIndicator.parentNode === messageContainer) {
+function hideTypingIndicator(agentName) {
+    let typingIndicator = document.getElementById(`typing-${agentName}`);
+    if (typingIndicator && typingIndicator.parentNode === messageContainer) {
         messageContainer.removeChild(typingIndicator);
+        activeMessages--; // Decrement
+        if (activeMessages === 0) {
+            // All messages have been processed, safe to fetch new messages
+            fetchResponses(); 
+        }
     }
 }
 
@@ -108,20 +137,31 @@ eventSource.addEventListener('typing', (event) => {
 });
 
 function simulateTyping(agentName, message) {
+    // Find the agent object by searching for an agentName match
+    const agentKey = Object.keys(agents).find(key => agents[key].agentName === agentName);
+    const agent = agents[agentKey];
+
+    if (!agent) {
+        console.error('Agent not found:', agentName);
+        return;
+    }
+
+    // Now, agent is correctly found, and you can access its properties like agent.avatar or agent.typingSpeed
+    // Calculate delay based on the message length and agent's typing speed
+    // Assuming you add typingSpeed to your agents' properties
+    const typingSpeed = agent.typingSpeed / 60; // Convert to characters per second
+    const messageLength = message.length;
+    const typingDuration = (messageLength / typingSpeed) * 1000; // Convert to milliseconds
+
     showTypingIndicator(agentName);
     setTimeout(() => {
-        appendMessage(message, true, agentName); // Pass agentName to appendMessage, ensuring isAgent is true for agents
-    }, 2000); // Adjust this delay as needed
+        appendMessage(message, true, agentName); // Ensure isAgent is true for agents
+        hideTypingIndicator(agentName); // Hide the typing indicator after the message is appended
+    }, typingDuration); // Use the calculated typing duration
 }
 
-eventSource.addEventListener('message', (event) => {
-    const agentName = event.data.split(':')[0]; // Assuming the format "AgentName: message"
-    const messageText = event.data.substring(agentName.length + 2); // +2 to skip ": "
-    appendMessage(messageText, true, agentName); // Assuming all messages received through this event are from agents, corrected to include agentName
-});
-
 document.addEventListener('DOMContentLoaded', function() {
-    startNewChat(); // Call this function to start a new chat and generate a conversationId
+    startNewChat(); // This will trigger the startNewChat function as soon as the DOM is fully loaded
     var chatWindow = document.getElementById("chatWindow");
     var analysisWindow = document.getElementById("locationAnalysis");
     var helpButton = document.getElementById("helpButton");
@@ -130,12 +170,12 @@ document.addEventListener('DOMContentLoaded', function() {
         analysisWindow.style.display = 'none';
         // Add any necessary logic for toggling active state
     });
-    
 
     document.getElementById("locationTab").addEventListener("click", function() {
         chatWindow.style.display = 'none';
     });
     simulateChat(); // Add this line to start the chat automatically
+
     messageInput.disabled = false;
     sendMessageButton.disabled = false;
     // Stop the automatic chat
@@ -148,41 +188,34 @@ sendMessageButton.addEventListener('click', () => {
     console.log('Send button clicked');
 
     // Simulate user typing similar to agent's typing mechanism
-    showTypingIndicator(badgeName); // Use the participant's badge name
-
-    // Append the user's message immediately after the typing indicator
-    appendMessage(messageText, false, badgeName); // Use false for isAgent and badgeName for the participant's name
+    appendMessageAfterTyping(messageText, false, badgeName); // Use appendMessageAfterTyping for user's message
 
     // Wait for a specified delay, then make a request to the '/ask-openai' endpoint
     setTimeout(() => {
-        console.log('Current conversationId is again:', currentConversationId); // Print the current conversationId for verification
         fetch('/ask-openai', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ firstName, badgeName, message: messageText, conversationHistory, conversationId: currentConversationId}) // Pass the message from the input field
+            body: JSON.stringify({ firstName, badgeName, message: messageText, conversationHistory }) // Pass the message from the input field
         })
             .then(response => response.json())
             .then(data => {
                 // Now remove the "typing..." message
-                hideTypingIndicator();
+                hideTypingIndicator(badgeName);
 
                 // Extract the currentAgentName from the response to use as agentName
                 const agentName = data.currentAgentName; // This line is added to utilize "currentAgentName" from the backend
 
                 // Check if data.responses exists and is not empty
                 if (data.responses && data.responses.length > 0) {
-                    // Then append the actual message after the delay
-                    data.responses.forEach((response) => {
-                        setTimeout(() => {
-                            appendMessage(response.content, true, agentName); // Use the extracted agentName for appending messages
-                        }, response.delay); // Use the delay provided by the backend for each message
+                    data.responses.forEach((response, index) => {
+                        // Use appendMessageAfterTyping to simulate typing and display the message
+                        appendMessageAfterTyping(response.content, true, response.role); // Display the message
+                        conversationHistory.push({ rolexf: response.role, content: response.content }); // Add to conversation history
                     });
                 } else {
                     console.error('Unexpected response structure:', data);
-                    // Handle the case where data.responses is not as expected
-                    // For example, display a default message or log an error
                 }
             })
             .catch(error => {
@@ -208,13 +241,42 @@ function generateRandomMessage() {
 let lastAgentIndex = null;
 
 function simulateChat() {
-    // Add at the beginning of the simulateChat function
-    let agentResponded = false;
-
     // Clear the previous interval
     clearInterval(chatInterval);
 
-    // Fetch the response first to get the current agent's name
+    // Check if it's the first call to simulateChat by checking the length of conversationHistory
+    if (conversationHistory.length === 0) {
+        // Predefined introduction message from Agent 1 (James)
+        const introductionMessage = {
+            role: 'Agent 1',
+            content: "Hello, I'm James. I'll be assisting you in evaluating potential locations for our new restaurant. Let's aim to rank these locations based on our criteria."
+        };
+
+        // Display "typing..." message with James's name
+        let messageElement = appendMessage(`James is typing...`, true, "James");
+
+        // Replace the "typing..." message with the actual message after a delay
+        setTimeout(() => {
+            // Ensure the first message starts with James:
+            let firstResponse = `James: ${introductionMessage.content}`;
+            let textElement = messageElement.querySelector('.text');
+            textElement.textContent = firstResponse;
+            conversationHistory.push({ role: "James", content: introductionMessage.content });
+
+            // Fetch the response after displaying the introduction message
+            fetchResponses();
+        }, 10000); // Adjust delay as needed
+    } else {
+        // If not the first call, directly fetch responses
+        fetchResponses();
+    }
+}
+
+function fetchResponses() {
+    if (activeMessages > 0) {
+        // Still processing messages, exit early
+        return;
+    }
     fetch('/ask-openai', {
         method: 'POST',
         headers: {
@@ -224,22 +286,15 @@ function simulateChat() {
     })
         .then(response => response.json())
         .then(data => {
-            if (data && data.responses && data.currentAgentName) {
-                agentResponded = true;
-                // Display "typing..." message with the correct agent's name
-                let messageElement = appendMessage(`${data.currentAgentName} is typing...`, true, data.currentAgentName);
+            if (data && data.responses) {
+                // Process responses
+                data.responses.forEach(response => {
+                    simulateTyping(response.role, `${response.role}: ${response.content}`); // Use simulateTyping to show typing indicator before appending message
+                    conversationHistory.push({ role: response.role, content: response.content });
+                });
 
-                // Replace the "typing..." message with the actual message after a delay
-                setTimeout(() => {
-                    data.responses.forEach(response => {
-                        let textElement = messageElement.querySelector('.text');
-                        textElement.textContent = `${response.role}: ${response.content}`;
-                        conversationHistory.push({ role: response.role, content: response.content });
-                    });
-
-                    // Call simulateChat again to keep the messages going
-                    simulateChat();
-                }, 10000); // Adjust delay as needed
+                // Call simulateChat again to keep the messages going
+                simulateChat();
             } else {
                 console.error('Unexpected response data:', data);
             }
@@ -247,12 +302,4 @@ function simulateChat() {
         .catch(error => {
             console.error('Error fetching data:', error);
         });
-
-    // Add at the end of the simulateChat function, before the catch block
-    setTimeout(() => {
-        if (!agentResponded) {
-            console.log('No agent responded, trying again...');
-            simulateChat(); // Call simulateChat again to try the next iteration
-        }
-    }, 10000); // Adjust the timeout as needed
 }

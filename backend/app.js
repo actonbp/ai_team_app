@@ -3,6 +3,7 @@ const express = require('express');
 const axios = require('axios');
 const path = require('path');
 const fs = require('fs').promises;
+const { v4: uuidv4 } = require('uuid'); // Add this at the top where other modules are imported
 // Import the necessary AWS SDK v3 packages
 const { SSMClient, GetParameterCommand } = require("@aws-sdk/client-ssm");
 const app = express();
@@ -28,7 +29,12 @@ async function getParameter(parameterName) {
     return null;
   }
 }
-
+app.post('/start-chat', (req, res) => {
+  const newConversationId = uuidv4(); // Generate a unique ID
+  conversationHistories[newConversationId] = []; // Initialize conversation history
+  console.log(`New conversation started with ID: ${newConversationId}`); // Print the conversationId to the console
+  res.json({ conversationId: newConversationId }); // Send ID to client
+});
 // Async function to initialize your application
 async function initializeApp() {
   const port = process.env.PORT || 3000;
@@ -123,6 +129,46 @@ let agentInformation = {
 };
 let lastSelectedAgentIndex = null;
 
+
+async function decideParticipation(conversationHistory, agentName) {
+  // Constructing a new prompt for deciding participation
+  const participationPrompt = `
+  James is outgoing and likes to particpate. He does not participate if he just did last message. 
+  Ethan is Stoic and less likely to particpate. He does not participate if he just did last message.
+  Sophia is very outgoing and loves to particpate. She might particpate even if she just did last message.
+  
+  Given the following conversation history and knowing you are impersonating ${agentName}, 
+  decide whether you should participate in the conversation. IMPORTANT: YOU SHOULD NOT participate if you just did recently, 
+  and you should only if you have helpful information to offer. Take some breaks from particpating randomly. 
+  It's good to respond early on in the conversation, but it's also good to take breaks.
+  If you have not participated in the last 3 messages, you should participate.
+
+  IMPORTANT: Respond with "YES" or "NO".
+
+Conversation History:
+${conversationHistory.map(entry => `${entry.role}: ${entry.content}`).join('\n')}
+
+Should ${agentName} participate in the conversation?`;
+
+  const response = await axios.post('https://api.openai.com/v1/chat/completions', {
+    model: 'gpt-4-0125-preview',
+    messages: [
+      {
+        role: 'system',
+        content: participationPrompt
+      }
+    ]
+  }, {
+    headers: {
+      'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+    }
+  });
+
+  // Extracting the decision from the response
+  const decision = response.data.choices[0].message.content.trim();
+  return decision.toUpperCase(); // Ensuring the decision is in uppercase for consistency
+}
+
 async function callOpenAI(messages, role = 'user') {
   const response = await axios.post('https://api.openai.com/v1/chat/completions', {
     model: 'gpt-4-0125-preview',
@@ -180,47 +226,64 @@ async function callOpenAI(messages, role = 'user') {
 }
 
 app.post('/ask-openai', async (req, res) => {
-    try {
-        const { firstName, badgeName, message, conversationId } = req.body;
-        const conversationHistory = conversationHistories[conversationId] || [];
-        let responses = [];
-
-        // Add the user's message to the conversation history
-        if (message) {
-            conversationHistory.push({
-                role: 'user',
-                content: message
-            });
-        }
-
-        // Loop through each agent to get their response
-        for (const agentName of agents) {
-            const agentInfo = agentInformation[agentName];
-            const messages = [...conversationHistory, { role: 'system', content: agentInfo }];
-            const responseContent = await callOpenAI(messages, 'user');
-            responses.push({ role: agentName, content: responseContent });
-
-            // Append the new AI message to the conversation history
-            conversationHistory.push({
-                role: agentName,
-                content: responseContent
-            });
-        }
-
-        // Update the stored conversation history
-        conversationHistories[conversationId] = conversationHistory;
-
-        // Send the responses after all agents have replied
-        res.json({
-            responses,
-            currentAgentName: null // This field becomes irrelevant in this context
-        });
-
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: error.toString() });
+  try {
+    const { message, conversationId } = req.body;
+    // Ensure there's a valid conversationId provided
+    if (!conversationId || !conversationHistories[conversationId]) {
+      return res.status(400).json({ error: "Invalid or missing conversation ID." });
     }
+    const conversationHistory = conversationHistories[conversationId] || [];
+    let responses = [];
+    let participatingAgents = []; // Moved inside the try block to ensure scope is correct
+
+    // Add the user's message to the conversation history
+    if (message) {
+      conversationHistory.push({
+        role: 'user',
+        content: message
+      });
+    }
+
+    // Loop through each agent to get their response
+    for (const agentName of agents) {
+      const agentInfo = agentInformation[agentName];
+      const messages = [...conversationHistory, { role: 'system', content: agentInfo }];
+
+      // Inside your /ask-openai endpoint
+      // Decide if the agent wants to participate
+      const participationDecision = await decideParticipation(messages, agentName);
+      console.log(`${agentName} participation decision: ${participationDecision}`); // Print the participation decision for each agent
+      if (participationDecision === 'YES') {
+        participatingAgents.push(agentName); // Add agent to participating list if they decide to participate
+        const responseContent = await callOpenAI(messages, 'user');
+        responses.push({ role: agentName, content: responseContent });
+
+        // Append the new AI message to the conversation history
+        conversationHistory.push({
+          role: agentName,
+          content: responseContent
+        });
+      }
+      
+    }
+    // Update the stored conversation history
+    conversationHistories[conversationId] = conversationHistory;
+
+    // After the for loop that processes each agent
+    if (responses.length > 0) {
+      // Process and send back the responses as you normally would
+      res.json({ responses, participatingAgents });
+    } else {
+      // Handle the case where there are no responses, e.g., send a default message or error
+      res.json({ message: "No agents available to respond at this time." });
+    }
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.toString() });
+  }
 });
+
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/login.html'));
@@ -229,3 +292,4 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
 });
+

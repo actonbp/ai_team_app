@@ -5,6 +5,10 @@ const badgeNameInput = document.getElementById('badgeNameInput');
 const avatarGrid = document.getElementById('avatarGrid');
 const avatars = ['avatar_1.png', 'avatar_2.png', 'avatar_3.png']; // List your avatar filenames
 
+// Function to handle avatar selection and store it in localStorage
+function selectAvatar(avatarFileName) {
+    localStorage.setItem('selectedAvatar', `avatars/${avatarFileName}`);
+}
 
 loginForm.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -69,4 +73,3 @@ document.querySelectorAll('.avatarOption').forEach(avatar => {
         localStorage.setItem('selectedAvatar', this.dataset.avatar); // Save the selected avatar
     });
 });
-
