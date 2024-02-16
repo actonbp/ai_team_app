@@ -182,17 +182,8 @@ async function callOpenAI(messages, role = 'user') {
 app.post('/ask-openai', async (req, res) => {
     try {
         const { firstName, badgeName, message, conversationId } = req.body;
-
-        // Select a different agent for each message
-        let selectedAgentIndex;
-        do {
-            selectedAgentIndex = Math.floor(Math.random() * agents.length);
-        } while (selectedAgentIndex === lastSelectedAgentIndex);
-        lastSelectedAgentIndex = selectedAgentIndex;
-
-        const currentAgentName = agents[selectedAgentIndex]; // This is your currentAgentName
-        const agentInfo = agentInformation[currentAgentName];
         const conversationHistory = conversationHistories[conversationId] || [];
+        let responses = [];
 
         // Add the user's message to the conversation history
         if (message) {
@@ -202,43 +193,28 @@ app.post('/ask-openai', async (req, res) => {
             });
         }
 
-        // Prepare the messages for the OpenAI API, including the agent's information
-        const messages = conversationHistory.map(entry => ({
-            role: entry.role,
-            content: entry.content
-        }));
+        // Loop through each agent to get their response
+        for (const agentName of agents) {
+            const agentInfo = agentInformation[agentName];
+            const messages = [...conversationHistory, { role: 'system', content: agentInfo }];
+            const responseContent = await callOpenAI(messages, 'user');
+            responses.push({ role: agentName, content: responseContent });
 
-        // Insert the agent's information as the latest message from the agent
-        messages.push({
-            role: 'system',
-            content: agentInfo
-        });
-
-        // Call OpenAI with the updated history
-        const responseContent = await callOpenAI(messages, 'user');
-
-        // Simulate typing delay
-        const typingDelay = 3000; // Simulate a typing delay
-        const messageDelay = 6000; // Simulate a delay between messages
-
-        setTimeout(() => {
             // Append the new AI message to the conversation history
             conversationHistory.push({
-                role: currentAgentName, // Use currentAgentName here
+                role: agentName,
                 content: responseContent
             });
+        }
 
-            // Update the stored conversation history
-            conversationHistories[conversationId] = conversationHistory;
+        // Update the stored conversation history
+        conversationHistories[conversationId] = conversationHistory;
 
-            // Send the response after the delay
-            res.json({
-                responses: [
-                    { role: currentAgentName, content: responseContent } // Include currentAgentName in the response
-                ],
-                currentAgentName // Optionally, explicitly send the currentAgentName back to the client
-            });
-        }, typingDelay + messageDelay);
+        // Send the responses after all agents have replied
+        res.json({
+            responses,
+            currentAgentName: null // This field becomes irrelevant in this context
+        });
 
     } catch (error) {
         console.error(error);
