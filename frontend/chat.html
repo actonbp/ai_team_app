@@ -16,11 +16,11 @@
             padding: 10px;
             text-align: left;
         }
-        .chat-area, .location-analysis {
+        .chat-area, .location-analysis, .help-section {
             max-height: 500px; /* Adjust this value based on your needs */
             overflow-y: auto; /* Enables vertical scrolling */
         }
-        .location-analysis {
+        .location-analysis, .help-section {
             display: none; /* Initially hidden */
         }
         .tab {
@@ -47,7 +47,15 @@
         </aside>
         <section class="chat-container">
             <header class="chat-header">
-                <h1>Team Chat</h1>
+                <h1>Your Information</h1>
+                <!-- Avatar image placeholder -->
+                <div class="participant-info">
+                    <img id="participantAvatar" src="default_avatar.png" alt="Participant Avatar" style="width: 50px; height: 50px;">
+                    <div id="participantDetails" class="participant-details">
+                        First Name: <span id="firstName"></span>, 
+                        Badge Name: <span id="badgeName"></span>
+                    </div>
+                </div>
             </header>
             <div class="chat-area" id="chatWindow">
                 <!-- Chat messages will be added here -->
@@ -124,6 +132,11 @@
                     </tr>
                 </table>
             </div>
+            <div class="help-section" id="helpSection">
+                <!-- Help Section Content -->
+                <h2>Help & Instructions</h2>
+                <p>Your group's goal is to rank the three locations in order of most attributes met. Each person has unique info. You cannot paste the info in the chat.</p>
+            </div>
             <div class="input-area">
                 <button id="raiseHandButton">Raise Hand to Participate</button>
                 <input type="text" id="messageInput" placeholder="Type a message...">
@@ -136,14 +149,26 @@
         document.getElementById('chatTab').addEventListener('click', function() {
             document.getElementById('chatWindow').style.display = 'block';
             document.getElementById('locationAnalysis').style.display = 'none';
+            document.getElementById('helpSection').style.display = 'none';
             this.classList.add('active-tab');
             document.getElementById('locationTab').classList.remove('active-tab');
+            document.getElementById('helpButton').classList.remove('active-tab');
         });
         document.getElementById('locationTab').addEventListener('click', function() {
             document.getElementById('chatWindow').style.display = 'none';
             document.getElementById('locationAnalysis').style.display = 'block';
+            document.getElementById('helpSection').style.display = 'none';
             this.classList.add('active-tab');
             document.getElementById('chatTab').classList.remove('active-tab');
+            document.getElementById('helpButton').classList.remove('active-tab');
+        });
+        document.getElementById('helpButton').addEventListener('click', function() {
+            document.getElementById('chatWindow').style.display = 'none';
+            document.getElementById('locationAnalysis').style.display = 'none';
+            document.getElementById('helpSection').style.display = 'block';
+            this.classList.add('active-tab');
+            document.getElementById('chatTab').classList.remove('active-tab');
+            document.getElementById('locationTab').classList.remove('active-tab');
         });
     </script>
 </body>

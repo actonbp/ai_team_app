@@ -9,18 +9,20 @@
     <style>
         body {
             display: flex;
-            justify-content: center;
+            justify-content: flex-start; /* Align content to the top */
             align-items: center;
-            flex-direction: column; /* Ensures vertical stacking of elements */
-            height: 100vh;
+            flex-direction: column;
             margin: 0;
             background-color: #f0f0f0;
             font-family: Arial, sans-serif;
-            overflow: auto; /* Allows scrolling to see all content */
+            overflow: auto; /* Ensures the page is scrollable */
+            line-height: 1.5;
+            padding-top: 20px; /* Add some padding at the top */
+            padding-bottom: 20px; /* Add some padding at the bottom */
         }
 
         .task-begin {
-            margin-bottom: 10px;
+            margin-bottom: 20px; /* Increase bottom margin */
             width: 80%; /* Adjust width to prevent text stretching across the screen */
             text-align: center; /* Center the text for better readability */
         }
@@ -34,11 +36,12 @@
             display: flex; /* Use flex to align form items nicely */
             flex-direction: column; /* Stack form items vertically */
             gap: 10px; /* Add space between form items */
+            margin-bottom: 20px; /* Increase bottom margin */
         }
 
         form input, form button {
             padding: 10px; /* Add padding for better touch targets */
-            margin: 5px 0; /* Add margin for spacing around inputs and button */
+            margin: 10px 0; /* Increase margin for spacing */
             border: 1px solid #ccc; /* Add border to inputs for distinction */
             border-radius: 5px; /* Round the corners of inputs and button */
         }
@@ -66,10 +69,11 @@
         /* Adjusted avatar grid for multiple columns */
         #avatarGrid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr); /* Adjust to show multiple columns */
+            grid-template-columns: repeat(4, 1fr); /* Adjust to show multiple columns */
             gap: 10px;
             justify-items: center;
             padding: 20px;
+            margin-bottom: 20px; /* Increase bottom margin */
         }
 
         .avatarOption {
@@ -81,6 +85,21 @@
 
         .avatarOption.selected {
             border-color: #6264a7; /* Highlight color */
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .task-begin, form, table, #avatarGrid {
+                width: 90%; /* Increase width for smaller screens */
+            }
+
+            table {
+                font-size: 0.9em; /* Increase font size for legibility */
+            }
+
+            form input, form button {
+                padding: 15px; /* Increase padding for easier interaction */
+            }
         }
     </style>
 </head>
@@ -167,12 +186,6 @@
         <p>Select an avatar that you most identify with. This avatar will represent you in the chat.</p>
     </div>
     <div id="avatarGrid">
-        <img src="avatars/avatar_1.png" class="avatarOption">
-        <img src="avatars/avatar_2.png" class="avatarOption">
-        <img src="avatars/avatar_3.png" class="avatarOption">
-        <img src="avatars/avatar_4.png" class="avatarOption">
-        <img src="avatars/avatar_5.png" class="avatarOption">
-        <img src="avatars/avatar_6.png" class="avatarOption">
     </div>
     <div>
         <h2>Pick Your Badge Name</h2>

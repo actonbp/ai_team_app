@@ -10,6 +10,11 @@ const raiseHandButton = document.getElementById('raiseHandButton');
 const messageContainer = document.getElementById('chatWindow');
 const typingIndicator = document.createElement('div');
 const message = messageInput.value;
+const participantAvatar = document.getElementById('participantAvatar');
+const selectedAvatar = localStorage.getItem('selectedAvatar');
+if (selectedAvatar) {
+    participantAvatar.src = selectedAvatar;
+}
 typingIndicator.innerText = 'Agent is typing...';
 
 // Disable the message input field and the send message button initially
@@ -28,11 +33,21 @@ let chatInterval;
 
 typingDelay = 10000
 const agents = {
-    'Agent 1': { agentName: 'James', avatar: 'avatars/avatar_2.png', isAgent: true, typingSpeed: 200 },
+    'Agent 1': { agentName: 'James', avatar: 'avatars/avatar_2.png', isAgent: true, typingSpeed: 160 },
     'Agent 2': { agentName: 'Sophia', avatar: 'avatars/avatar_3.png', isAgent: true, typingSpeed: 180 },
-    'Agent 3': { agentName: 'Ethan', avatar: 'avatars/avatar_6.png', isAgent: true, typingSpeed: 220 }
+    'Agent 3': { agentName: 'Ethan', avatar: 'avatars/avatar_6.png', isAgent: true, typingSpeed: 200 }
 }; // Corrected avatar paths to be consistent with the appendMessage function and added typingSpeed for each agent
 // This function is called to initiate a new chat session
+
+document.addEventListener('DOMContentLoaded', function () {
+    // Retrieve the first name and badge name from localStorage
+    const firstName = localStorage.getItem('firstName');
+    const badgeName = localStorage.getItem('badgeName');
+
+    // Find the span elements by their IDs and set their text content
+    document.getElementById('firstName').textContent = firstName;
+    document.getElementById('badgeName').textContent = badgeName;
+});
 
 function startNewChat() {
     fetch('/start-chat', {
@@ -72,7 +87,7 @@ function appendMessageAfterTyping(messageText, isAgent = false, agentName) {
     }, typingDuration);
 }
 
-function appendMessage(messageText, isAgent = false, agentName) {
+function appendMessage(messageText, isAgent = false, agentName, isParticipant = false) {
     const messageElement = document.createElement('div');
     messageElement.classList.add('message');
 
@@ -92,12 +107,12 @@ function appendMessage(messageText, isAgent = false, agentName) {
     const textElement = document.createElement('div');
     textElement.classList.add('text');
 
-    // Prepend the badge name to the participant's message or use the agent's name
+    // Prepend the badge name and first name to the participant's message or use the agent's name
     if (!isAgent) {
         const badgeName = localStorage.getItem('badgeName');
-        textElement.innerText = `${badgeName}: ${messageText}`;
-        // Add the participant's message to the conversation history with their badge name
-        conversationHistory.push({ role: badgeName, content: messageText });
+        textElement.innerText = `${firstName} (${badgeName}): ${messageText}`;
+        // Add the participant's message to the conversation history with their badge name and first name
+        conversationHistory.push({ role: ` ${badgeName} (${firstName})`, content: messageText, isParticipant: true });
     } else {
         textElement.innerText = `${agentName}: ${messageText}`;
         // If the message is from an agent, add it to the conversation history with the agent's name
@@ -117,6 +132,22 @@ function appendMessage(messageText, isAgent = false, agentName) {
     }
 
     messageContainer.scrollTop = messageContainer.scrollHeight; // Scrolls to the bottom
+
+    // New code to save the message after it's appended
+    fetch('/save-message', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            conversationId: localStorage.getItem('currentConversationId'),
+            message: {
+                role: isAgent ? agentName : `${badgeName} (${firstName})`,
+                content: messageText
+            }
+        })
+    });
+
     return messageElement;
 }
 
@@ -195,11 +226,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Event listener for the send message button
 sendMessageButton.addEventListener('click', () => {
-    const messageText = messageInput.value;
+    const messageText = `${messageInput.value}`;
     console.log('Send button clicked');
 
     // Simulate user typing similar to agent's typing mechanism
-    appendMessageAfterTyping(messageText, false, badgeName); // Use appendMessageAfterTyping for user's message
+    appendMessageAfterTyping(messageText, false, `${badgeName} (${firstName})`); // Use appendMessageAfterTyping for user's message
 
     // Wait for a specified delay, then make a request to the '/ask-openai' endpoint
     setTimeout(() => {
@@ -215,17 +246,21 @@ sendMessageButton.addEventListener('click', () => {
             .then(response => response.json())
             .then(data => {
                 // Now remove the "typing..." message
-                hideTypingIndicator(badgeName);
+                hideTypingIndicator(`${badgeName} (${firstName})`);
 
                 // Extract the currentAgentName from the response to use as agentName
                 const agentName = data.currentAgentName; // This line is added to utilize "currentAgentName" from the backend
-
+                const messageText = messageInput.value;
+                // Existing code to handle message sending
+                // When constructing the message object, add isParticipant: true
+                const messageObject = { role: `${badgeName} (${firstName})`, content: messageText, isParticipant: true };
+                // Existing code to send the message to the server
                 // Check if data.responses exists and is not empty
                 if (data.responses && data.responses.length > 0) {
                     data.responses.forEach((response, index) => {
                         // Use appendMessageAfterTyping to simulate typing and display the message
                         appendMessageAfterTyping(response.content, true, response.role); // Display the message
-                        conversationHistory.push({ rolexf: response.role, content: response.content }); // Add to conversation history
+                        conversationHistory.push({ role: response.role, content: response.content }); // Add to conversation history
                     });
                 } else {
                     console.error('Unexpected response structure:', data);
@@ -263,7 +298,7 @@ function simulateChat() {
         // Predefined introduction message from Agent 1 (James)
         const introductionMessage = {
             role: 'Agent 1',
-            content: "Hello, I'm James. I'll be assisting you in evaluating potential locations for our new restaurant. Let's aim to rank these locations based on our criteria."
+            content: "Hey team, James here! Excited to work with you all on finding the perfect spot for our new restaurant. How about we start by discussing what type of strategy we should take before we share specfic unique information? How should we go about solving this task correctly?"
         };
 
         // Display "typing..." message with James's name
@@ -284,6 +319,22 @@ function simulateChat() {
         // If not the first call, directly fetch responses
         fetchResponses();
     }
+}
+
+function updateChatTranscript(conversationHistory) {
+    fetch('/update-transcript', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            conversationId: localStorage.getItem('currentConversationId'),
+            conversationHistory
+        })
+    })
+        .then(response => response.json())
+        .then(data => console.log('Transcript updated successfully'))
+        .catch(error => console.error('Error updating transcript:', error));
 }
 
 function fetchResponses() {
@@ -309,7 +360,7 @@ function fetchResponses() {
             if (data && data.responses) {
                 // Process responses
                 data.responses.forEach(response => {
-                    simulateTyping(response.role, `${response.role}: ${response.content}`); // Use simulateTyping to show typing indicator before appending message
+                    simulateTyping(response.role, `${response.content}`); // Use simulateTyping to show typing indicator before appending message
                     conversationHistory.push({ role: response.role, content: response.content });
                 });
 

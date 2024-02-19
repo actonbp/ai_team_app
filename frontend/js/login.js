@@ -3,12 +3,49 @@ const loginForm = document.getElementById('login-form');
 const firstNameInput = document.getElementById('firstNameInput');
 const badgeNameInput = document.getElementById('badgeNameInput');
 const avatarGrid = document.getElementById('avatarGrid');
-const avatars = ['avatar_1.png', 'avatar_2.png', 'avatar_3.png']; // List your avatar filenames
+
 
 // Function to handle avatar selection and store it in localStorage
 function selectAvatar(avatarFileName) {
     localStorage.setItem('selectedAvatar', `avatars/${avatarFileName}`);
+    console.log(`Selected avatar file path: avatars/${avatarFileName}`); // Print the file path of the selected avatar
 }
+
+// Function to dynamically load avatars, add event listeners for selection, and print all loaded avatars in the console
+async function loadAndHandleAvatars() {
+    try {
+        const response = await fetch('/avatars');
+        const avatars = await response.json();
+
+        console.log("Loaded avatars:"); // Print a header for the loaded avatars list in the console
+
+        avatars.forEach(avatar => {
+            const imgElement = document.createElement('img');
+            imgElement.src = `avatars/${avatar}`;
+            imgElement.classList.add('avatarOption');
+            imgElement.dataset.avatar = avatar;
+            avatarGrid.appendChild(imgElement);
+
+            console.log(`avatars/${avatar}`); // Print each loaded avatar file path in the console
+        });
+
+        // Attach event listeners to the loaded avatars as before
+        document.querySelectorAll('.avatarOption').forEach(avatar => {
+            avatar.addEventListener('click', function () {
+                document.querySelectorAll('.avatarOption').forEach(img => img.style.border = '2px solid transparent');
+                this.style.border = '5px solid #ff4500';
+                selectAvatar(this.dataset.avatar);
+            });
+        });
+    } catch (error) {
+        console.error('Failed to load avatars:', error);
+    }
+}
+
+// Call the function to load avatars and set up event listeners when the page loads
+document.addEventListener('DOMContentLoaded', () => {
+    loadAndHandleAvatars();
+});
 
 loginForm.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -22,54 +59,10 @@ loginForm.addEventListener('submit', (e) => {
         return;
     }
 
-    // Dynamically load avatars into the grid
-    avatars.forEach(avatar => {
-        const imgElement = document.createElement('img');
-        imgElement.src = `avatars/${avatar}`;
-        imgElement.classList.add('avatarOption');
-        imgElement.dataset.avatar = avatar;
-        avatarGrid.appendChild(imgElement);
-    });
-
-    // Event listener for avatar selection
-    document.querySelectorAll('.avatarOption').forEach(avatar => {
-        avatar.addEventListener('click', function () {
-            document.querySelectorAll('.avatarOption').forEach(img => img.classList.remove('selected'));
-            this.classList.add('selected');
-            localStorage.setItem('selectedAvatar', this.dataset.avatar);
-        });
-    });
-
-    // Dynamically load avatars into the grid
-    avatars.forEach(avatar => {
-        const imgElement = document.createElement('img');
-        imgElement.src = `frontend/avatars/${avatar}`;
-        imgElement.classList.add('avatarOption');
-        imgElement.dataset.avatar = avatar;
-        avatarGrid.appendChild(imgElement);
-    });
-
-    // Event listener for avatar selection
-    document.querySelectorAll('.avatarOption').forEach(avatar => {
-        avatar.addEventListener('click', function () {
-            document.querySelectorAll('.avatarOption').forEach(img => img.classList.remove('selected'));
-            this.classList.add('selected');
-            localStorage.setItem('selectedAvatar', this.dataset.avatar);
-        });
-    });
-
     // Persist user details in localStorage
     localStorage.setItem('firstName', firstName);
     localStorage.setItem('badgeName', badgeName);
 
     // Navigate user to the chat interface
     window.location.href = 'chat.html';
-});
-
-document.querySelectorAll('.avatarOption').forEach(avatar => {
-    avatar.addEventListener('click', function () {
-        document.querySelectorAll('.avatarOption').forEach(img => img.classList.remove('selected'));
-        this.classList.add('selected');
-        localStorage.setItem('selectedAvatar', this.dataset.avatar); // Save the selected avatar
-    });
 });

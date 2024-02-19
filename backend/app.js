@@ -7,7 +7,7 @@ const { v4: uuidv4 } = require('uuid'); // Add this at the top where other modul
 // Import the necessary AWS SDK v3 packages
 const { SSMClient, GetParameterCommand } = require("@aws-sdk/client-ssm");
 const app = express();
-const port = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../frontend')));
@@ -64,6 +64,7 @@ const conversationHistories = {};
 const agents = ['James', 'Sophia', 'Ethan'];
 let agentInformation = {
   "James": `Your name is JAMES, youre a go-to guy for quick, witty responses. You are extraverted, confident, and in positive. 
+  Your three teamates are Sophia, Ethan, and a participant who will give you their name. Feel free to call people out by name and ask questions.
   - East Point Mall: 
     - At least 50 parking spaces - Y
     - Larger than 2000 sqft - N
@@ -85,6 +86,7 @@ let agentInformation = {
     - Quick access to waste disposal - N
     - Large population of employable individuals - Y`,
   "Sophia": `Your name is SOPHIA, youre always ready to provide detailed, thoughtful insights. Here's what you need to know. You are highly agreeable, seek to work with others and are friendly.
+  Your three teamates are James, Ethan, and a participant who will give you their name. Feel free to call people out by name and ask questions. 
   - East Point Mall: 
     - At least 50 parking spaces - Y
     - Purchasing cost of less than 1MM - N
@@ -107,6 +109,7 @@ let agentInformation = {
     - Large tourist population - Y`,
   "Ethan": `Your name is ETHAN, youre a analytical expert with a knack for numbers--known for short responses. 
   You are short, and often rude. You are high on neuroticism and low on agreeableness. 
+  Your three teamates are James, Sophia, and a participant who will give you their name. Feel free to call people out by name and ask questions.
   - East Point Mall: 
     - At least 50 parking spaces - Y
     - Substantial foot traffic - Y
@@ -180,7 +183,8 @@ async function callOpenAI(messages, role = 'user') {
                   East Point Mall, Starlight Valley, and Cape James Beach. 
                   Your role is to help the team rank these locations from most to least desirable 
                   based on ten criteria. Engage in the chat by providing insights, 
-                  asking clarifying questions, and responding to team members' inputs. IMPORTANT: Keep messages short and act like a human who is typing chat messages. When you are finished, you can say something short about being done.
+                  asking clarifying questions, and responding to team members' inputs. IMPORTANT: Keep messages short and act like a human who is typing chat messages. 
+                  MAKE CONVERSATION NO MATTER WHAT THE TOPIC IS. YOU ARE PRETENDING TO BE A HUMAN IN A CHAT ROOM. TYPOS, MISTAKES, ETC ARE GOOD.
 
                   GUIDELINES:
 
@@ -194,7 +198,9 @@ async function callOpenAI(messages, role = 'user') {
                   - If you lack past conversation history, indicate that you are ready to assist with the information at hand.
                   - Continue the discussion until the team reaches a consensus on the ranking of the locations.
                   - DO NOT give away that you are a single AI Bot. Pretend you are a real person in a team chat.
-                  - Introduce yourself by your name in your first message if you can and alway know who you are
+                  - Introduce yourself by your name in your first message if you can and always know who you are
+                  - If THE REAL PERSON ADDS A MESSAGE (ANYONE NOT NAMED SOPHIA, JAMES, ETHAN), PRIORITIZE RESPONDING TO THEM, NO MATTER WHAT THEY SAY MAKE CONVERSATION.
+                  - THE REAL PERSON HAS A STAR IN THE TRANSCRIPT. PRIORITIZE THEIR MESSAGES NO MATTER WHAT!
 
                   CRITERIA: 
                   (1) at least 50 parking spaces, 
@@ -211,7 +217,7 @@ async function callOpenAI(messages, role = 'user') {
 
                   Please keep responses under 100-200 characters if you can, similar to quick text messages.
                   You can ask specfic other team members questions if you have not heard from someone. Always use the prior chat for context.
-                  IMPORTANT: When you believe the task is fully completed, please say 'task-complete' on a message BY ITSELF (nothing else).
+                  IMPORTANT: When you believe the task is fully completed, please say 'task-complete' on a message BY ITSELF (nothing else). You must have the rankings before this. 
                   DO NOT stop until you complete the task. And seek to have multiple shorter messages. Wait to finish your point on the next message where possible`
       },
       ...messages.map(entry => ({ role, content: entry.content }))
@@ -236,11 +242,11 @@ app.post('/ask-openai', async (req, res) => {
     let responses = [];
     let participatingAgents = []; // Moved inside the try block to ensure scope is correct
 
-    // Add the user's message to the conversation history
+    // Add the user's message to the conversation history with stars around the message
     if (message) {
       conversationHistory.push({
         role: 'user',
-        content: message
+        content: `⭐${message}⭐`
       });
     }
 
@@ -284,12 +290,46 @@ app.post('/ask-openai', async (req, res) => {
   }
 });
 
+app.post('/save-message', async (req, res) => {
+  const { conversationId, message } = req.body;
+  const filePath = path.join(__dirname, 'transcripts', `${conversationId}.txt`);
+  let fileContent;
+  if (['Ethan', 'Sophia', 'James'].includes(message.role)) {
+    fileContent = `${message.role}: ${message.content}\n`;
+  } else {
+    fileContent = `PARTICIPANT: ${message.role}: ⭐${message.content}⭐\n`;
+  }
+  try {
+    await fs.appendFile(filePath, fileContent, { flag: 'a' });
+    res.json({ message: "Message saved successfully." });
+  } catch (error) {
+    console.error('Error saving message:', error);
+    res.status(500).json({ error: 'Failed to save message.' });
+  }
+});
+
+
+
+// New endpoint to get avatar filenames
+app.get('/avatars', async (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  const avatarsDirectory = '/Users/bacton/Documents/GitHub/ai_team_app/frontend/avatars';
+  try {
+    const files = await fs.readdir(avatarsDirectory);
+    const avatars = files.filter(file => /\.(jpg|jpeg|png|gif)$/i.test(file)); // Filter for image files only
+    res.json(avatars);
+  } catch (error) {
+    console.error('Failed to read avatars directory:', error);
+    res.status(500).send('Failed to load avatars.');
+  }
+});
+
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/login.html'));
 });
 
-app.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}`);
+app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
 });
 
