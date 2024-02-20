@@ -15,6 +15,13 @@ function selectAvatar(avatarFileName) {
 async function loadAndHandleAvatars() {
     try {
         const response = await fetch('/avatars');
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            throw new TypeError('Expected JSON response');
+        }
         const avatars = await response.json();
 
         console.log("Loaded avatars:"); // Print a header for the loaded avatars list in the console

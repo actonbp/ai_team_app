@@ -313,7 +313,7 @@ app.post('/save-message', async (req, res) => {
 // New endpoint to get avatar filenames
 app.get('/avatars', async (req, res) => {
   res.set('Cache-Control', 'no-store');
-  const avatarsDirectory = '/Users/bacton/Documents/GitHub/ai_team_app/frontend/avatars';
+  const avatarsDirectory = path.join(__dirname, '../frontend/avatars');
   try {
     const files = await fs.readdir(avatarsDirectory);
     const avatars = files.filter(file => /\.(jpg|jpeg|png|gif)$/i.test(file)); // Filter for image files only
@@ -323,7 +323,6 @@ app.get('/avatars', async (req, res) => {
     res.status(500).send('Failed to load avatars.');
   }
 });
-
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/login.html'));
