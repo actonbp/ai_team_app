@@ -4,9 +4,13 @@ const axios = require('axios');
 const path = require('path');
 const fs = require('fs').promises;
 const app = express();
+<<<<<<< Updated upstream
 const port = process.env.PORT || 1000;
 const conversationHistories = {};
 const crypto = require('crypto'); // Add this line to use the crypto module for generating unique IDs
+=======
+const port = 3000;
+>>>>>>> Stashed changes
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../frontend')));

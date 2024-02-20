@@ -178,6 +178,39 @@ function appendMessage(messageText, sentByUser, avatarSrc, agentRole) {
     return messageElement;
 }
 
+<<<<<<< Updated upstream
+=======
+eventSource.addEventListener('message', (event) => {
+    const agentName = event.data.split(':')[0]; // Assuming the format "AgentName: message"
+    const messageText = event.data.substring(agentName.length + 2); // +2 to skip ": "
+    appendMessage(messageText, true, agentName); // Assuming all messages received through this event are from agents, corrected to include agentName
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Generate a unique ID for the conversation session
+    const conversationId = Date.now().toString(); // Place this line right inside the DOMContentLoaded event listener
+
+    var chatWindow = document.getElementById("chatWindow");
+    var analysisWindow = document.getElementById("locationAnalysis");
+    var helpButton = document.getElementById("helpButton");
+    document.getElementById("chatTab").addEventListener("click", function() {
+        chatWindow.style.display = 'block';
+        analysisWindow.style.display = 'none';
+        // Add any necessary logic for toggling active state
+    });
+
+    document.getElementById("locationTab").addEventListener("click", function() {
+        chatWindow.style.display = 'none';
+    });
+    simulateChat(); // Add this line to start the chat automatically
+
+    messageInput.disabled = false;
+    sendMessageButton.disabled = false;
+    // Stop the automatic chat
+    clearInterval(chatInterval);
+}); // Fixed misplaced closing bracket
+
+>>>>>>> Stashed changes
 // Event listener for the send message button
 sendMessageButton.addEventListener('click', () => {
     // Append the "typing..." message immediately
@@ -191,6 +224,7 @@ sendMessageButton.addEventListener('click', () => {
             headers: {
                 'Content-Type': 'application/json'
             },
+<<<<<<< Updated upstream
 <<<<<<< HEAD
             body: JSON.stringify({ firstName, badgeName, message: messageText, conversationId: 'your_unique_conversation_id', conversationHistory })        })
 =======
@@ -277,6 +311,36 @@ const chatSession = new ChatSession();
                     appendMessage(`${data.responses[1].role}: ${data.responses[1].content}`);
                 }, data.responses[1].delay); // Use the delay provided by the backend
             });
+=======
+            body: JSON.stringify({ firstName, badgeName, message: messageText, conversationId, conversationHistory })        
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Now remove the "typing..." message
+            hideTypingIndicator();
+
+            // Extract the currentAgentName from the response to use as agentName
+            const agentName = data.currentAgentName; // This line is added to utilize "currentAgentName" from the backend
+
+            // Check if data.responses exists and is not empty
+            if (data.responses && data.responses.length > 0) {
+                // Then append the actual message after the delay
+                data.responses.forEach((response) => {
+                    setTimeout(() => {
+                        appendMessage(response.content, true, agentName); // Use the extracted agentName for appending messages
+                    }, response.delay); // Use the delay provided by the backend for each message
+                });
+            } else {
+                console.error('Unexpected response data:', data);
+                // Handle the case where data.responses is not as expected
+                // For example, display a default message or log an error
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching data:', error);
+            // Handle any errors that occurred during the fetch
+        });
+>>>>>>> Stashed changes
     }, typingDelay); // typingDelay is the time you show the typing indicator for
 });
 
@@ -319,6 +383,7 @@ function simulateChat() {
     } while (agents.length > 1 && agentIndex === lastAgentIndex);
     lastAgentIndex = agentIndex;
 
+<<<<<<< Updated upstream
     const agent = agents[agentIndex];
 
     clearInterval(chatInterval); // Clear the previous interval
@@ -358,3 +423,42 @@ function simulateChat() {
 // Start the automatic chat
 chatInterval = setInterval(simulateChat, 5000); // 30 seconds interval
 >>>>>>> parent of caa1ce5 (made chat better, more realistic, shorter via changing prompts. App working stable)
+=======
+    // Fetch the response first to get the current agent's name
+    fetch('/ask-openai', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ firstName, badgeName, conversationHistory })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data && data.responses && data.currentAgentName) {
+            // Display "typing..." message with the correct agent's name
+            let messageElement = appendMessage(`${data.currentAgentName} is typing...`, true, data.currentAgentName);
+
+            // Replace the "typing..." message with the actual message after a delay
+            setTimeout(() => {
+                data.responses.forEach(response => {
+                    let textElement = messageElement.querySelector('.text');
+                    textElement.textContent = `${response.role}: ${response.content}`;
+                    conversationHistory.push({ role: response.role, content: response.content });
+                });
+
+                // Call simulateChat again to keep the messages going
+                simulateChat();
+            }, 10000); // Adjust delay as needed
+        } else {
+            console.error('Unexpected response data:', data);
+        }
+    })
+    .catch(error => {
+        console.error('Error fetching data:', error);
+    });
+}
+// Example code to save conversationHistory to localStorage
+window.addEventListener('beforeunload', () => {
+    localStorage.setItem('conversationHistory', JSON.stringify(conversationHistory));
+});
+>>>>>>> Stashed changes
