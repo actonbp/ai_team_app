@@ -3,7 +3,9 @@ if (!localStorage.getItem('badgeName')) {
     window.location.href = 'login.html';
 }
 const firstName = localStorage.getItem('firstName');
-const badgeName = localStorage.getItem('badgeName');
+// Import agentBadge from app.js
+const agentBadge = localStorage.getItem('{agentBadge');
+console.log(`Agent Badge: ${agentBadge}`); // Print agentBadge to console
 const messageInput = document.getElementById('messageInput');
 const sendMessageButton = document.getElementById('sendMessageButton');
 const raiseHandButton = document.getElementById('raiseHandButton');
@@ -33,10 +35,10 @@ let chatInterval;
 
 typingDelay = 10000
 const agents = {
-    'Agent 1': { agentName: 'James', avatar: 'avatars/avatar_2.png', isAgent: true, typingSpeed: 160 },
-    'Agent 2': { agentName: 'Sophia', avatar: 'avatars/avatar_3.png', isAgent: true, typingSpeed: 180 },
-    'Agent 3': { agentName: 'Ethan', avatar: 'avatars/avatar_6.png', isAgent: true, typingSpeed: 200 }
-}; // Corrected avatar paths to be consistent with the appendMessage function and added typingSpeed for each agent
+    'James': { agentName: 'James', avatar: 'avatars/avatar_2.png', isAgent: true, typingSpeed: 160, agentBadge: 'Master of Motivation' },
+    'Sophia': { agentName: 'Sophia', avatar: 'avatars/avatar_3.png', isAgent: true, typingSpeed: 180, agentBadge: 'Strategist Supreme' },
+    'Ethan': { agentName: 'Ethan', avatar: 'avatars/avatar_6.png', isAgent: true, typingSpeed: 200, agentBadge: 'Logic Luminary' }
+};// Corrected avatar paths to be consistent with the appendMessage function, added typingSpeed for each agent, and added agentBadge name to match @app.js
 // This function is called to initiate a new chat session
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -104,6 +106,12 @@ function appendMessage(messageText, isAgent = false, agentName, isParticipant = 
     const avatarElement = document.createElement('img');
     avatarElement.classList.add('avatar');
 
+    if (isParticipant) {
+        messageElement.classList.add('participant');
+    } else if (isAgent) {
+        messageElement.classList.add(`agent-${agentName}`);
+    }
+
     // Determine the avatar image source based on the agent's name or if it's the participant
     let avatarSrc;
     if (isAgent) {
@@ -124,11 +132,12 @@ function appendMessage(messageText, isAgent = false, agentName, isParticipant = 
         // Add the participant's message to the conversation history with their badge name and first name
         conversationHistory.push({ role: ` ${badgeName} (${firstName})`, content: messageText, isParticipant: true });
     } else {
-        textElement.innerText = `${agentName}: ${messageText}`;
-        // If the message is from an agent, add it to the conversation history with the agent's name
-        conversationHistory.push({ role: agentName, content: messageText });
+        // Retrieve the agent's badge from the agents object using the agentName
+        const agentBadge = agents[agentName] ? agents[agentName].agentBadge : 'Unknown'; // Retrieve the agent's badge
+        textElement.innerText = `${agentName} (${agentBadge}): ${messageText}`;
+        // If the message is from an agent, add it to the conversation history with the agent's name and badge
+        conversationHistory.push({ role: `${agentBadge} (${agentName})`, content: messageText, isParticipant: false });
     }
-
     messageElement.appendChild(avatarElement);
     messageElement.appendChild(textElement);
     messageContainer.append(messageElement);
@@ -330,7 +339,7 @@ function simulateChat() {
         // Replace the "typing..." message with the actual message after a delay
         setTimeout(() => {
             // Ensure the first message starts with James:
-            let firstResponse = `James: ${introductionMessage.content}`;
+            let firstResponse = `James (Master of Motivation): ${introductionMessage.content}`;
             let textElement = messageElement.querySelector('.text');
             textElement.textContent = firstResponse;
             conversationHistory.push({ role: "James", content: introductionMessage.content });
