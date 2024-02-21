@@ -1,0 +1,5 @@
+PARTICIPANT: Agent 2: ⭐Sophia has joined the chat.⭐
+PARTICIPANT: Agent 1: ⭐James has joined the chat.⭐
+PARTICIPANT: Agent 3: ⭐Ethan has joined the chat.⭐
+Ethan: Sophia, tourists matter, but not a deal-breaker for East Point Mall. We need to weigh all criteria. How's parking & size at other locations?
+James: James is typing...

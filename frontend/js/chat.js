@@ -47,6 +47,15 @@ document.addEventListener('DOMContentLoaded', function () {
     // Find the span elements by their IDs and set their text content
     document.getElementById('firstName').textContent = firstName;
     document.getElementById('badgeName').textContent = badgeName;
+
+    // Display join alerts for James and Sophia immediately
+    displayJoinAlert('James has joined the chat.');
+    displayJoinAlert('Sophia has joined the chat.');
+
+    // Simulate Ethan joining after a short delay
+    setTimeout(() => {
+        displayJoinAlert('Ethan has joined the chat.');
+    }, 3000); // Adjust the delay as needed
 });
 
 function startNewChat() {
@@ -61,6 +70,7 @@ function startNewChat() {
             // Store the conversationId received from the server in localStorage
             localStorage.setItem('currentConversationId', data.conversationId);
             console.log(`OH YEAH, New chat started with ID: ${data.conversationId}`);
+            // Add James' introduction message to conversationHistory in the specified format
         })
         .catch(error => console.error('Error starting new chat:', error));
 }
@@ -179,27 +189,31 @@ eventSource.addEventListener('typing', (event) => {
 });
 
 function simulateTyping(agentName, message) {
-    // Find the agent object by searching for an agentName match
-    const agentKey = Object.keys(agents).find(key => agents[key].agentName === agentName);
-    const agent = agents[agentKey];
+    return new Promise((resolve) => {
+        // Find the agent object by searching for an agentName match
+        const agentKey = Object.keys(agents).find(key => agents[key].agentName === agentName);
+        const agent = agents[agentKey];
 
-    if (!agent) {
-        console.error('Agent not found:', agentName);
-        return;
-    }
+        if (!agent) {
+            console.error('Agent not found:', agentName);
+            resolve(); // Resolve the promise even if the agent is not found to avoid hanging
+            return;
+        }
 
-    // Now, agent is correctly found, and you can access its properties like agent.avatar or agent.typingSpeed
-    // Calculate delay based on the message length and agent's typing speed
-    // Assuming you add typingSpeed to your agents' properties
-    const typingSpeed = agent.typingSpeed / 60; // Convert to characters per second
-    const messageLength = message.length;
-    const typingDuration = (messageLength / typingSpeed) * 1000; // Convert to milliseconds
+        // Now, agent is correctly found, and you can access its properties like agent.avatar or agent.typingSpeed
+        // Calculate delay based on the message length and agent's typing speed
+        // Assuming you add typingSpeed to your agents' properties
+        const typingSpeed = agent.typingSpeed / 60; // Convert to characters per second
+        const messageLength = message.length;
+        const typingDuration = (messageLength / typingSpeed) * 1000; // Convert to milliseconds
 
-    showTypingIndicator(agentName);
-    setTimeout(() => {
-        appendMessage(message, true, agentName); // Ensure isAgent is true for agents
-        hideTypingIndicator(agentName); // Hide the typing indicator after the message is appended
-    }, typingDuration); // Use the calculated typing duration
+        showTypingIndicator(agentName);
+        setTimeout(() => {
+            appendMessage(message, true, agentName); // Ensure isAgent is true for agents
+            hideTypingIndicator(agentName); // Hide the typing indicator after the message is appended
+            resolve(); // Resolve the promise after the delay and actions are completed
+        }, typingDuration); // Use the calculated typing duration
+    });
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -279,6 +293,15 @@ const messages = [
     "Let's get started."
 ];
 
+// Function to display join alerts
+function displayJoinAlert(message) {
+    const alertElement = document.createElement('div');
+    alertElement.textContent = message;
+    alertElement.style.fontStyle = 'italic';
+    alertElement.style.marginBottom = '10px';
+    messageContainer.prepend(alertElement); // Prepend to ensure it stays at the top
+}
+
 // Function to generate a random message
 function generateRandomMessage() {
     const message = messages[messageIndex];
@@ -311,6 +334,7 @@ function simulateChat() {
             let textElement = messageElement.querySelector('.text');
             textElement.textContent = firstResponse;
             conversationHistory.push({ role: "James", content: introductionMessage.content });
+            // updateChatTranscript(conversationHistory); // Adjust this line if necessary based on your actual function's expected parameters
 
             // Fetch the response after displaying the introduction message
             fetchResponses();
@@ -321,21 +345,7 @@ function simulateChat() {
     }
 }
 
-function updateChatTranscript(conversationHistory) {
-    fetch('/update-transcript', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            conversationId: localStorage.getItem('currentConversationId'),
-            conversationHistory
-        })
-    })
-        .then(response => response.json())
-        .then(data => console.log('Transcript updated successfully'))
-        .catch(error => console.error('Error updating transcript:', error));
-}
+
 
 function fetchResponses() {
     if (activeMessages > 0) {
@@ -373,4 +383,25 @@ function fetchResponses() {
         .catch(error => {
             console.error('Error fetching data:', error);
         });
+}
+
+function updateChatTranscript(conversationHistory) {
+    fetch('/save-message', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            conversationId: localStorage.getItem('currentConversationId'),
+            conversationHistory
+        })
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json(); // Only parse as JSON if the response is ok
+        })
+        .then(data => console.log('Transcript updated successfully'))
+        .catch(error => console.error('Error updating transcript:', error));
 }
