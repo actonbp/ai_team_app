@@ -20,8 +20,8 @@ if (selectedAvatar) {
 typingIndicator.innerText = 'Agent is typing...';
 
 // Disable the message input field and the send message button initially
-messageInput.disabled = true;
-sendMessageButton.disabled = true;
+messageInput.style.display = 'none';
+sendMessageButton.style.display = 'none';
 
 // Initialize an empty array to store the conversation history
 let conversationHistory = [];
@@ -58,6 +58,8 @@ document.addEventListener('DOMContentLoaded', function () {
     setTimeout(() => {
         displayJoinAlert('Ethan has joined the chat.');
     }, 3000); // Adjust the delay as needed
+
+    displayTeamMembers();
 });
 
 function startNewChat() {
@@ -99,7 +101,7 @@ function appendMessageAfterTyping(messageText, isAgent = false, agentName) {
     }, typingDuration);
 }
 
-function appendMessage(messageText, isAgent = false, agentName, isParticipant = false) {
+function appendMessage(messageText, isAgent = false, agentName, isParticipant = false, badgeName) {
     const messageElement = document.createElement('div');
     messageElement.classList.add('message');
 
@@ -125,16 +127,18 @@ function appendMessage(messageText, isAgent = false, agentName, isParticipant = 
     const textElement = document.createElement('div');
     textElement.classList.add('text');
 
+    const participantBadgeName = localStorage.getItem('badgeName');
+    // Predefined introduction message from Agent 1 (James) including the participant's badge name
+
     // Prepend the badge name and first name to the participant's message or use the agent's name
     if (!isAgent) {
-        const badgeName = localStorage.getItem('badgeName');
-        textElement.innerText = `${firstName} (${badgeName}): ${messageText}`;
+        textElement.innerText = `${firstName} (${participantBadgeName}): ${messageText}`;
         // Add the participant's message to the conversation history with their badge name and first name
         conversationHistory.push({ role: ` ${badgeName} (${firstName})`, content: messageText, isParticipant: true });
     } else {
         // Retrieve the agent's badge from the agents object using the agentName
         const agentBadge = agents[agentName] ? agents[agentName].agentBadge : 'Unknown'; // Retrieve the agent's badge
-        textElement.innerText = `${agentName} (${agentBadge}): ${messageText}`;
+        textElement.innerText = `${agentName} (${agentBadge}): ${messageText}`; // Removed emojis from here
         // If the message is from an agent, add it to the conversation history with the agent's name and badge
         conversationHistory.push({ role: `${agentBadge} (${agentName})`, content: messageText, isParticipant: false });
     }
@@ -146,7 +150,7 @@ function appendMessage(messageText, isAgent = false, agentName, isParticipant = 
     const taskCompleteMessages = conversationHistory.filter(message => message.content.toLowerCase().includes("task-complete")).length;
 
     // Redirect if there are 3 or more "task-complete" messages
-    if (taskCompleteMessages >= 3) {
+    if (taskCompleteMessages >= 3 && taskCompleteButtonClicked) {
         window.location.href = 'simulation_end.html'; // Replace 'simulation_end.html' with the actual path if different
     }
 
@@ -241,30 +245,45 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     simulateChat(); // Add this line to start the chat automatically
 
-    messageInput.disabled = false;
-    sendMessageButton.disabled = false;
     // Stop the automatic chat
     clearInterval(chatInterval);
 }); // Fixed misplaced closing bracket
 
+document.getElementById('raiseHandButton').addEventListener('click', function() {
+    document.getElementById('messageInput').style.display = 'block'; // Make the input field visible
+    document.getElementById('sendMessageButton').style.display = 'block'; // Make the send button visible
+    document.getElementById('messageInput').classList.add('showChat');
+    document.getElementById('sendMessageButton').classList.add('showChat');
+});
+
 // Event listener for the send message button
 sendMessageButton.addEventListener('click', () => {
-    const messageText = `${messageInput.value}`;
     console.log('Send button clicked');
+    const messageText = messageInput.value;
+    const firstName = localStorage.getItem('firstName'); // Retrieve firstName from localStorage
+    const badgeName = localStorage.getItem('badgeName'); // Retrieve badgeName from localStorage
 
     // Simulate user typing similar to agent's typing mechanism
     appendMessageAfterTyping(messageText, false, `${badgeName} (${firstName})`); // Use appendMessageAfterTyping for user's message
 
+    // Hide the send button and message entry window after sending a message
+    sendMessageButton.style.display = 'none';
+    messageInput.style.display = 'none';
+
     // Wait for a specified delay, then make a request to the '/ask-openai' endpoint
     setTimeout(() => {
-        const currentConversationId = localStorage.getItem('currentConversationId'); // Correct place to get it
+        const currentConversationId = localStorage.getItem('currentConversationId');
 
         fetch('/ask-openai', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ firstName, badgeName, message: messageText, conversationHistory, conversationId: currentConversationId }) // Pass the message from the input field
+            body: JSON.stringify({
+                message: messageText,
+                conversationId: currentConversationId,
+                participantName: firstName
+            })
         })
             .then(response => response.json())
             .then(data => {
@@ -327,10 +346,12 @@ function simulateChat() {
 
     // Check if it's the first call to simulateChat by checking the length of conversationHistory
     if (conversationHistory.length === 0) {
-        // Predefined introduction message from Agent 1 (James)
+        // Fetch the participant's badge name from localStorage
+        const participantBadgeName = localStorage.getItem('badgeName');
+        // Predefined introduction message from Agent 1 (James) including the participant's badge name
         const introductionMessage = {
             role: 'Agent 1',
-            content: "Hey team, James here! Excited to work with you all on finding the perfect spot for our new restaurant. How about we start by discussing what type of strategy we should take before we share specfic unique information? How should we go about solving this task correctly?"
+            content: `Hey team, James here! I see ${participantBadgeName} just joined the chat. Welcome to the team! I'll start us off since I've been here the longest. Excited to work with all of you on finding the perfect spot for our new restaurant. Let's begin by discussing our strategy before we dive into sharing specific unique information. How should we approach solving this task correctly?`
         };
 
         // Display "typing..." message with James's name
@@ -362,25 +383,28 @@ function fetchResponses() {
         return;
     }
     const currentConversationId = localStorage.getItem('currentConversationId');
+    const firstName = localStorage.getItem('firstName'); // Ensure firstName is defined
+    const badgeName = localStorage.getItem('badgeName'); // Define badgeName by retrieving it from localStorage
     fetch('/ask-openai', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-            body: JSON.stringify({
-                firstName,
-                badgeName,
-                conversationHistory,
-                conversationId: currentConversationId // Include this line
-            })
+        body: JSON.stringify({
+            firstName,
+            badgeName,
+            conversationHistory,
+            conversationId: currentConversationId,
+            participantName: firstName // Include the participant's name in the request
         })
+    })
         .then(response => response.json())
         .then(data => {
             if (data && data.responses) {
                 // Process responses
                 data.responses.forEach(response => {
-                    simulateTyping(response.role, `${response.content}`); // Use simulateTyping to show typing indicator before appending message
-                    conversationHistory.push({ role: response.role, content: response.content });
+                    simulateTyping(response.role, `${response.content}`); // Removed emojis from here
+                    conversationHistory.push({ role: response.role, content: response.content, participantName: firstName }); // Append participant's name to the content
                 });
 
                 // Call simulateChat again to keep the messages going
@@ -414,3 +438,87 @@ function updateChatTranscript(conversationHistory) {
         .then(data => console.log('Transcript updated successfully'))
         .catch(error => console.error('Error updating transcript:', error));
 }
+
+// Assuming you have an object with team members' details
+const teamMembers = {
+    'James': { name: 'James', avatar: 'avatars/avatar_2.png', badgeName: 'Master of Motivation' },
+    'Sophia': { name: 'Sophia', avatar: 'avatars/avatar_3.png', badgeName: 'Strategist Supreme' },
+    'Ethan': { name: 'Ethan', avatar: 'avatars/avatar_6.png', badgeName: 'Logic Luminary' }
+};
+
+function displayTeamMembers() {
+    const container = document.getElementById('teamMembers');
+    container.innerHTML = ''; // Clear existing content
+
+    // Add Bryan's information first
+    const myInfo = {
+        name: localStorage.getItem('firstName'),
+        avatar: localStorage.getItem('selectedAvatar'), // Fetch the selected avatar path
+        badgeName: localStorage.getItem('badgeName')
+    };
+
+    // Create an element for Bryan's information
+    const myElement = document.createElement('div');
+    myElement.className = 'team-member my-info'; // Use 'my-info' for distinct styling
+    myElement.innerHTML = `
+        <img src="${myInfo.avatar}" alt="${myInfo.name}" class="team-member-avatar avatar-outline-red">
+        <div class="team-member-info">
+            <h4>${myInfo.name}</h4>
+            <p>${myInfo.badgeName}</p>
+        </div>
+    `;
+    container.appendChild(myElement);
+
+    // Add other team members
+    Object.values(teamMembers).forEach(member => {
+        const memberElement = document.createElement('div');
+        memberElement.className = 'team-member';
+        memberElement.innerHTML = `
+            <img src="${member.avatar}" alt="${member.name}" class="team-member-avatar">
+            <div class="team-member-info">
+                <h4>${member.name}</h4>
+                <p>${member.badgeName}</p>
+            </div>
+        `;
+        container.appendChild(memberElement);
+    });
+}
+
+// Call this function when the page loads or when the team members' information is available
+document.addEventListener('DOMContentLoaded', displayTeamMembers);
+
+let taskCompleteButtonClicked = false;
+let agentTaskCompleteCount = 0; // Assuming you have a way to count this
+
+document.getElementById('taskCompleteButton').addEventListener('click', function() {
+    this.classList.add('task-complete-clicked');
+    taskCompleteButtonClicked = true;
+    checkConditionsAndProceed();
+});
+
+function checkConditionsAndProceed() {
+    if (taskCompleteButtonClicked && agentTaskCompleteCount >= 2) {
+        // Logic to proceed to the next page, e.g., window.location.href = 'nextpage.html';
+    }
+}
+
+// Increment agentTaskCompleteCount when an agent says "task complete"
+function incrementAgentTaskCompleteCount(agentName) {
+    // Assuming agentName is passed correctly and matches one of the agents
+    if (agentName && agents.hasOwnProperty(agentName)) {
+        const messageContent = conversationHistory.find(message => message.role.includes(agentName) && message.content.toLowerCase().includes("task-complete"));
+        if (messageContent) {
+            agentTaskCompleteCount++;
+            checkConditionsAndProceed();
+        }
+    }
+}
+
+// Example usage of incrementAgentTaskCompleteCount within the chat logic
+// This is a simplified example and might need adjustments based on the actual chat logic
+document.addEventListener('messageReceived', function(event) {
+    const { agentName, messageText } = event.detail; // Assuming event.detail contains these properties
+    if (messageText.toLowerCase().includes("task-complete")) {
+        incrementAgentTaskCompleteCount(agentName);
+    }
+});

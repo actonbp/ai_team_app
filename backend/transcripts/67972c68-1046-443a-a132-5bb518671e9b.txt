@@ -1,0 +1,22 @@
+undefined (Bryan): Hello, shouldn't our strategy be to list how many yes's each location has?
+Ethan: Ethan here. Got a question - Bryan, how do we even consider Starlight Valley with only 2 Ys that matter? Competitors, really? Need to focus on $$$ and foot traffic!
+Sophia: Great point, Bryan! Let's break it down with those "yes's" then. Based on what we know:
+
+East Point Mall:
+- Y: 5
+- N: 2
+Missing info on maintenance and competitors.
+
+Starlight Valley:
+- Y: 3 
+- N: 2
+Missing info on parking, purchasing cost, maintenance, competitors, waste disposal.
+
+Cape James Beach:
+- Y: 4
+- N: 1
+Missing info on size, maintenance, student population, waste disposal, employable population.
+
+Any toughts on filling the gaps?
+Ethan: So, no maintenance info on Valley and competitors around the Mall, Sophia? Seems like we're missing pieces. Bryan, got any insights on this?
+James: James is typing...

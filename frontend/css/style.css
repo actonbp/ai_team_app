@@ -1,38 +1,44 @@
+:root {
+    --primary-color: #6264a7;
+    --background-color: #f3f2f1;
+    --text-color: #333;
+    --font-family-base: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f3f2f1;
-    background-image: linear-gradient(to right, #f3f2f1, #e6e4e3); /* Smooth gradient background */
+    font-family: var(--font-family-base);
+    background-color: var(--background-color);
+    color: var(--text-color);
+    font-size: 16px; /* Increase base font size */
+    line-height: 1.6; /* Improve line spacing */
 }
 
 #chatWindow {
     width: 80vw;
-    /* Use viewport width */
     height: 80vh;
-    /* Use viewport height */
 }
 
 #app {
     display: flex;
     height: 100vh;
-    justify-content: center; /* Center the app container */
-    align-items: center; /* Vertically align the app container */
+    justify-content: center;
+    align-items: center;
 }
 
 .chat-area {
     display: flex;
     flex-direction: column;
-    /* Ensure it takes up appropriate space on smaller screens */
 }
+
 .sidebar {
-    width: 250px; /* Adjust the width as needed */
+    width: 250px;
     background-color: #6264a7;
     color: white;
     padding: 20px;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add shadow for depth */
-    border-radius: 10px; /* Rounded corners for a modern look */
-    overflow-y: auto; /* Enable scrolling if the content is too long */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    overflow-y: auto;
 }
 
 .sidebar button {
@@ -41,101 +47,87 @@ body {
     padding: 10px 0;
     color: white;
     background-color: transparent;
-    border: 1px solid white; /* Add border to buttons */
+    border: 1px solid white;
     text-align: left;
     font-size: 1em;
-    transition: background-color 0.3s; /* Smooth transition for hover effect */
+    transition: background-color 0.3s;
 }
 
 .sidebar button:hover {
-    background-color: rgba(255, 255, 255, 0.2); /* Hover effect for buttons */
+    background-color: #484b7a; /* Darker shade for hover state */
+    color: #fff; /* White text color for better contrast */
+    transform: scale(1.05); /* Slightly enlarge on hover */
 }
 
 .unique-information {
     font-size: 1em;
-    /* Adjust base font size if necessary */
     padding: 10px;
-    /* Ensure there's padding around the text */
 }
 
 .unique-information h2 {
-    font-size: 1em; /* Adjust the heading size to fit the sidebar */
+    font-size: 1em;
     margin-bottom: 10px;
 }
 
 .unique-information table {
-    width: 100%; /* Make the table use all available width */
-    font-size: 0.8em; /* Adjust font size to fit the sidebar */
-    /* Other table styles */
+    width: 100%;
+    font-size: 0.8em;
 }
 
 .unique-information th, .unique-information td {
-    padding: 5px; /* Reduce padding to save space */
-    /* Other styles */
+    padding: 5px;
 }
 
 .chat-area {
     width: 80%;
     display: flex;
     flex-direction: column;
-    max-height: 500px; /* Adjust this value based on your needs */
-    overflow-y: auto; /* Enables vertical scrolling */
+    max-height: 500px;
+    overflow-y: auto;
 }
 
 .chat-header {
     background-color: #edebe9;
     padding: 10px;
     border-bottom: 1px solid #8a8886;
-    border-radius: 10px 10px 0 0; /* Rounded corners at the top */
+    border-radius: 10px 10px 0 0;
 }
 
 #chatWindow {
     flex-grow: 1;
     width: 800px;
     height: 600px;
-    background-color: rgb(211, 211, 211); /* Added missing semicolon */
+    background-color: rgb(211, 211, 211);
     padding: 20px;
     overflow-y: auto;
-    border-radius: 0 0 10px 10px; /* Rounded corners at the bottom */
+    border-radius: 0 0 10px 10px;
 }
 
 #chatWindow,
 .location-analysis {
     width: 800px;
     height: 600px;
-    /* Adjust based on your needs */
     margin: auto;
-    /* Centers the elements */
     overflow-y: auto;
-        /* Add scroll if needed */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .location-analysis table {
     width: 100%;
-    /* Make the table use all available width */
     border-collapse: collapse;
-    /* Collapse borders for a cleaner look */
 }
 
 .location-analysis th,
 .location-analysis td {
     text-align: left;
-    /* Align text to the left for readability */
     padding: 8px;
-    /* Add padding for spacing */
     border-bottom: 1px solid #ddd;
-    /* Add a bottom border to each cell */
 }
 
 .location-analysis th {
     background-color: #f3f2f1;
-    /* Light background for the header */
     color: #333;
-    /* Dark text for contrast */
 }
-
-/* ... existing styles ... */
 
 .task-instructions button {
     padding: 10px 20px;
@@ -143,7 +135,6 @@ body {
     font-size: 1em;
     color: white;
     background-color: #4CAF50;
-    /* Use a color that fits your design */
     border: none;
     border-radius: 5px;
     cursor: pointer;
@@ -151,14 +142,13 @@ body {
 
 .task-instructions button:hover {
     background-color: #367c39;
-    /* Darker shade for hover effect */
 }
 
 .input-area {
     display: flex;
     padding: 10px;
     border-top: 1px solid #8a8886;
-    background-color: #f3f2f1; /* Match the body background for a seamless look */
+    background-color: #f3f2f1;
 }
 
 #messageInput {
@@ -166,41 +156,38 @@ body {
     padding: 10px;
     border-radius: 5px;
     border: 1px solid #8a8886;
-    background-color: #ffffff; /* Bright input field for contrast */
+    background-color: #ffffff;
+    display: none; /* Hide the chat bar initially */
 }
 
 #sendMessageButton,
 #raiseHandButton {
-    width: 10%; /* Adjusted width */
-    padding: 10px;
-    background-color: #6264a7;
-    color: white;
-    border: none;
-    margin-left: 5px; /* Adjusted margin for alignment */
-    cursor: pointer; /* Indicate clickable buttons */
-    transition: background-color 0.3s; /* Smooth transition for hover effect */
+    display: inline-block; /* Ensure visibility */
+    padding: 10px 20px; /* Bigger button */
+    background-color: red; /* Red background */
+    color: white; /* White text */
+    font-size: 20px; /* Larger font size */
+    border: none; /* Remove border */
+    cursor: pointer; /* Pointer cursor on hover */
+    margin-right: 10px; /* Space from the next button */
 }
 
 #sendMessageButton:hover,
 #raiseHandButton:hover {
-    background-color: #484b7a; /* Darken button color on hover for feedback */
+    background-color: #484b7a;
 }
 
-/* Styles for message bubbles with different colors for each agent */
 #chatWindow .agent-1 {
     background-color: yellowgreen;
 }
 #chatWindow .agent-2 {
     background-color: #3582b1;
-    /* Darker blue for Agent 2 */
 }
 
 #chatWindow .agent-3 {
     background-color: #a03d16;
-    /* Dark blue for Agent 3 */
 }
 
-/* Common message bubble styling */
 .messageElement {
     padding: 10px;
     border-radius: 15px;
@@ -208,10 +195,9 @@ body {
     color: white;
     max-width: 80%;
     word-wrap: break-word;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Add shadow for depth */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Styling for the typing indicator */
 #typingIndicator {
     color: #6264a7;
     font-style: italic;
@@ -225,15 +211,15 @@ body {
 }
 
 .avatar {
-    width: 60px; /* Increased size */
-    height: 80px; /* Increased size */
+    width: 60px;
+    height: 80px;
     border-radius: 50%;
     margin-right: 10px;
 }
 
 #avatarGrid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(1000px, 1fr)); /* Adjust size as needed */
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
     gap: 10px;
     justify-items: center;
     padding: 20px;
@@ -243,23 +229,21 @@ body {
     display: flex;
     flex-direction: column;
     width: 100%;
-    /* ... other styles to match chat area ... */
 }
 
 .nav-button.active {
     background-color: #484b7a;
-    /* Darker shade for active state */
 }
 
 .avatarOption {
-    width: 100px; /* Uniform size */
-    height: 100px; /* Uniform size */
+    width: 100px;
+    height: 100px;
     cursor: pointer;
-    border: 2px solid transparent; /* For highlighting */
+    border: 2px solid transparent;
 }
 
 .avatarOption.selected {
-    border-color: #6264a7; /* Highlight color */
+    border-color: #6264a7;
 }
 
 .text {
@@ -269,30 +253,22 @@ body {
     display: inline-block;
 }
 
-
-/* Message bubble styling */
 .message {
     background-color: #e1f3fb;
-    /* Light blue background for the message bubble */
     border-radius: 15px;
-    /* Rounded corners */
     padding: 10px;
     margin-bottom: 10px;
-    max-width: 90%; /* Adjusted from 60% to 90% */
+    max-width: 90%;
     word-wrap: break-word;
 }
 
 .message.sent {
     background-color: #d1e7dd;
-    /* Different color for sent messages */
     margin-left: auto;
-    /* Align sent messages to the right */
 }
 
 .message.received {
     background-color: #f8d7da;
-    /* Different color for received messages */
-    /* Received messages are left-aligned by default */
 }
 
 .message.sent::after {
@@ -303,24 +279,20 @@ body {
     width: 0;
     height: 0;
     border: 10px solid transparent;
-    border-left-color: #d1e7dd; /* Match the background of sent messages */
+    border-left-color: #d1e7dd;
     border-right: 0;
     border-bottom: 0;
     margin-top: 5px;
-    filter: drop-shadow(2px 2px 2px rgba(0, 0, 0, 0.1)); /* Optional: Adds shadow to the tail */
+    filter: drop-shadow(2px 2px 2px rgba(0, 0, 0, 0.1));
 }
 
 .message.sent {
     background-color: #d1e7dd;
-    /* Different color for sent messages */
     margin-left: auto;
-    /* Align sent messages to the right */
 }
 
 .message.received {
     background-color: #f8d7da;
-    /* Different color for received messages */
-    /* Received messages are left-aligned by default */
 }
 
 .message.received::after {
@@ -328,82 +300,239 @@ body {
     position: absolute;
     top: 0;
     left: -10px;
-    /* Adjust based on bubble size */
     width: 0;
     height: 0;
     border: 10px solid transparent;
     border-right-color: #f8d7da;
-    /* Match the background of received messages */
     border-left: 0;
     border-bottom: 0;
     margin-top: 5px;
     filter: drop-shadow(-2px 2px 2px rgba(0, 0, 0, 0.1));
-    /* Optional: Adds shadow to the tail */
 }
 
 .message.participant {
-    background-color: #f0f8ff; /* Light blue for participant */
+    background-color: #f0f8ff;
 }
 
 .message.agent-James {
-    background-color: #ffefd5; /* Peach for James */
+    background-color: #ffefd5;
 }
 
 .message.agent-Sophia {
-    background-color: #e6e6fa; /* Lavender for Sophia */
+    background-color: #e6e6fa;
 }
 
 .message.agent-Ethan {
-    background-color: #ffe4e1; /* Misty Rose for Ethan */
+    background-color: #ffe4e1;
 }
-
-/* Additional global styles can go here */
 
 @media (max-width: 768px) {
     .unique-information h2 {
         font-size: 0.8em;
-        /* Adjust heading size on smaller screens */
     }
 
     .unique-information p {
         margin-bottom: 10px;
-        /* Ensure adequate spacing between paragraphs */
     }
 
     table {
         width: 100%;
-        /* Allow the table to fill the screen width */
         font-size: 0.9em;
-        /* Increase font size for readability */
     }
 
     #avatarGrid {
         grid-template-columns: repeat(2, 1fr);
-        /* Adjust to 2 columns for tighter spaces */
     }
     .sidebar button,
     .unique-information h2,
     .chat-header,
     .messageElement {
         font-size: 0.8em;
-        /* Smaller font size */
     }
 }
 
 @media (max-width: 768px) {
     #chatWindow, .location-analysis {
-        width: 100%; /* Full width on smaller screens */
-        height: auto; /* Adjust height dynamically */
-        margin: 0; /* Remove margin to utilize full screen width */
-        padding: 10px; /* Adjust padding for smaller screens */
+        width: 100%;
+        height: auto;
+        margin: 0;
+        padding: 10px;
     }
 
     .input-area {
-        flex-direction: column; /* Stack input and buttons vertically on smaller screens */
+        flex-direction: column;
     }
 
     #sendMessageButton, #raiseHandButton {
-        width: 100%; /* Full width buttons on smaller screens */
-        margin-top: 10px; /* Add margin top for spacing between input and buttons */
+        width: 100%;
+        margin-top: 10px;
     }
+    .chat-area {
+        flex-direction: column-reverse; /* Stack elements vertically on smaller screens */
+    }
+}
+/* Smooth scroll */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Dynamic greeting styles */
+#dynamicGreeting {
+    font-size: 1.5em;
+    color: var(--primary-color);
+    margin-bottom: 20px;
+}
+
+/* Placeholder image styles */
+.placeholder {
+    background-color: #f3f2f1;
+    width: 100%;
+    height: 200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #6264a7;
+    font-size: 1em;
+}
+
+.next-button {
+    width: 90%; /* Full width for better mobile interaction */
+    padding: 15px; /* Larger touch target */
+    margin-top: 20px; /* Adequate spacing from content */
+    font-size: 1em; /* Readable font size */
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.next-button:hover {
+    background-color: darken(var(--primary-color), 10%);
+}
+
+.team-members {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    padding: 10px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.team-member {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 10px;
+}
+
+.team-member-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    margin-bottom: 10px;
+}
+
+.team-member-info h4 {
+    font-size: 1em;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.team-member-info p {
+    font-size: 0.9em;
+    color: #555;
+}
+
+.your-information {
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.team-members-section h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+.my-info {
+    background-color: #ffecec; /* Light red background */
+    border: 2px solid red; /* Highlight in red */
+    flex-basis: calc(33.333% - 20px); /* Adjust based on the desired width, accounting for margins */
+    margin: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.team-members-section {
+    display: flex;
+    flex-direction: column; /* Align items in a column */
+    align-items: center;
+    justify-content: flex-start; /* Align items to the start */
+    width: 100%; /* Ensure the container spans the full width */
+    margin-bottom: 20px; /* Space between sections */
+}
+
+.team-member, .my-info {
+    flex: 1; /* Allows items to grow and fill the space */
+    margin: 10px; /* Consistent spacing */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Consistent shadow */
+    padding: 20px; /* Consistent padding */
+    border-radius: 10px; /* Rounded corners */
+    background-color: #fff; /* Consistent background */
+}
+.avatar-outline-red {
+    border: 2px solid red; /* Adjust the border size and color as needed */
+    border-radius: 50%; /* This makes the outline circular, matching the avatar shape */
+}
+@keyframes slideIn {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.showChat {
+    animation: slideIn 0.5s forwards; /* Adjust duration as needed */
+}
+.button-container {
+    display: flex !important;
+    flex-direction: column !important; /* Stack buttons vertically */
+    align-items: stretch !important; /* Stretch buttons to fill the container width */
+}
+
+.button-container button {
+    width: 100% !important; /* Ensure each button stretches to fill the container */
+    margin: 5px !important; /* Adjust spacing between buttons */
+    height: 100% !important; /* Example fixed height, adjust as needed */
+    margin-bottom: 10px !important; /* Space between buttons */
+}
+.task-complete {
+    background-color: green !important;
+    color: white; 
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    display: block; /* Adjust as needed */
+    margin: 20px auto; /* Center the button */
+}
+
+.task-complete-clicked {
+    animation: clickAnimation 0.5s forwards;
+}
+
+@keyframes clickAnimation {
+    0% { transform: scale(1); }
+    50% { transform: scale(0.9); }
+    100% { transform: scale(1); }
 }

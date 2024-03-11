@@ -68,7 +68,7 @@ loginForm.addEventListener('submit', (e) => {
 
     // Persist user details in localStorage
     localStorage.setItem('firstName', firstName);
-    localStorage.setItem('badgeName', badgeName);
+    localStorage.setItem('badgeName', badgeName); // Ensure badgeName is correctly stored in localStorage
 
     // Navigate user to the chat interface
     window.location.href = 'chat.html';

@@ -16,7 +16,8 @@
             background-color: #f0f0f0;
             font-family: Arial, sans-serif;
             overflow: auto; /* Ensures the page is scrollable */
-            line-height: 1.5;
+            line-height: 1.6; /* Improve line spacing */
+            font-size: 16px; /* Increase base font size */
             padding-top: 20px; /* Add some padding at the top */
             padding-bottom: 20px; /* Add some padding at the bottom */
         }
@@ -42,14 +43,22 @@
         form input, form button {
             padding: 10px; /* Add padding for better touch targets */
             margin: 10px 0; /* Increase margin for spacing */
-            border: 1px solid #ccc; /* Add border to inputs for distinction */
+            border: 2px solid #ccc; /* Solid border for inputs */
             border-radius: 5px; /* Round the corners of inputs and button */
+            width: calc(100% - 24px); /* Adjust width to account for padding */
         }
 
         form button {
             background-color: #4CAF50; /* Change button color for better visibility */
             color: white; /* Change button text color for contrast */
             border: none; /* Remove button border for cleaner look */
+        }
+
+        /* Add to existing button styles */
+        form button:hover {
+            background-color: #484b7a; /* Darker shade for hover state */
+            color: #fff; /* White text color for better contrast */
+            transform: scale(1.05); /* Slightly enlarge on hover */
         }
 
         /* Adjusted styles for the table for more compact display */
@@ -194,7 +203,7 @@
     <form id="login-form">
         <input type="text" id="firstNameInput" placeholder="Enter your first name...">
         <input type="text" id="badgeNameInput" placeholder="Enter your badge name...">
-        <button type="submit">Start Chat</button>
+        <button type="submit"><i class="fas fa-sign-in-alt"></i> Start Chat</button>
     </form>
     <script src="js/login.js"></script>
 </body>

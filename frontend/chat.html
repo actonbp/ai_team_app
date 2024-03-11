@@ -34,6 +34,77 @@
         .active-tab {
             background-color: #484b7a;
         }
+        .team-members-section {
+            display: flex;
+            flex-direction: column; /* Align items in a column */
+            align-items: center;
+            width: 100%; /* Ensure the container spans the full width */
+        }
+        .team-member, .my-info {
+            flex: 1; /* Allows items to grow and fill the space */
+            margin: 10px; /* Consistent spacing */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Consistent shadow */
+            padding: 20px; /* Consistent padding */
+            border-radius: 10px; /* Rounded corners */
+            background-color: #fff; /* Consistent background */
+        }
+        .team-member-avatar {
+            width: 60px; /* Consistent size */
+            height: 60px;
+            border-radius: 50%;
+            margin-bottom: 10px; /* Space between avatar and text */
+        }
+        .team-member-info h4 {
+            font-size: 1em;
+            font-weight: bold;
+            margin-bottom: 5px; /* Space between name and badge title */
+        }
+        .team-member-info p {
+            font-size: 0.9em;
+            color: #555;
+        }
+        .participant-details {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .my-info {
+            background-color: #ffecec; /* Light red background */
+            border: 2px solid red; /* Highlight in red */
+            padding: 20px; /* Consistent padding */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+            margin-bottom: 20px; /* Space between your info and the next section */
+            border-radius: 10px; /* Rounded corners */
+        }
+        #raiseHandButton {
+            display: inline-block; /* Ensure visibility and allow width adjustment */
+            background-color: red; /* Red background */
+            color: white; /* White text */
+            font-size: 20px; /* Larger font size */
+            padding: 10px 20px; /* Bigger button */
+            border: none; /* Remove border */
+            cursor: pointer; /* Pointer cursor on hover */
+            margin-right: 10px; /* Space from the next button */
+        }
+        .button-container {
+            display: flex;
+            flex-direction: column; /* Stack buttons vertically */
+            align-items: stretch; /* Stretch buttons to fill the container width */
+        }
+
+        .button-container button {
+            width: 100%; /* Ensure each button stretches to fill the container */
+        }
+        .task-complete {
+            background-color: green;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: block; /* Adjust as needed */
+            margin: 20px auto; /* Center the button */
+        }
     </style>
 </head>
 
@@ -41,19 +112,27 @@
     <div id="app">
         <aside class="sidebar">
             <!-- Navigation buttons -->
-            <button class="nav-button" id="chatTab">Chat</button>
-            <button class="nav-button" id="locationTab">Unique Information</button>
-            <button class="nav-button" id="helpButton">Help</button>
+            <div class="button-container">
+                <button id="raiseHandButton">Raise Hand to Participate</button>
+                <button class="nav-button" id="chatTab">Chat</button>
+                <button class="nav-button" id="locationTab">Unique Information</button>
+                <button class="nav-button" id="helpButton">Help</button>
+                <button id="taskCompleteButton" class="task-complete">Task is Complete</button>
+            </div>
         </aside>
         <section class="chat-container">
             <header class="chat-header">
-                <h1>Your Information</h1>
-                <!-- Avatar image placeholder -->
-                <div class="participant-info">
-                    <img id="participantAvatar" src="default_avatar.png" alt="Participant Avatar" style="width: 50px; height: 50px;">
-                    <div id="participantDetails" class="participant-details">
-                        First Name: <span id="firstName"></span>, 
-                        Badge Name: <span id="badgeName"></span>
+                <div id="teamMembersSection" class="team-members-section">
+                    <h2>Teammate Information</h2>
+                    <div id="teamMembers" class="team-members">
+                        <div id="myInformation" class="team-member my-info">
+                            <img id="participantAvatar" src="default_avatar.png" alt="Participant Avatar" style="width: 50px; height: 50px;">
+                            <div id="participantDetails" class="participant-details">
+                                <span id="firstName">Bryan</span>, 
+                                <span id="badgeName">Team Lead</span>
+                            </div>
+                        </div>
+                        <!-- Team members' information will be dynamically added here -->
                     </div>
                 </div>
             </header>
@@ -138,7 +217,6 @@
                 <p>Your group's goal is to rank the three locations in order of most attributes met. Each person has unique info. You cannot paste the info in the chat.</p>
             </div>
             <div class="input-area">
-                <button id="raiseHandButton">Raise Hand to Participate</button>
                 <input type="text" id="messageInput" placeholder="Type a message...">
                 <button id="sendMessageButton">Send</button>
             </div>
@@ -146,7 +224,7 @@
     </div>
     <script src="js/chat.js"></script>
     <script>
-        document.getElementById('chatTab').addEventListener('click', function() {
+        document.getElementById('raiseHandButton').addEventListener('click', function() {
             document.getElementById('chatWindow').style.display = 'block';
             document.getElementById('locationAnalysis').style.display = 'none';
             document.getElementById('helpSection').style.display = 'none';
