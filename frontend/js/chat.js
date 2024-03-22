@@ -34,11 +34,15 @@ let activeMessages = 0;
 let chatInterval;
 
 typingDelay = 10000
+// Clearing the agents object before redefining it
+localStorage.removeItem('agents');
+
 const agents = {
     'James': { agentName: 'James', avatar: 'avatars/avatar_1.png', isAgent: true, typingSpeed: 160, agentBadge: 'Master of Motivation', color: 'rgba(255, 215, 0, 0.5)', colorRGB: {r: 255, g: 215, b: 0} },
-    'Sophia': { agentName: 'Sophia', avatar: 'avatars/avatar_4.png', isAgent: true, typingSpeed: 180, agentBadge: 'Strategist Supreme', color: 'rgba(255, 105, 180, 0.5)', colorRGB: {r: 255, g: 105, b: 180} },
+    'Sophia': { agentName: 'Sophia', avatar: 'avatars/avatar_2.png', isAgent: true, typingSpeed: 180, agentBadge: 'Strategist Supreme', color: 'rgba(255, 105, 180, 0.5)', colorRGB: {r: 255, g: 105, b: 180} },
     'Ethan': { agentName: 'Ethan', avatar: 'avatars/avatar_3.png', isAgent: true, typingSpeed: 200, agentBadge: 'Logic Luminary', color: 'rgba(30, 144, 255, 0.5)', colorRGB: {r: 30, g: 144, b: 255} }
-};// Corrected avatar paths to be consistent with the appendMessage function, added typingSpeed for each agent, and added agentBadge name to match @app.js
+};
+// Corrected avatar paths to be consistent with the appendMessage function, added typingSpeed for each agent, and added agentBadge name to match @app.js
 // This function is called to initiate a new chat session
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -505,12 +509,12 @@ function displayTeamMembers() {
         const memberElement = document.createElement('div');
         memberElement.className = 'team-member';
         memberElement.innerHTML = `
-            <img src="${member.avatar}" alt="${member.name}" class="team-member-avatar">
-            <div class="team-member-info">
-                <h4>${member.name}</h4>
-                <p>${member.badgeName}</p>
-            </div>
-        `;
+        <img src="${agents[member.name].avatar}" alt="${member.name}" class="team-member-avatar">
+        <div class="team-member-info">
+            <h4>${member.name}</h4>
+            <p>${member.badgeName}</p>
+        </div>
+    `;
         // Set the text color for the team member's name or badge
         memberElement.querySelector('.team-member-info').style.color = 'black';
         // Set the background color for the team member's display
