@@ -3,18 +3,160 @@
     --background-color: #f3f2f1;
     --text-color: #333;
     --font-family-base: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-body {
-    font-family: var(--font-family-base);
-    background-color: var(--background-color);
-    color: var(--text-color);
-    font-size: 16px; /* Increase base font size */
-    line-height: 1.6; /* Improve line spacing */
+    --background-color-dark: #000; /* Dark mode background color */
+    --text-color-dark: #fff; /* Dark mode text color */
 }
 
+body {
+    display: flex;
+    justify-content: flex-start;
+    /* Align content to the top */
+    align-items: center;
+    flex-direction: column;
+    margin: 0;
+    background: linear-gradient(to right, #74ebd5, #acb6e5);
+    /* Add a background gradient */
+    font-family: 'Open Sans', sans-serif;
+    /* Change the font */
+    overflow: auto;
+    /* Ensures the page is scrollable */
+    line-height: 1.6;
+    /* Improve line spacing */
+    font-size: 18px;
+    /* Increase base font size for better readability */
+    padding: 0 20px;
+    /* Add horizontal padding */
+}
+
+form {
+    background: white;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.1);
+    width: 50%;
+    /* Adjust form width for a cleaner look */
+    display: flex;
+    /* Use flex to align form items nicely */
+    flex-direction: column;
+    /* Stack form items vertically */
+    gap: 10px;
+    /* Add space between form items */
+    margin-bottom: 20px;
+    /* Increase bottom margin */
+}
+
+form input,
+form button {
+    padding: 10px;
+    /* Add padding for better touch targets */
+    margin: 10px 0;
+    /* Increase margin for spacing */
+    border: 2px solid #ccc;
+    /* Solid border for inputs */
+    border-radius: 5px;
+    /* Round the corners of inputs and button */
+    width: auto;
+    /* Adjust width to account for padding */
+}
+
+form button {
+    background-color: #4CAF50;
+    /* Change button color for better visibility */
+    color: white;
+    /* Change button text color for contrast */
+    border: none;
+    /* Remove button border for cleaner look */
+}
+
+form button:hover {
+    background-color: #484b7a;
+    /* Darker shade for hover state */
+    color: #fff;
+    /* White text color for better contrast */
+    transform: scale(1.05);
+    /* Slightly enlarge on hover */
+}
+
+form input:focus,
+form button:hover {
+    outline: none;
+    border-color: #4CAF50;
+    /* Add focus color for inputs and hover color for button */
+}
+
+form {
+    background: white;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.1);
+    width: 50%; /* Adjust form width for a cleaner look */
+    display: flex; /* Use flex to align form items nicely */
+    flex-direction: column; /* Stack form items vertically */
+    gap: 10px; /* Add space between form items */
+    margin-bottom: 100px; /* Increase bottom margin */
+}
+
+form input, form button {
+    padding: 10px; /* Add padding for better touch targets */
+    margin: 10px 0; /* Increase margin for spacing */
+    border: 2px solid #ccc; /* Solid border for inputs */
+    border-radius: 5px; /* Round the corners of inputs and button */
+    width: calc(100% - 24px); /* Adjust width to account for padding */
+}
+
+form button {
+    background-color: #4CAF50; /* Change button color for better visibility */
+    color: white; /* Change button text color for contrast */
+    border: none; /* Remove button border for cleaner look */
+}
+
+form button:hover {
+    background-color: #484b7a; /* Darker shade for hover state */
+    color: #fff; /* White text color for better contrast */
+    transform: scale(1.05); /* Slightly enlarge on hover */
+}
+
+form input:focus, form button:hover {
+    outline: none;
+    border-color: #4CAF50; /* Add focus color for inputs and hover color for button */
+}
+
+.form-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start !important;
+    /* Align items at the start (top) */
+    height: auto;
+    margin-bottom: 0 !important; /* Remove bottom margin if any */
+    /* Adjust or remove the height as necessary */
+}
+
+@media (prefers-color-scheme: light) {
+    body {
+        background-color: var(--background-color);
+        color: var(--text-color);
+    }
+}
+
+.self-reflective-title-section {
+    background-color: #fff;
+    /* White background */
+    padding: 20px;
+    /* Padding around the text */
+    margin: 50px auto;
+    /* Big vertical margins and centered horizontally */
+    width: 80%;
+    /* Width to make it centered with space around */
+    text-align: center;
+    /* Center the text inside the container */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    /* Subtle shadow for depth */
+    border-radius: 10px;
+    /* Rounded corners */
+}
 #chatWindow {
-    width: 80vw;
-    height: 80vh;
+    width: 800px;
+    height: 600px;
 }
 
 #app {
@@ -42,15 +184,19 @@ body {
 }
 
 .sidebar button {
-    width: 100%;
-    margin-bottom: 10px;
-    padding: 10px 0;
-    color: white;
-    background-color: transparent;
-    border: 1px solid white;
-    text-align: left;
-    font-size: 1em;
-    transition: background-color 0.3s;
+    display: block; /* Ensure each button is on its own line */
+    width: 90%; /* Adjust width as needed */
+    margin: 10px auto; /* Center buttons and add vertical spacing */
+    padding: 15px 0; /* Increase padding for a taller button */
+    background-color: #6264a7; /* Primary button color */
+    color: white; /* Text color */
+    font-size: 16px; /* Adjust text size as needed */
+    text-align: center; /* Center button text */
+    border: none; /* Remove border */
+    border-radius: 5px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s; /* Smooth background color transition on hover */
+    outline: 1px solid #ddd; /* Adds a slight outline */
 }
 
 .sidebar button:hover {
@@ -97,10 +243,11 @@ body {
     flex-grow: 1;
     width: 800px;
     height: 600px;
-    background-color: rgb(211, 211, 211);
+    background-color: rgba(255, 255, 255, 0.1);
     padding: 20px;
     overflow-y: auto;
     border-radius: 0 0 10px 10px;
+    border: 2px solid #6264a7; /* Solid color outline for message bubbles */
 }
 
 #chatWindow,
@@ -110,23 +257,25 @@ body {
     margin: auto;
     overflow-y: auto;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: 2px solid #6264a7; /* Solid color outline for message bubbles */
 }
 
 .location-analysis table {
-    width: 100%;
-    border-collapse: collapse;
+    width: 100%; /* Full width */
+    border-collapse: collapse; /* Remove gaps between borders */
+    margin: 20px 0; /* Add some margin around the table */
 }
 
 .location-analysis th,
 .location-analysis td {
-    text-align: left;
-    padding: 8px;
-    border-bottom: 1px solid #ddd;
+    text-align: left; /* Align text to the left */
+    padding: 8px; /* Add padding for readability */
+    border-bottom: 1px solid #ddd; /* Light border for each row */
 }
 
 .location-analysis th {
-    background-color: #f3f2f1;
-    color: #333;
+    background-color: #4CAF50; /* Green background for headers */
+    color: white; /* White text for headers */
 }
 
 .task-instructions button {
@@ -140,6 +289,18 @@ body {
     cursor: pointer;
 }
 
+.task-begin {
+    width: auto;
+    /* Adjust to match other sections */
+    margin: auto;
+    /* Center align */
+    padding: 10px; /* Add padding inside the section */
+    background-color: #f9f9f9; /* Light background color */
+    border-radius: 10px; /* Rounded corners */
+    margin-left: 100px; /* Added more space on the left side */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    text-align: center; /* Center the text for better readability */
+}
 .task-instructions button:hover {
     background-color: #367c39;
 }
@@ -176,16 +337,15 @@ body {
 #raiseHandButton:hover {
     background-color: #484b7a;
 }
-
 #chatWindow .agent-1 {
-    background-color: yellowgreen;
+    background-color: rgba(154, 205, 50, 0.1); /* yellowgreen with transparency */
 }
 #chatWindow .agent-2 {
-    background-color: #3582b1;
+    background-color: rgba(53, 130, 177, 0.1); /* #3582b1 with transparency */
 }
 
 #chatWindow .agent-3 {
-    background-color: #a03d16;
+    background-color: rgba(160, 61, 22, 0.1); /* #a03d16 with transparency */
 }
 
 .messageElement {
@@ -196,6 +356,7 @@ body {
     max-width: 80%;
     word-wrap: break-word;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background-color: rgba(255, 255, 255, 0.9); /* Adjusted transparency */
 }
 
 #typingIndicator {
@@ -210,19 +371,47 @@ body {
     margin-bottom: 10px;
 }
 
+.team-member-avatar img, .your-information img {
+    height: 300px; /* Increase height */
+    width: auto; /* Adjust width as necessary to maintain aspect ratio */
+}
+
 .avatar {
     width: 60px;
-    height: 80px;
+    height: 150px;
     border-radius: 50%;
     margin-right: 10px;
 }
 
 #avatarGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-    gap: 10px;
-    justify-items: center;
-    padding: 20px;
+    display: none; /* Hide the original avatar grid */
+}
+
+.carousel {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    gap: 20px;
+    justify-content: center;
+    padding: 20px 0;
+}
+
+.carousel-item {
+    flex: none;
+    scroll-snap-align: start;
+    transition: transform 0.5s ease;
+}
+
+.carousel-item img {
+    width: 100px; /* Adjust based on desired size */
+    height: auto;
+    cursor: pointer;
+}
+
+/* Highlight selected avatar */
+.carousel-item.selected img {
+    transform: scale(1.2);
+    border: 2px solid #4CAF50;
 }
 
 .analysis-area {
@@ -251,6 +440,7 @@ body {
     border-radius: 5px;
     color: black;
     display: inline-block;
+    max-width: 80%; /* Ensure text does not exceed 80% width */
 }
 
 .message {
@@ -260,6 +450,8 @@ body {
     margin-bottom: 10px;
     max-width: 90%;
     word-wrap: break-word;
+    border-radius: 20px; /* Adjust for bubble shape */
+    padding: 10px; /* Adjust padding for content spacing */
 }
 
 .message.sent {
@@ -311,7 +503,12 @@ body {
 }
 
 .message.participant {
-    background-color: #f0f8ff;
+    background-color: #fff; /* Consistent background */
+    border: 2px solid #6264a7; /* Example color, adjust as needed */
+    padding: 20px;
+    border-radius: 10px; /* Rounded corners */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Consistent shadow */
+    margin-bottom: 10px; /* Space between messages */
 }
 
 .message.agent-James {
@@ -335,9 +532,8 @@ body {
         margin-bottom: 10px;
     }
 
-    table {
-        width: 100%;
-        font-size: 0.9em;
+    table, th, td {
+        font-size: 0.8em; /* Smaller font size on smaller screens */
     }
 
     #avatarGrid {
@@ -369,6 +565,12 @@ body {
     }
     .chat-area {
         flex-direction: column-reverse; /* Stack elements vertically on smaller screens */
+    }
+    img {
+        width: 90%; /* Adjusts the image width on smaller screens */
+    }
+    .Scenario {
+        width: 90%; /* Adjusts the content width on smaller screens */
     }
 }
 /* Smooth scroll */
@@ -417,7 +619,7 @@ html {
     flex-wrap: wrap;
     justify-content: space-around;
     padding: 10px;
-    background-color: #fff;
+    background-color: transparent;
     border-radius: 10px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
@@ -426,12 +628,18 @@ html {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin: 10px;
+    margin: 5px;
+    border-radius: 5px; /* Rounded corners */
+    padding: 10px; /* Inner spacing */
+    margin-bottom: 5px; /* Spacing between team member blocks */
+    background-color: transparent; /* Even lighter background */
+    border: 2px solid; /* Border will use the agent's color */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Consistent shadow */
 }
 
 .team-member-avatar {
     width: 60px;
-    height: 60px;
+    height: 100px;
     border-radius: 50%;
     margin-bottom: 10px;
 }
@@ -440,6 +648,7 @@ html {
     font-size: 1em;
     font-weight: bold;
     margin-bottom: 5px;
+    color: black; /* Ensures text color is black for all team member names */
 }
 
 .team-member-info p {
@@ -448,7 +657,7 @@ html {
 }
 
 .your-information {
-    background-color: #fff;
+    background-color: #140f0f;
     border-radius: 10px;
     padding: 20px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -460,13 +669,17 @@ html {
     margin-bottom: 20px;
 }
 .my-info {
-    background-color: #ffecec; /* Light red background */
-    border: 2px solid red; /* Highlight in red */
-    flex-basis: calc(33.333% - 20px); /* Adjust based on the desired width, accounting for margins */
+    background-color: rgba(255, 0, 0, 0.20); /* Light red background with transparency */
+    border: 2px solid rgba(255, 0, 0, 0.5); /* Red border with semi-transparency */
     margin: 10px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     padding: 20px;
     border-radius: 10px;
+}
+
+.dark-mode {
+    background-color: #fff; /* Sets background to white in day mode */
+    color: #000; /* Optional: Sets text color to black for better readability */
 }
 
 .team-members-section {
@@ -478,18 +691,40 @@ html {
     margin-bottom: 20px; /* Space between sections */
 }
 
+.team-member,
+.team-member {
+    flex: 1;
+    /* Allows items to grow and fill the space */
+    margin: 10px;
+    /* Consistent spacing */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    /* Consistent shadow */
+    padding: 20px;
+    /* Consistent padding */
+    border-radius: 10px;
+    /* Rounded corners */
+    background-color: #fbfdfc;
+    /* Consistent background */
+    border: 2px solid #6264a7;
+    /* Solid color outline for message bubbles */
+}
+
+
+
 .team-member, .my-info {
     flex: 1; /* Allows items to grow and fill the space */
     margin: 10px; /* Consistent spacing */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Consistent shadow */
     padding: 20px; /* Consistent padding */
     border-radius: 10px; /* Rounded corners */
-    background-color: #fff; /* Consistent background */
+    background-color: #760404; /* Light grey background */
+    border: 1px solid #ddd; /* Subtle border */
 }
-.avatar-outline-red {
-    border: 2px solid red; /* Adjust the border size and color as needed */
-    border-radius: 50%; /* This makes the outline circular, matching the avatar shape */
-}
+/* .avatar-outline-red {
+/*  border: 2px solid red; /* Adjust the border size and color as needed */
+/*  border-radius: 50%; /* This makes the outline circular, matching the avatar shape */
+/* }
+
 @keyframes slideIn {
     from {
         transform: translateY(100%);
@@ -518,13 +753,13 @@ html {
 }
 .task-complete {
     background-color: green !important;
-    color: white; 
-    padding: 10px 20px;
+    color: rgb(210, 208, 208); 
+    padding: 5px 21px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
     display: block; /* Adjust as needed */
-    margin: 20px auto; /* Center the button */
+    margin: 21px auto; /* Center the button */
 }
 
 .task-complete-clicked {
@@ -535,4 +770,367 @@ html {
     0% { transform: scale(1); }
     50% { transform: scale(0.9); }
     100% { transform: scale(1); }
+}
+/* Styling for the task completion checkbox */
+#taskCompleteCheckbox {
+    transform: scale(1.5); /* Makes the checkbox larger */
+    margin-right: 10px; /* Adds some space between the checkbox and its label */
+    cursor: pointer; /* Changes cursor to pointer when hovering over the checkbox */
+}
+
+label[for="taskCompleteCheckbox"] {
+    font-size: 1.25em; /* Increases the font size of the label */
+    cursor: pointer; /* Changes cursor to pointer when hovering over the label */
+    
+}
+
+/* Change label color to green when the checkbox is checked */
+#taskCompleteCheckbox:checked + label {
+    color: green;
+}
+
+.task-complete-container {
+    background-color: #fff; /* White background */
+    padding: 20px; /* Spacing inside the container */
+    width: 80%; /* Adjust the width as needed */
+    margin: auto; /* Center the container */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional: Adds a subtle shadow for depth */
+    border-radius: 10px; /* Optional: Rounds the corners */
+    display: none; /* Initially hidden */
+}
+
+#notesSection {
+    width: 800px; /* Match the chat window width */
+    height: 600px; /* Match the chat window height */
+    margin: auto;
+    overflow-y: auto; /* Allows scrolling */
+    background-color: #fff; /* White background */
+    display: none; /* Initially hidden */
+}
+
+#notesPad {
+    width: 100%; /* Use full width */
+    height: calc(100% - 20px); /* Use full height minus any padding */
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+    line-height: 1.5; /* Improves readability */
+    font-family: Arial, sans-serif; /* Example font family */
+    font-size: 16px; /* Example font size */
+}
+
+.nav-button:hover, .nav-button:focus {
+    background-color: #484b7a; /* Darker shade for hover and focus */
+    outline: none; /* Removes the outline on focus for a cleaner look */
+}
+
+.nav-button {
+    margin-bottom: 15px; /* Increases space between buttons */
+    padding: 10px 0; /* Reduced padding for a less tall button */
+}
+
+@media (max-width: 600px) {
+    .nav-button {
+        width: 90%; /* Full width on smaller screens */
+    }
+    #notesPad {
+        font-size: 14px; /* Smaller font size on smaller screens */
+    }
+}
+
+.nav-button {
+    width: 100%; /* Full width of the container */
+    padding: 10px 0; /* Adequate padding */
+    margin: 5px 0; /* Space between buttons */
+    /* Add other styling as needed */
+    display: block; /* Ensure each button is on its own line */
+    width: 90%; /* Adjust width as needed */
+    margin: 10px auto; /* Center buttons and add vertical spacing */
+    padding: 15px 0; /* Increase padding for a taller button */
+    background-color: #e7e7e7; /* Lighter background */
+    color: #333; /* Darker text */
+    font-size: 16px; /* Adjust text size as needed */
+    text-align: center; /* Center button text */
+    border: 1px solid #ccc; /* Subtle border */
+    border-radius: 5px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s; /* Smooth background color transition on hover */
+    outline: 1px solid #ddd; /* Adds a slight outline */
+}
+
+.nav-button:hover {
+    background-color: #484b7a; /* Darker shade for hover state */
+}
+
+.active-tab {
+    background-color: #367c39; /* Different color for active tab */
+}
+
+#helpSection {
+    width: 800px; /* Match the chat window width */
+    height: 600px; /* Match the chat window height */
+    overflow-y: auto; /* Allows scrolling */
+    background-color: #fff; /* White background */
+}
+
+.nav-button {
+    padding: 10px; /* Reduced padding for a less tall button */
+}
+
+.dark-mode-toggle {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 1000;
+}
+
+#darkModeToggle {
+    position: relative;
+    display: inline-block;
+    width: 60px; /* Adjust size as needed */
+    height: 34px; /* Adjust size as needed */
+    background-color: #ccc; /* Background of the switch */
+    border-radius: 34px; /* Rounded corners */
+    transition: background-color 0.3s; /* Smooth transition */
+}
+
+#darkModeToggle span {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 24px;
+}
+
+.moon, .sun {
+    transition: 0.3s;
+}
+
+.moon {
+    left: 4px;
+}
+
+.sun {
+    right: 4px;
+}
+
+.dark-mode #darkModeToggle {
+    background-color: #555; /* Dark mode background */
+}
+
+.dark-mode {
+    background-color: #000; /* Sets background to black in dark mode */
+    color: #f1ececd2; /* Optional: Sets text color to white for better readability */
+}
+.dark-mode .team-members-section {
+    background-color: #333; /* Change to a darker grey */
+    color: #fafcfb; /* Optional: Sets text color to white for better readability */
+}
+
+.dark-mode #chatWindow {
+    flex-grow: 1;
+    width: 800px;
+    height: 600px;
+    background-color: rgba(245, 242, 242, 0.05); /* Very low transparent background for dark mode */
+    padding: 20px;
+    overflow-y: auto;
+    border-radius: 0 0 10px 10px;
+    border: 2px solid rgba(129, 129, 132, 0.26); /* Semi-transparent solid color outline for message bubbles */
+    color: #fff; /* Sets text color to white */
+}
+
+
+.dark-mode .team-members {
+    background-color: #f5f2f2d9;
+    /* Change to a darker grey */
+    color: #0bf570;
+    /* Optional: Sets text color to white for better readability */
+}
+
+.dark-mode .nav-button {
+    background-color: #d4d2d252;
+    color: #fff;
+}
+/* Hides the default checkbox */
+.theme-switch input[type="checkbox"] {
+  display: none;
+}
+
+/* The slider */
+.theme-switch .slider {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+  background-color: #170b0b;
+  border-radius: 34px;
+  cursor: pointer;
+}
+
+.theme-switch .slider:before {
+  content: "";
+  position: absolute;
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: rgb(39, 3, 3);
+  border-radius: 50%;
+  transition: 0.4s;
+}
+
+input:checked + .slider {
+  background-color: #66bb6a;
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+  background-color: #66bb6a;
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+form input:focus, form button:hover {
+    outline: none;
+    border-color: #4CAF50; /* Add focus color for inputs and hover color for button */
+}
+
+/* Add this at the end of your CSS file */
+.avatarOption:hover {
+    transform: scale(1.1); /* Enlarge avatars on hover */
+    border-color: #4CAF50; /* Change border color on hover */
+}
+.styled-table {
+    border-collapse: collapse !important;
+    margin: 25px 0 !important;
+    font-size: 0.9em !important;
+    min-width: 400px !important;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15) !important;
+    width: auto !important; /* Decrease the width to make the table less wide */
+    margin: 0 auto !important; /* Center the table horizontally */
+}
+
+.styled-header {
+    background-color: #009879;
+    color: #ffffff;
+    text-align: left;
+    padding: 12px 15px;
+}
+
+.styled-cell {
+    padding: 12px 15px;
+    border-bottom: 1px solid #dddddd;
+}
+
+.styled-table tr:last-of-type .styled-cell {
+    border-bottom: 2px solid #009879;
+}
+.criteria-grid {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important; /* Adjust based on the number of columns */
+    gap: 0 !important; /* Reduced gap for a more compact layout */
+    margin: 50px auto !important; /* Centered the grid with auto margins */
+    width: 40% !important; /* Adjusted width for better centering */
+    border: 10px solid #4CAF50 !important; /* Added colorful border around the grid */
+}
+.criteria-header:nth-child(n+2):nth-child(-n+4) {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px;
+    text-align: center;
+    border: 4px solid #ffcc00; /* Added colorful lines for definition */
+    width: 90%; /* Set width for 2nd to 4th headers */
+}
+
+.criteria-grid,
+.criteria-item {
+    background-color: #fff;
+    /* Simplify background to white */
+    border: 1px solid #ddd;
+    /* Simplify borders */
+}
+.criteria-item {
+    padding: 4px;
+    /* Reduced padding */
+    margin: 2px;
+    /* Reduced margin */
+    font-weight: normal;
+        /* Use normal font weight */
+    color: #333;
+        /* Use a simple color for text */
+    }
+
+.criteria-item:nth-child(4n+2),
+/* 2nd column */
+.criteria-item:nth-child(4n+3),
+/* 3rd column */
+.criteria-item:nth-child(4n+4) {
+    /* 4th column */
+    font-weight: bold; /* Make their text bold */
+    padding: 8px; /* Smaller padding for less space between border and text */
+    width: 90%; /* Adjusted width to make it smaller */
+}
+/* Example of adding specific colors to individual items */
+.criteria-item:nth-child(odd):not(:nth-child(4n+1)) {
+    background-color: rgba(255, 255, 255, 0.5); /* Lighter for odd items, excluding the first column */
+}
+
+.criteria-item:nth-child(even):not(:nth-child(4n+1)) {
+    background-color: rgba(220, 220, 220, 0.5); /* Slightly darker for even items, excluding the first column */
+}
+
+.avatar-arrow-container {
+    display: flex;
+    align-items: center; /* Align vertically */
+}
+
+.avatar {
+    margin-right: 5px; /* Adjust as needed to bring the arrow closer */
+    width: auto
+}
+
+.avatar-selection-grid {
+    display: grid;
+    margin: auto;
+        /* Center the container horizontally */
+    width: 100%;
+        /* Make the container wider */
+        /* Keep the rest of the properties unchanged */
+    grid-template-columns: repeat(12, 1fr); /* Set to 5 columns */
+    gap: 25px; /* Adjust gap between items */
+    justify-items: center;
+}
+
+.avatar-selection-container {
+    margin: auto; /* Center the container horizontally */
+    width: auto; /* Adjust width as needed */
+    max-width: 1200px; /* Maximum width to control the layout */
+    background-color: white; /* White background */
+    padding: 20px 40px;
+    border-radius: 10px; /* Rounded corners */
+    border: 5px solid #4CAF50; /* Add a cool green frame */
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2); /* Enhance the existing shadow for depth */
+    display: flex; /* Use flex to center the grid horizontally */
+    justify-content: center; /* Center the grid */
+}
+
+.avatar-item {
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.avatar-item img {
+    width: 100%; /* Adjust based on your needs */
+    height: auto;
+    border-radius: 100%; /* Circular avatars */
+}
+
+.avatar-item.selected {
+    transform: scale(1.5); /* Slightly enlarge selected avatar */
+    outline: 3px solid #4CAF50; /* Highlight color */
+}
+
+.avatar-item:hover {
+    transform: scale(1.5); /* More noticeable scale */
+    transition: transform 0.2s ease;
 }

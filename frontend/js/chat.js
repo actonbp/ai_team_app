@@ -35,9 +35,9 @@ let chatInterval;
 
 typingDelay = 10000
 const agents = {
-    'James': { agentName: 'James', avatar: 'avatars/avatar_2.png', isAgent: true, typingSpeed: 160, agentBadge: 'Master of Motivation' },
-    'Sophia': { agentName: 'Sophia', avatar: 'avatars/avatar_3.png', isAgent: true, typingSpeed: 180, agentBadge: 'Strategist Supreme' },
-    'Ethan': { agentName: 'Ethan', avatar: 'avatars/avatar_6.png', isAgent: true, typingSpeed: 200, agentBadge: 'Logic Luminary' }
+    'James': { agentName: 'James', avatar: 'avatars/avatar_1.png', isAgent: true, typingSpeed: 160, agentBadge: 'Master of Motivation', color: 'rgba(255, 215, 0, 0.5)', colorRGB: {r: 255, g: 215, b: 0} },
+    'Sophia': { agentName: 'Sophia', avatar: 'avatars/avatar_4.png', isAgent: true, typingSpeed: 180, agentBadge: 'Strategist Supreme', color: 'rgba(255, 105, 180, 0.5)', colorRGB: {r: 255, g: 105, b: 180} },
+    'Ethan': { agentName: 'Ethan', avatar: 'avatars/avatar_3.png', isAgent: true, typingSpeed: 200, agentBadge: 'Logic Luminary', color: 'rgba(30, 144, 255, 0.5)', colorRGB: {r: 30, g: 144, b: 255} }
 };// Corrected avatar paths to be consistent with the appendMessage function, added typingSpeed for each agent, and added agentBadge name to match @app.js
 // This function is called to initiate a new chat session
 
@@ -60,6 +60,36 @@ document.addEventListener('DOMContentLoaded', function () {
     }, 3000); // Adjust the delay as needed
 
     displayTeamMembers();
+
+    const messageInput = document.getElementById('messageInput');
+    messageInput.addEventListener('copy', (e) => e.preventDefault());
+    messageInput.addEventListener('paste', (e) => e.preventDefault());
+
+    // Add event listener for the Notes tab
+    document.getElementById('notesTab').addEventListener('click', function() {
+        document.getElementById('chatWindow').style.display = 'none';
+        document.getElementById('locationAnalysis').style.display = 'none';
+        document.getElementById('helpSection').style.display = 'none';
+        document.getElementById('notesSection').style.display = 'block';
+        this.classList.add('active-tab');
+        document.getElementById('chatTab').classList.remove('active-tab');
+        document.getElementById('locationTab').classList.remove('active-tab');
+        document.getElementById('helpButton').classList.remove('active-tab');
+    });
+});
+
+document.getElementById('chatTab').addEventListener('click', function() {
+    document.getElementById('chatWindow').style.display = 'block';
+    document.getElementById('locationAnalysis').style.display = 'none';
+    document.getElementById('helpSection').style.display = 'none';
+    document.getElementById('notesSection').style.display = 'none';
+    this.classList.add('active-tab');
+    document.getElementById('chatTab').classList.remove('active-tab');
+    document.getElementById('locationTab').classList.remove('active-tab');
+    document.getElementById('helpButton').classList.remove('active-tab');
+    // Put anything you want to happen here when they click the chat button on the side.
+    // Show the chat window
+    // Add any additional logic needed for showing the chat and hiding other sections
 });
 
 function startNewChat() {
@@ -107,11 +137,18 @@ function appendMessage(messageText, isAgent = false, agentName, isParticipant = 
 
     const avatarElement = document.createElement('img');
     avatarElement.classList.add('avatar');
-
-    if (isParticipant) {
-        messageElement.classList.add('participant');
-    } else if (isAgent) {
+    if (isAgent) {
         messageElement.classList.add(`agent-${agentName}`);
+        messageElement.style.backgroundColor = `rgba(${agents[agentName].colorRGB.r}, ${agents[agentName].colorRGB.g}, ${agents[agentName].colorRGB.b}, 0.1)`; // More whitish hue in the middle
+        messageElement.style.borderColor = agents[agentName].color; // Brighter outline
+        messageElement.style.borderWidth = "2px";
+        messageElement.style.borderStyle = "solid";
+    } else {
+        messageElement.classList.add('participant');
+        // Directly apply styles to ensure they take effect
+        messageElement.style.border = "2px solid #ff0000"; // Example: bright red border for distinction
+        messageElement.style.borderRadius = "20px"; // Bubble shape
+        messageElement.style.padding = "10px"; // Adjust padding for content spacing
     }
 
     // Determine the avatar image source based on the agent's name or if it's the participant
@@ -121,6 +158,7 @@ function appendMessage(messageText, isAgent = false, agentName, isParticipant = 
         avatarSrc = agent ? agent.avatar : 'default_agent_avatar.png'; // Fallback to a default agent avatar if not found
     } else {
         avatarSrc = localStorage.getItem('selectedAvatar'); // Use the participant's selected avatar
+        messageElement.style.backgroundColor = 'rgba(255, 0, 0, 0.1)'; // Lighter red whitish opacity hue
     }
     avatarElement.src = avatarSrc;
 
@@ -145,14 +183,6 @@ function appendMessage(messageText, isAgent = false, agentName, isParticipant = 
     messageElement.appendChild(avatarElement);
     messageElement.appendChild(textElement);
     messageContainer.append(messageElement);
-
-    // Check for "task-complete" messages in conversationHistory
-    const taskCompleteMessages = conversationHistory.filter(message => message.content.toLowerCase().includes("task-complete")).length;
-
-    // Redirect if there are 3 or more "task-complete" messages
-    if (taskCompleteMessages >= 3 && taskCompleteButtonClicked) {
-        window.location.href = 'simulation_end.html'; // Replace 'simulation_end.html' with the actual path if different
-    }
 
     messageContainer.scrollTop = messageContainer.scrollHeight; // Scrolls to the bottom
 
@@ -269,6 +299,7 @@ sendMessageButton.addEventListener('click', () => {
     // Hide the send button and message entry window after sending a message
     sendMessageButton.style.display = 'none';
     messageInput.style.display = 'none';
+    messageInput.value = ''; // Clear the text box after sending the message
 
     // Wait for a specified delay, then make a request to the '/ask-openai' endpoint
     setTimeout(() => {
@@ -480,6 +511,11 @@ function displayTeamMembers() {
                 <p>${member.badgeName}</p>
             </div>
         `;
+        // Set the text color for the team member's name or badge
+        memberElement.querySelector('.team-member-info').style.color = 'black';
+        // Set the background color for the team member's display
+        memberElement.style.backgroundColor = `rgba(${agents[member.name].colorRGB.r}, ${agents[member.name].colorRGB.g}, ${agents[member.name].colorRGB.b}, 0.1)`; // Even lighter, more subtle hue
+        memberElement.style.borderColor = agents[member.name].color; // Agent's unique color
         container.appendChild(memberElement);
     });
 }
@@ -490,9 +526,14 @@ document.addEventListener('DOMContentLoaded', displayTeamMembers);
 let taskCompleteButtonClicked = false;
 let agentTaskCompleteCount = 0; // Assuming you have a way to count this
 
-document.getElementById('taskCompleteButton').addEventListener('click', function() {
-    this.classList.add('task-complete-clicked');
-    taskCompleteButtonClicked = true;
+document.getElementById('taskCompleteCheckbox').addEventListener('change', function() {
+    var label = document.querySelector('label[for="taskCompleteCheckbox"]');
+    if (this.checked) {
+        label.style.color = 'green';
+    } else {
+        label.style.color = 'initial'; // Change back to the default color if unchecked
+    }
+    taskCompleteButtonClicked = true; // Assuming taskCompleteButtonClicked is your conditional variable
     checkConditionsAndProceed();
 });
 
@@ -513,12 +554,26 @@ function incrementAgentTaskCompleteCount(agentName) {
         }
     }
 }
-
 // Example usage of incrementAgentTaskCompleteCount within the chat logic
 // This is a simplified example and might need adjustments based on the actual chat logic
 document.addEventListener('messageReceived', function(event) {
     const { agentName, messageText } = event.detail; // Assuming event.detail contains these properties
     if (messageText.toLowerCase().includes("task-complete")) {
         incrementAgentTaskCompleteCount(agentName);
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('checkbox').addEventListener('change', function(event) {
+        if(this.checked) {
+            // Apply dark mode styles
+            document.body.classList.add('dark-mode');
+        } else {
+            // Revert to light mode styles
+            document.body.classList.remove('dark-mode');
+        }
+    });
+    if (!document.body.classList.contains('dark-mode')) {
+        console.log('Dark mode is initially off');
     }
 });

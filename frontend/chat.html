@@ -16,14 +16,14 @@
             padding: 10px;
             text-align: left;
         }
-        .chat-area, .location-analysis, .help-section {
+        .chat-area, .location-analysis, .help-section, #notesSection {
             max-height: 500px; /* Adjust this value based on your needs */
             overflow-y: auto; /* Enables vertical scrolling */
         }
-        .location-analysis, .help-section {
+        .location-analysis, .help-section, #notesSection {
             display: none; /* Initially hidden */
         }
-        .tab {
+        .tab, #notesTab {
             cursor: pointer;
             padding: 10px;
             border: none;
@@ -46,11 +46,13 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Consistent shadow */
             padding: 20px; /* Consistent padding */
             border-radius: 10px; /* Rounded corners */
-            background-color: #fff; /* Consistent background */
+            background-color: transparent; /* Consistent background */
+            width: 90%; /* Adjust this to match the desired width */
         }
         .team-member-avatar {
-            width: 60px; /* Consistent size */
-            height: 60px;
+            display: flex;
+            width: 80px; /* Consistent size */
+            height: 150px;
             border-radius: 50%;
             margin-bottom: 10px; /* Space between avatar and text */
         }
@@ -68,14 +70,16 @@
             flex-direction: column;
             align-items: flex-start;
         }
+
         .my-info {
-            background-color: #ffecec; /* Light red background */
-            border: 2px solid red; /* Highlight in red */
-            padding: 20px; /* Consistent padding */
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
-            margin-bottom: 20px; /* Space between your info and the next section */
-            border-radius: 10px; /* Rounded corners */
+            background-color: rgba(255, 0, 0, 0.20); /* Light red background with transparency */
+             border: none; /*2px solid rgba(255, 0, 0, 0.5); /* Red border with semi-transparency */
+             margin: 10px;
+             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+             padding: 20px;
+             border-radius: 10px;
         }
+        
         #raiseHandButton {
             display: inline-block; /* Ensure visibility and allow width adjustment */
             background-color: red; /* Red background */
@@ -95,15 +99,27 @@
         .button-container button {
             width: 100%; /* Ensure each button stretches to fill the container */
         }
-        .task-complete {
-            background-color: green;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            display: block; /* Adjust as needed */
-            margin: 20px auto; /* Center the button */
+        .task-complete-container {
+            background-color: #fff; /* White background */
+            padding: 20px; /* Spacing inside the container */
+            width: 80%; /* Adjust the width as needed */
+            margin: auto; /* Center the container */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional: Adds a subtle shadow for depth */
+            border-radius: 10px; /* Optional: Rounds the corners */
+            display: flex;
+            align-items: center;
+            justify-content: space-between; /* Positions the checkbox to the right of the text */
+        }
+        #taskCompleteCheckbox {
+            transform: scale(2); /* Makes the checkbox larger */
+            margin-right: 10px; /* Adds some space between the checkbox and its label */
+            cursor: pointer; /* Changes cursor to pointer when hovering over the checkbox */
+        }
+        label[for="taskCompleteCheckbox"] {
+            font-size: 1.5em; /* Increases the font size of the label */
+            cursor: pointer; /* Changes cursor to pointer when hovering over the label */
+            order: 2; /* Positions the label to the right of the checkbox */
+            color: green; /* Changes the text color to green */
         }
     </style>
 </head>
@@ -113,11 +129,16 @@
         <aside class="sidebar">
             <!-- Navigation buttons -->
             <div class="button-container">
-                <button id="raiseHandButton">Raise Hand to Participate</button>
+                <button class="nav-button" id="raiseHandButton">Raise Hand to Participate</button>
                 <button class="nav-button" id="chatTab">Chat</button>
                 <button class="nav-button" id="locationTab">Unique Information</button>
                 <button class="nav-button" id="helpButton">Help</button>
-                <button id="taskCompleteButton" class="task-complete">Task is Complete</button>
+                <button class="nav-button" id="notesTab" aria-label="Open notes">Notes</button>
+                <div class="task-complete-container">
+                    <input type="checkbox" id="taskCompleteCheckbox" name="taskComplete" value="completed">
+                    <label for="taskCompleteCheckbox" style="order: 1;">Task Completed?</label>
+                </div>
+                <!-- Toggle Switch for Dark Mode -->
             </div>
         </aside>
         <section class="chat-container">
@@ -216,37 +237,87 @@
                 <h2>Help & Instructions</h2>
                 <p>Your group's goal is to rank the three locations in order of most attributes met. Each person has unique info. You cannot paste the info in the chat.</p>
             </div>
+            <div id="notesSection" style="display:none;">
+                <textarea id="notesPad" rows="10" cols="50">Take your notes here...</textarea>
+            </div>
             <div class="input-area">
-                <input type="text" id="messageInput" placeholder="Type a message...">
+                <input type="text" id="messageInput" placeholder="Type a message..." oncopy="return false;" onpaste="return false;">
                 <button id="sendMessageButton">Send</button>
             </div>
         </section>
     </div>
+    <div class="dark-mode-toggle">
+        <button id="darkModeToggle">
+            <span class="moon">🌙</span>
+            <span class="sun" style="display:none;">☀️</span>
+        </button>
+    </div>
     <script src="js/chat.js"></script>
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!document.body.classList.contains('dark-mode')) {
+                console.log('Dark mode is initially off');
+            }
+        });
         document.getElementById('raiseHandButton').addEventListener('click', function() {
             document.getElementById('chatWindow').style.display = 'block';
             document.getElementById('locationAnalysis').style.display = 'none';
             document.getElementById('helpSection').style.display = 'none';
+            document.getElementById('notesSection').style.display = 'none';
             this.classList.add('active-tab');
             document.getElementById('locationTab').classList.remove('active-tab');
             document.getElementById('helpButton').classList.remove('active-tab');
+            document.getElementById('notesTab').classList.remove('active-tab');
         });
         document.getElementById('locationTab').addEventListener('click', function() {
             document.getElementById('chatWindow').style.display = 'none';
             document.getElementById('locationAnalysis').style.display = 'block';
             document.getElementById('helpSection').style.display = 'none';
+            document.getElementById('notesSection').style.display = 'none';
             this.classList.add('active-tab');
             document.getElementById('chatTab').classList.remove('active-tab');
             document.getElementById('helpButton').classList.remove('active-tab');
+            document.getElementById('notesTab').classList.remove('active-tab');
         });
         document.getElementById('helpButton').addEventListener('click', function() {
             document.getElementById('chatWindow').style.display = 'none';
             document.getElementById('locationAnalysis').style.display = 'none';
             document.getElementById('helpSection').style.display = 'block';
+            document.getElementById('notesSection').style.display = 'none';
             this.classList.add('active-tab');
             document.getElementById('chatTab').classList.remove('active-tab');
             document.getElementById('locationTab').classList.remove('active-tab');
+            document.getElementById('notesTab').classList.remove('active-tab');
+        });
+        document.getElementById('notesTab').addEventListener('click', function() {
+            document.getElementById('chatWindow').style.display = 'none';
+            document.getElementById('locationAnalysis').style.display = 'none';
+            document.getElementById('helpSection').style.display = 'none';
+            document.getElementById('notesSection').style.display = 'block';
+            this.classList.add('active-tab');
+            document.getElementById('chatTab').classList.remove('active-tab');
+            document.getElementById('locationTab').classList.remove('active-tab');
+            document.getElementById('helpButton').classList.remove('active-tab');
+        });
+        document.getElementById('taskCompleteCheckbox').addEventListener('change', function() {
+            var label = document.querySelector('label[for="taskCompleteCheckbox"]');
+            if (this.checked) {
+                label.style.color = 'green';
+            } else {
+                label.style.color = 'initial'; // Change back to the default color if unchecked
+            }
+        });
+        document.getElementById('darkModeToggle').addEventListener('click', function() {
+            const moonIcon = document.querySelector('.moon');
+            const sunIcon = document.querySelector('.sun');
+            document.body.classList.toggle('dark-mode');
+            if (document.body.classList.contains('dark-mode')) {
+                moonIcon.style.display = 'none';
+                sunIcon.style.display = 'inline';
+            } else {
+                moonIcon.style.display = 'inline';
+                sunIcon.style.display = 'none';
+            }
         });
     </script>
 </body>
