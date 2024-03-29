@@ -1,5 +1,14 @@
 <div class="thank-you-container">
     <h2>Thank You for Your Participation!</h2>
     <p>Your insights and contributions have been invaluable to our simulation. We appreciate the time and effort you've dedicated to this exercise.</p>
-    <button id="continueButton" onclick="window.location.href='https://qualtrics.com/next';">Continue to Next Step</button>
+    <p>Please copy the unique code below and paste it into the Qualtrics survey you have open in another window to confirm you've completed the task:</p>
+    <p id="uniqueCode" style="font-weight: bold;"></p>
+    <script>
+        function generateUniqueCode() {
+            const code = 'FDW965gsf' //const code = Math.floor(10000000 + Math.random() * 90000000); // Generates a random 8 digit number
+            document.getElementById('uniqueCode').innerText = code;
+        }
+        window.onload = generateUniqueCode;
+    </script>
+    <p>Please ensure you paste this code into the appropriate field in the Qualtrics survey to complete the process.</p>
 </div>

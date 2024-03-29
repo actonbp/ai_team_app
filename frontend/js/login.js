@@ -6,8 +6,8 @@ const avatarCarousel = document.getElementById('avatarCarousel'); // Ensure this
 
 // Function to handle avatar selection and store it in localStorage
 function selectAvatar(avatarFileName) {
-    localStorage.setItem('selectedAvatar', `avatars/${avatarFileName}`);
-    console.log(`Selected avatar file path: avatars/${avatarFileName}`); // Print the file path of the selected avatar
+    localStorage.setItem('selectedAvatar', `./${avatarFileName}`);
+    console.log(`Selected avatar file path: ./${avatarFileName}`); // Print the file path of the selected avatar
 }
 
 // Function to dynamically load avatars, add event listeners for selection, and print all loaded avatars in the console
@@ -15,18 +15,18 @@ async function loadAndHandleAvatars() {
     try {
         let avatars = await fetchAvatars(); // This should return an array of avatar file names
         avatars = shuffleArray(avatars); // Shuffle avatars before appending them to the grid
-        const swiperWrapper = document.querySelector('.swiper-wrapper');
+        const avatarSelectionGrid = document.querySelector('.avatar-selection-grid'); // Select the avatar-selection-grid element from login.html
         avatars.forEach(avatarFileName => {
-            const slide = document.createElement('div');
-            slide.className = 'swiper-slide';
-            slide.innerHTML = `<img src="./avatars/${avatarFileName}" alt="Avatar">`;
-            swiperWrapper.appendChild(slide);
+            const avatarItem = document.createElement('div');
+            avatarItem.className = 'avatar-item';
+            avatarItem.innerHTML = `<img src="./${avatarFileName}" alt="Avatar" data-avatar="${avatarFileName}">`; // Ensure the path is correct and add data-avatar attribute
+            avatarSelectionGrid.appendChild(avatarItem); // Append the avatarItem to the avatarSelectionGrid
         });
 
-        // Attach event listeners to the loaded avatars for carousel interaction
-        document.querySelectorAll('.swiper-slide img').forEach(item => {
+        // Attach event listeners to the loaded avatars for selection
+        document.querySelectorAll('.avatar-item img').forEach(item => {
             item.addEventListener('click', function() {
-                document.querySelectorAll('.swiper-slide').forEach(div => div.classList.remove('selected'));
+                document.querySelectorAll('.avatar-item').forEach(div => div.classList.remove('selected'));
                 this.parentElement.classList.add('selected');
                 selectAvatar(this.dataset.avatar);
             });
@@ -45,33 +45,21 @@ function shuffleArray(array) {
 }
 
 async function fetchAvatars() {
-    // Dynamically generate avatar file names
-    let avatars = [];
-    const totalAvatars = 41; // Adjust based on the actual number of avatars
-    for (let i = 1; i <= totalAvatars; i++) {
-        avatars.push(`avatar_${i}.png`);
+    try {
+        const response = await fetch('http://localhost:3000/avatars');
+        if (!response.ok) throw new Error('Failed to fetch avatars');
+        const avatars = await response.json();
+        return avatars;
+    } catch (error) {
+        console.error('Error fetching avatars:', error);
+        return [];
     }
-    return avatars;
 }
 
 // Call the function to load avatars and set up event listeners when the page loads
 document.addEventListener('DOMContentLoaded', () => {
     loadAndHandleAvatars();
-    
-    // Initialize Swiper here, after other DOM content has been loaded and handled
-    var swiper = new Swiper('.swiper-container', {
-        slidesPerView: 1,
-        spaceBetween: 30,
-        loop: true,
-        navigation: {
-            nextEl: '.swiper-button-next',
-            prevEl: '.swiper-button-prev',
-        },
-        pagination: {
-            el: '.swiper-pagination',
-            clickable: true,
-        },
-    });
+
 
     // Check if the table exists before attempting to modify it
     const table = document.querySelector('table');
@@ -88,15 +76,6 @@ document.addEventListener('DOMContentLoaded', () => {
             cell.classList.add('styled-cell');
         });
     }
-});
-
-document.querySelectorAll('.avatar-item img').forEach(item => {
-    item.addEventListener('click', function() {
-        document.querySelectorAll('.avatar-item').forEach(div => div.classList.remove('selected'));
-        this.parentElement.classList.add('selected');
-        localStorage.setItem('selectedAvatar', this.src); // Store the selected avatar's source
-        // Add any additional logic for avatar selection confirmation
-    });
 });
 
 loginForm.addEventListener('submit', (e) => {

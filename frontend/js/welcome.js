@@ -1,10 +1,10 @@
 document.addEventListener('DOMContentLoaded', (event) => {
     // This code runs when the DOM is fully loaded
-    const nextButton = document.querySelector('.task-instructions button');
-
-    nextButton.addEventListener('click', () => {
-        window.location.href = 'login.html'; // Navigate to login.html when the button is clicked
-    });
+    const nextButton = document.querySelector('.next-button');
+    
+    // nextButton.addEventListener('click', () => {
+    //     window.location.href = 'login.html'; // Navigate to login.html when the button is clicked
+    // });
 
     // Smooth Scroll to Next Section
     document.querySelector('.next-button').addEventListener('click', function(e) {
@@ -21,4 +21,15 @@ document.addEventListener('DOMContentLoaded', (event) => {
     else if (hours < 18) greeting = 'Good Afternoon!';
     else greeting = 'Good Evening!';
     greetingElement.textContent = greeting;
+
+    // Save Prolific ID on input
+    document.getElementById('prolificIdInput').addEventListener('input', function(e) {
+        localStorage.setItem('prolificId', e.target.value.trim());
+    });
+
+    // Modify the Next button's click event to redirect to login.html
+    // This part remains unchanged as per instructions
+    document.querySelector('.next-button').addEventListener('click', function() {
+        window.location.href = 'login.html';
+    });
 });

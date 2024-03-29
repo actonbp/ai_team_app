@@ -55,52 +55,6 @@ form button {
     /* Solid border for inputs */
     border-radius: 5px;
     /* Round the corners of inputs and button */
-    width: auto;
-    /* Adjust width to account for padding */
-}
-
-form button {
-    background-color: #4CAF50;
-    /* Change button color for better visibility */
-    color: white;
-    /* Change button text color for contrast */
-    border: none;
-    /* Remove button border for cleaner look */
-}
-
-form button:hover {
-    background-color: #484b7a;
-    /* Darker shade for hover state */
-    color: #fff;
-    /* White text color for better contrast */
-    transform: scale(1.05);
-    /* Slightly enlarge on hover */
-}
-
-form input:focus,
-form button:hover {
-    outline: none;
-    border-color: #4CAF50;
-    /* Add focus color for inputs and hover color for button */
-}
-
-form {
-    background: white;
-    padding: 20px;
-    border-radius: 5px;
-    box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.1);
-    width: 50%; /* Adjust form width for a cleaner look */
-    display: flex; /* Use flex to align form items nicely */
-    flex-direction: column; /* Stack form items vertically */
-    gap: 10px; /* Add space between form items */
-    margin-bottom: 100px; /* Increase bottom margin */
-}
-
-form input, form button {
-    padding: 10px; /* Add padding for better touch targets */
-    margin: 10px 0; /* Increase margin for spacing */
-    border: 2px solid #ccc; /* Solid border for inputs */
-    border-radius: 5px; /* Round the corners of inputs and button */
     width: calc(100% - 24px); /* Adjust width to account for padding */
 }
 
@@ -116,7 +70,8 @@ form button:hover {
     transform: scale(1.05); /* Slightly enlarge on hover */
 }
 
-form input:focus, form button:hover {
+form input:focus,
+form button:hover {
     outline: none;
     border-color: #4CAF50; /* Add focus color for inputs and hover color for button */
 }
@@ -243,7 +198,7 @@ form input:focus, form button:hover {
     flex-grow: 1;
     width: 800px;
     height: 600px;
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.25);
     padding: 20px;
     overflow-y: auto;
     border-radius: 0 0 10px 10px;
@@ -333,19 +288,201 @@ form input:focus, form button:hover {
     margin-right: 10px; /* Space from the next button */
 }
 
+        table,
+        th,
+        td {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+    
+        th,
+        td {
+            padding: 10px;
+            text-align: left;
+        }
+    
+        .chat-area,
+        .location-analysis,
+        .help-section,
+        #notesSection {
+            max-height: 500px;
+            /* Adjust this value based on your needs */
+            overflow-y: auto;
+            /* Enables vertical scrolling */
+        }
+    
+        .location-analysis,
+        .help-section,
+        #notesSection {
+            display: none;
+            /* Initially hidden */
+        }
+    
+        .tab,
+        #notesTab {
+            cursor: pointer;
+            padding: 10px;
+            border: none;
+            background-color: #6264a7;
+            color: white;
+            margin-bottom: 5px;
+        }
+    
+        .active-tab {
+            background-color: #484b7a;
+        }
+    
+        .team-members-section {
+            display: flex;
+            flex-direction: column;
+            /* Align items in a column */
+            align-items: center;
+            width: 100%;
+            /* Ensure the container spans the full width */
+        }
+    
+        .team-member,
+        .my-info {
+            flex: 1;
+            /* Allows items to grow and fill the space */
+            margin: 10px;
+            /* Consistent spacing */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            /* Consistent shadow */
+            padding: 20px;
+            /* Consistent padding */
+            border-radius: 10px;
+            /* Rounded corners */
+            background-color: transparent;
+            /* Consistent background */
+            width: 90%;
+            /* Adjust this to match the desired width */
+        }
+    
+        .team-member-avatar {
+            display: flex;
+            width: 80px;
+            /* Consistent size */
+            height: 150px;
+            border-radius: 50%;
+            margin-bottom: 10px;
+            /* Space between avatar and text */
+        }
+    
+        .team-member-info h4 {
+            font-size: 1em;
+            font-weight: bold;
+            margin-bottom: 5px;
+            /* Space between name and badge title */
+        }
+    
+        .team-member-info p {
+            font-size: 0.9em;
+            color: #555;
+        }
+    
+        .participant-details {
+            display: flex;
+            background-color: #FFA07A;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    
+        .my-info {
+            background-color: #FFA07A;            /* Light red background with transparency */
+            border: none;
+            /*2px solid rgba(255, 0, 0, 0.5); /* Red border with semi-transparency */
+            margin: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+        }
+    
+        #raiseHandButton {
+            display: inline-block;
+            /* Ensure visibility and allow width adjustment */
+            background-color: red;
+            /* Red background */
+            color: white;
+            /* White text */
+            font-size: 20px;
+            /* Larger font size */
+            padding: 10px 20px;
+            /* Bigger button */
+            border: none;
+            /* Remove border */
+            cursor: pointer;
+            /* Pointer cursor on hover */
+            margin-right: 10px;
+            /* Space from the next button */
+        }
+    
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            /* Stack buttons vertically */
+            align-items: stretch;
+            /* Stretch buttons to fill the container width */
+        }
+    
+        .button-container button {
+            width: 100%;
+            /* Ensure each button stretches to fill the container */
+        }
+    
+        .task-complete-container {
+            background-color: #fff;
+            /* White background */
+            padding: 20px;
+            /* Spacing inside the container */
+            width: 80%;
+            /* Adjust the width as needed */
+            margin: auto;
+            /* Center the container */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            /* Optional: Adds a subtle shadow for depth */
+            border-radius: 10px;
+            /* Optional: Rounds the corners */
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            /* Positions the checkbox to the right of the text */
+        }
+    
+        #taskCompleteCheckbox {
+            transform: scale(2);
+            /* Makes the checkbox larger */
+            margin-right: 10px;
+            /* Adds some space between the checkbox and its label */
+            cursor: pointer;
+            /* Changes cursor to pointer when hovering over the checkbox */
+        }
+    
+        label[for="taskCompleteCheckbox"] {
+            font-size: 1.5em;
+            /* Increases the font size of the label */
+            cursor: pointer;
+            /* Changes cursor to pointer when hovering over the label */
+            order: 2;
+            /* Positions the label to the right of the checkbox */
+            color: green;
+            /* Changes the text color to green */
+        }
+    
+
 #sendMessageButton:hover,
 #raiseHandButton:hover {
     background-color: #484b7a;
 }
 #chatWindow .agent-1 {
-    background-color: rgba(154, 205, 50, 0.1); /* yellowgreen with transparency */
+    background-color: rgba(154, 205, 50, 0.25); /* yellowgreen with transparency */
 }
 #chatWindow .agent-2 {
-    background-color: rgba(53, 130, 177, 0.1); /* #3582b1 with transparency */
+    background-color: rgba(53, 130, 177, 0.25); /* #3582b1 with transparency */
 }
 
 #chatWindow .agent-3 {
-    background-color: rgba(160, 61, 22, 0.1); /* #a03d16 with transparency */
+    background-color: rgba(160, 61, 22, 0.25); /* #a03d16 with transparency */
 }
 
 .messageElement {
@@ -355,7 +492,7 @@ form input:focus, form button:hover {
     color: white;
     max-width: 80%;
     word-wrap: break-word;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
     background-color: rgba(255, 255, 255, 0.9); /* Adjusted transparency */
 }
 
@@ -660,7 +797,7 @@ html {
     background-color: #140f0f;
     border-radius: 10px;
     padding: 20px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
     margin-bottom: 20px;
 }
 
@@ -670,7 +807,7 @@ html {
 }
 .my-info {
     background-color: rgba(255, 0, 0, 0.20); /* Light red background with transparency */
-    border: 2px solid rgba(255, 0, 0, 0.5); /* Red border with semi-transparency */
+    border: 2px solid rgba(255, 0, 0, 0.75); /* Red border with semi-transparency */
     margin: 10px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     padding: 20px;
@@ -697,7 +834,7 @@ html {
     /* Allows items to grow and fill the space */
     margin: 10px;
     /* Consistent spacing */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
     /* Consistent shadow */
     padding: 20px;
     /* Consistent padding */
@@ -714,11 +851,11 @@ html {
 .team-member, .my-info {
     flex: 1; /* Allows items to grow and fill the space */
     margin: 10px; /* Consistent spacing */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Consistent shadow */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25); /* Consistent shadow */
     padding: 20px; /* Consistent padding */
     border-radius: 10px; /* Rounded corners */
-    background-color: #760404; /* Light grey background */
-    border: 1px solid #ddd; /* Subtle border */
+    background-color: rgba(255, 160, 122, 0.5);
+    border: 1px solid #f90f0f; /* Subtle border */
 }
 /* .avatar-outline-red {
 /*  border: 2px solid red; /* Adjust the border size and color as needed */
