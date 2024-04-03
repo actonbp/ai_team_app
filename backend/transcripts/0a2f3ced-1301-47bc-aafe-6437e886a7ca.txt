@@ -1,7 +1,0 @@
-PARTICIPANT: Agent 2: ⭐Sophia has joined the chat.⭐
-PARTICIPANT: Agent 1: ⭐James has joined the chat.⭐
-PARTICIPANT: Agent 3: ⭐Ethan has joined the chat.⭐
-Sophia: Hey James! Sophia here. 👋 Agree, East Point Mall does tick boxes for foot traffic and student population. But, it's over our $1MM budget. Thoughts?
-James: Hey team! James here. 🚀 Let's get started on ranking these locations. First off, I'm thinking East Point Mall seems strong on foot traffic and student pop. Thoughts? 🤔
-Ethan: Cost is a big deal, Sophia. East Point Mall being over $1MM is a major red flag. Worth considering cheaper options like Starlight Valley?
-James: James is typing...

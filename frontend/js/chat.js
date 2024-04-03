@@ -5,7 +5,7 @@ if (!localStorage.getItem('badgeName')) {
 const firstName = localStorage.getItem('firstName');
 // Import team_race from app.js
 const team_race = localStorage.getItem('team_race'); // Assuming team_race is stored in localStorage
-const agentName = localStorage.getItem('agentName');
+console.log(`Current team_race: ${team_race}`); // Add this line to print the current team_race
 // Assuming agentsOptions is defined globally or imported from another script that has access to app.js exports
 const messageInput = document.getElementById('messageInput');
 const sendMessageButton = document.getElementById('sendMessageButton');
@@ -41,15 +41,15 @@ typingDelay = 10000
 // Clearing the agents object before redefining it
 
 const agentsOptions = {
-    A: {
-        'James': { agentName: 'James', avatar: 'avatars/majority/avatar_1.png', isAgent: true, typingSpeed: 130, agentBadge: 'Master of Motivation', color: 'rgba(255, 215, 0, 0.5)', colorRGB: { r: 255, g: 215, b: 0 } },
-        'Sophia': { agentName: 'Sophia', avatar: 'avatars/majority/avatar_2.png', isAgent: true, typingSpeed: 180, agentBadge: 'Strategist Supreme', color: 'rgba(255, 105, 180, 0.5)', colorRGB: { r: 255, g: 105, b: 180 } },
-        'Ethan': { agentName: 'Ethan', avatar: 'avatars/majority/avatar_3.png', isAgent: true, typingSpeed: 220, agentBadge: 'Logic Luminary', color: 'rgba(30, 144, 255, 0.5)', colorRGB: { r: 30, g: 144, b: 255 } }
-    },
     B: {
         'James': { agentName: 'James', avatar: 'avatars/majority/avatar_1.png', isAgent: true, typingSpeed: 130, agentBadge: 'Master of Motivation', color: 'rgba(255, 215, 0, 0.5)', colorRGB: { r: 255, g: 215, b: 0 } },
         'Sophia': { agentName: 'Sophia', avatar: 'avatars/majority/avatar_2.png', isAgent: true, typingSpeed: 180, agentBadge: 'Strategist Supreme', color: 'rgba(255, 105, 180, 0.5)', colorRGB: { r: 255, g: 105, b: 180 } },
         'Ethan': { agentName: 'Ethan', avatar: 'avatars/majority/avatar_3.png', isAgent: true, typingSpeed: 220, agentBadge: 'Logic Luminary', color: 'rgba(30, 144, 255, 0.5)', colorRGB: { r: 30, g: 144, b: 255 } }
+    },
+    A: {
+        'Maurice': { agentName: 'Maurice', avatar: 'avatars/minority/avatar_10.png', isAgent: true, typingSpeed: 130, agentBadge: 'Master of Motivation', color: 'rgba(255, 215, 0, 0.5)', colorRGB: { r: 255, g: 215, b: 0 } },
+        'Ebony': { agentName: 'Ebony', avatar: 'avatars/minority/avatar_11.png', isAgent: true, typingSpeed: 180, agentBadge: 'Strategist Supreme', color: 'rgba(255, 105, 180, 0.5)', colorRGB: { r: 255, g: 105, b: 180 } },
+        'Trevon': { agentName: 'Trevon', avatar: 'avatars/minority/avatar_13.png', isAgent: true, typingSpeed: 220, agentBadge: 'Logic Luminary', color: 'rgba(30, 144, 255, 0.5)', colorRGB: { r: 30, g: 144, b: 255 } }
     }
 };
 // Corrected avatar paths to be consistent with the appendMessage function, added typingSpeed for each agent, and added agentBadge name to match @app.js
@@ -65,6 +65,7 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(response => response.json())
         .then(data => {
             const { team_race } = data;
+            localStorage.setItem('team_race', team_race); // Store team_race in localStorage
             // Correctly set agents based on team_race being 'A' or 'B'
             agents = team_race === 'A' ? agentsOptions.A : agentsOptions.B;
             displayTeamMembers(); // Call displayTeamMembers here to ensure agents are set
@@ -78,15 +79,6 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('firstName').textContent = firstName;
     document.getElementById('badgeName').textContent = badgeName;
 
-    // Display join alerts for James and Sophia immediately
-    displayJoinAlert('James has joined the chat.');
-    displayJoinAlert('Sophia has joined the chat.');
-
-    // Simulate Ethan joining after a short delay
-    setTimeout(() => {
-        displayJoinAlert('Ethan has joined the chat.');
-    }, 3000); // Adjust the delay as needed
-
     displayTeamMembers();
 
     const messageInput = document.getElementById('messageInput');
@@ -94,7 +86,7 @@ document.addEventListener('DOMContentLoaded', function () {
     messageInput.addEventListener('paste', (e) => e.preventDefault());
 
     // Add event listener for the Notes tab
-    document.getElementById('notesTab').addEventListener('click', function() {
+    document.getElementById('notesTab').addEventListener('click', function () {
         document.getElementById('chatWindow').style.display = 'none';
         document.getElementById('locationAnalysis').style.display = 'none';
         document.getElementById('helpSection').style.display = 'none';
@@ -106,7 +98,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-document.getElementById('chatTab').addEventListener('click', function() {
+document.getElementById('chatTab').addEventListener('click', function () {
     document.getElementById('chatWindow').style.display = 'block';
     document.getElementById('locationAnalysis').style.display = 'none';
     document.getElementById('helpSection').style.display = 'none';
@@ -149,7 +141,7 @@ function appendMessageAfterTyping(messageText, isAgent = false, agentName) {
         }
     }
 
-    const typingDuration = (messageText.length / typingSpeed) * 2500; // Calculate pause based on message length
+    const typingDuration = (messageText.length / typingSpeed) * 3000; // Calculate pause based on message length
 
     // Show typing indicator for the calculated duration
     showTypingIndicator(agentName);
@@ -250,7 +242,7 @@ function hideTypingIndicator(agentName) {
         activeMessages--; // Decrement
         if (activeMessages === 0) {
             // All messages have been processed, safe to fetch new messages
-            fetchResponses(); 
+            fetchResponses();
         }
     }
 }
@@ -285,18 +277,18 @@ function simulateTyping(agentKey, message) {
     });
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     startNewChat(); // This will trigger the startNewChat function as soon as the DOM is fully loaded
     var chatWindow = document.getElementById("chatWindow");
     var analysisWindow = document.getElementById("locationAnalysis");
     var helpButton = document.getElementById("helpButton");
-    document.getElementById("chatTab").addEventListener("click", function() {
+    document.getElementById("chatTab").addEventListener("click", function () {
         chatWindow.style.display = 'block';
         analysisWindow.style.display = 'none';
         // Add any necessary logic for toggling active state
     });
 
-    document.getElementById("locationTab").addEventListener("click", function() {
+    document.getElementById("locationTab").addEventListener("click", function () {
         chatWindow.style.display = 'none';
     });
     simulateChat(); // Add this line to start the chat automatically
@@ -305,7 +297,7 @@ document.addEventListener('DOMContentLoaded', function() {
     clearInterval(chatInterval);
 }); // Fixed misplaced closing bracket
 
-document.getElementById('raiseHandButton').addEventListener('click', function() {
+document.getElementById('raiseHandButton').addEventListener('click', function () {
     document.getElementById('messageInput').style.display = 'block'; // Make the input field visible
     document.getElementById('sendMessageButton').style.display = 'block'; // Make the send button visible
     document.getElementById('messageInput').classList.add('showChat');
@@ -396,53 +388,58 @@ function generateRandomMessage() {
 
 let lastAgentIndex = null;
 
-function simulateChat() {
+function simulateChat(intro_on = false) {
     // Clear the previous interval
     clearInterval(chatInterval);
     const currentConversationId = localStorage.getItem('currentConversationId'); // Retrieve the stored ID
 
-    // Check if it's the first call to simulateChat by checking the length of conversationHistory
-    if (conversationHistory.length === 0) {
-        // Fetch the participant's badge name from localStorage
-        const participantBadgeName = localStorage.getItem('badgeName');
-        // Predefined introduction message from Agent 1 (James) including the participant's badge name
-        const introductionMessage = {
-            role: 'Agent 1',
-            content: `Hey team, James here! I see ${participantBadgeName} just joined the chat. Welcome to the team! I'll start us off since I've been here the longest.... Hey y'all! It's James here, the Master of Motivation! Think of me as your personal hype man. Ready to dive in and make this project shine.`
-        };
+    if (intro_on) {
+        // Check if it's the first call to simulateChat by checking the length of conversationHistory
+        if (conversationHistory.length === 0) {
+            // Fetch the participant's badge name from localStorage
+            const participantBadgeName = localStorage.getItem('badgeName');
+            // Predefined introduction message from Agent 1 (James) including the participant's badge name
+            const introductionMessage = {
+                role: 'Agent 1',
+                content: `Hey team, James here! I see ${participantBadgeName} just joined the chat. Welcome to the team! I'll start us off since I've been here the longest.... Hey y'all! It's James here, the Master of Motivation! Think of me as your personal hype man. Ready to dive in and make this project shine.`
+            };
 
-        // Display "typing..." message with James's name
-        let messageElement = appendMessage(`James is typing...`, true, "James");
+            // Display "typing..." message with James's name
+            let messageElement = appendMessage(`James is typing...`, true, "James");
 
-        // Replace the "typing..." message with the actual message after a delay
-        setTimeout(() => {
-            // Ensure the first message starts with James:
-            let firstResponse = `James (Master of Motivation): ${introductionMessage.content}`;
-            let textElement = messageElement.querySelector('.text');
-            textElement.textContent = firstResponse;
-            conversationHistory.push({ role: "James", content: introductionMessage.content });
+            // Replace the "typing..." message with the actual message after a delay
+            setTimeout(() => {
+                // Ensure the first message starts with James:
+                let firstResponse = `James (Master of Motivation): ${introductionMessage.content}`;
+                let textElement = messageElement.querySelector('.text');
+                textElement.textContent = firstResponse;
+                conversationHistory.push({ role: "James", content: introductionMessage.content });
 
-            // Create a chat transcript file and save the introduction message as the first line
-            const currentConversationId = localStorage.getItem('currentConversationId');
-            fetch('/save-message', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    conversationId: currentConversationId,
-                    message: { role: "James", content: introductionMessage.content }
+                // Create a chat transcript file and save the introduction message as the first line
+                const currentConversationId = localStorage.getItem('currentConversationId');
+                fetch('/save-message', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        conversationId: currentConversationId,
+                        message: { role: "James", content: introductionMessage.content }
+                    })
                 })
-            })
-            .then(response => response.json())
-            .then(data => console.log('Message saved:', data))
-            .catch(error => console.error('Error saving message:', error));
+                    .then(response => response.json())
+                    .then(data => console.log('Message saved:', data))
+                    .catch(error => console.error('Error saving message:', error));
 
-            // Fetch the response after displaying the introduction message
+                // Fetch the response after displaying the introduction message
+                fetchResponses();
+            }, 10000); // Adjust delay as needed
+        } else {
+            // If not the first call, directly fetch responses
             fetchResponses();
-        }, 10000); // Adjust delay as needed
+        }
     } else {
-        // If not the first call, directly fetch responses
+        // If intro_on is false, directly fetch responses without displaying the introduction message
         fetchResponses();
     }
 }
@@ -555,6 +552,18 @@ function displayTeamMembers() {
         memberElement.style.borderColor = member.color; // Agent's unique color
         container.appendChild(memberElement);
     });
+
+    // Add messages for each agent with different timings
+    let delay = 1000; // Initial delay in milliseconds
+    const delayIncrement = 1000; // Increment delay for each subsequent message
+
+    Object.values(agents).forEach(agent => {
+        setTimeout(() => {
+            const joinMessage = `${agent.agentName} has joined the chat!`;
+            appendMessage(joinMessage, true, agent.agentName); // Display the agent join message in the chat
+        }, delay);
+        delay += delayIncrement; // Increment delay for the next agent
+    });
 }
 
 // Call this function when the page loads or when the team members' information is available
@@ -563,17 +572,17 @@ document.addEventListener('DOMContentLoaded', displayTeamMembers);
 let taskCompleteButtonClicked = false;
 let agentTaskCompleteCount = 0; // Assuming you have a way to count this
 
-document.getElementById('taskCompleteCheckbox').addEventListener('change', function() {
+document.getElementById('taskCompleteCheckbox').addEventListener('change', function () {
     if (this.checked) {
         window.location.href = 'simulation_end.html';
     }
 });
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const checkboxElement = document.getElementById('checkbox');
     if (checkboxElement) {
-        checkboxElement.addEventListener('change', function(event) {
-            if(this.checked) {
+        checkboxElement.addEventListener('change', function (event) {
+            if (this.checked) {
                 // Apply dark mode styles
                 document.body.classList.add('dark-mode');
             } else {

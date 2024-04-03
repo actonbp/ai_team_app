@@ -1,4 +1,0 @@
-PARTICIPANT: Agent 2: ⭐Sophia has joined the chat.⭐
-PARTICIPANT: Agent 1: ⭐James has joined the chat.⭐
-PARTICIPANT: Agent 3: ⭐Ethan has joined the chat.⭐
-James: James is typing...

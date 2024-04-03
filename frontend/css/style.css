@@ -1,10 +1,10 @@
 :root {
     --primary-color: #6264a7;
-    --background-color: #f3f2f1;
+    --background-color: #ffffff;
     --text-color: #333;
     --font-family-base: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    --background-color-dark: #000; /* Dark mode background color */
-    --text-color-dark: #fff; /* Dark mode text color */
+    --background-color-dark: linear-gradient(to right, #240742, #32177a); /* Updated darker blue gradient */
+    --text-color-dark: #000000; /* Dark mode text color */
 }
 
 body {
@@ -93,6 +93,15 @@ form button:hover {
     }
 }
 
+@media (prefers-color-scheme: dark) {
+    body {
+        --background-color: var(--background-color-dark); /* Use the dark mode background */
+        --text-color: var(--text-color-dark); /* Use the dark mode text color */
+        background-color: var(--background-color); /* Apply the dark mode background */
+        color: var(--text-color); /* Apply the dark mode text color */
+    }
+}
+
 .self-reflective-title-section {
     background-color: #fff;
     /* White background */
@@ -112,6 +121,8 @@ form button:hover {
 #chatWindow {
     width: 800px;
     height: 600px;
+    background-color: #D3D3D3; /* Light grey background */
+    color: #000;
 }
 
 #app {
@@ -121,9 +132,12 @@ form button:hover {
     align-items: center;
 }
 
-.chat-area {
+.chat-container {
     display: flex;
     flex-direction: column;
+    background-color: #D3D3D3; /* Light grey background */
+    width: 800px;
+    height: 1000px;
 }
 
 .sidebar {
@@ -198,20 +212,10 @@ form button:hover {
     flex-grow: 1;
     width: 800px;
     height: 600px;
-    background-color: rgba(255, 255, 255, 0.25);
+    background-color: rgba(255, 255, 255, 0.745);
     padding: 20px;
     overflow-y: auto;
     border-radius: 0 0 10px 10px;
-    border: 2px solid #6264a7; /* Solid color outline for message bubbles */
-}
-
-#chatWindow,
-.location-analysis {
-    width: 800px;
-    height: 600px;
-    margin: auto;
-    overflow-y: auto;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     border: 2px solid #6264a7; /* Solid color outline for message bubbles */
 }
 
@@ -817,6 +821,7 @@ html {
 .dark-mode {
     background-color: #fff; /* Sets background to white in day mode */
     color: #000; /* Optional: Sets text color to black for better readability */
+    background: linear-gradient(to right, #240742, #32177a);
 }
 
 .team-members-section {
@@ -1061,7 +1066,7 @@ label[for="taskCompleteCheckbox"] {
     color: #fafcfb; /* Optional: Sets text color to white for better readability */
 }
 
-.dark-mode #chatWindow {
+.dark-mode #chatcontainer {
     flex-grow: 1;
     width: 800px;
     height: 600px;
@@ -1070,7 +1075,7 @@ label[for="taskCompleteCheckbox"] {
     overflow-y: auto;
     border-radius: 0 0 10px 10px;
     border: 2px solid rgba(129, 129, 132, 0.26); /* Semi-transparent solid color outline for message bubbles */
-    color: #fff; /* Sets text color to white */
+    color: #ffffff50; /* Sets text color to white */
 }
 
 

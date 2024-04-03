@@ -46,7 +46,7 @@ function shuffleArray(array) {
 
 async function fetchAvatars() {
     try {
-        const response = await fetch('http://localhost:3000/avatars');
+        const response = await fetch('/avatars'); // Changed to relative URL
         if (!response.ok) throw new Error('Failed to fetch avatars');
         const avatars = await response.json();
         return avatars;
