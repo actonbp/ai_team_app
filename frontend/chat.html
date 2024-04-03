@@ -8,22 +8,38 @@
     <title>Team Chat</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
-        table, th, td {
+        table,
+        th,
+        td {
             border: 1px solid black;
             border-collapse: collapse;
         }
-        th, td {
+
+        th,
+        td {
             padding: 10px;
             text-align: left;
         }
-        .chat-area, .location-analysis, .help-section {
-            max-height: 500px; /* Adjust this value based on your needs */
-            overflow-y: auto; /* Enables vertical scrolling */
+
+        .chat-area,
+        .location-analysis,
+        .help-section,
+        #notesSection {
+            max-height: 500px;
+            /* Adjust this value based on your needs */
+            overflow-y: auto;
+            /* Enables vertical scrolling */
         }
-        .location-analysis, .help-section {
-            display: none; /* Initially hidden */
+
+        .location-analysis,
+        .help-section,
+        #notesSection {
+            display: none;
+            /* Initially hidden */
         }
-        .tab {
+
+        .tab,
+        #notesTab {
             cursor: pointer;
             padding: 10px;
             border: none;
@@ -31,8 +47,146 @@
             color: white;
             margin-bottom: 5px;
         }
+
         .active-tab {
             background-color: #484b7a;
+        }
+
+        .team-members-section {
+            display: flex;
+            flex-direction: column;
+            /* Align items in a column */
+            align-items: center;
+            width: 100%;
+            /* Ensure the container spans the full width */
+        }
+
+        .team-member,
+        .my-info {
+            flex: 1;
+            /* Allows items to grow and fill the space */
+            margin: 10px;
+            /* Consistent spacing */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            /* Consistent shadow */
+            padding: 20px;
+            /* Consistent padding */
+            border-radius: 10px;
+            /* Rounded corners */
+            background-color: transparent;
+            /* Consistent background */
+            width: 90%;
+            /* Adjust this to match the desired width */
+        }
+
+        .team-member-avatar {
+            display: flex;
+            width: 80px;
+            /* Consistent size */
+            height: 150px;
+            border-radius: 50%;
+            margin-bottom: 10px;
+            /* Space between avatar and text */
+        }
+
+        .team-member-info h4 {
+            font-size: 1em;
+            font-weight: bold;
+            margin-bottom: 5px;
+            /* Space between name and badge title */
+        }
+
+        .team-member-info p {
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        .participant-details {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .my-info {
+            background-color: rgba(255, 0, 0, 0.20);
+            /* Light red background with transparency */
+            border: none;
+            /*2px solid rgba(255, 0, 0, 0.5); /* Red border with semi-transparency */
+            margin: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        #raiseHandButton {
+            display: inline-block;
+            /* Ensure visibility and allow width adjustment */
+            background-color: red;
+            /* Red background */
+            color: white;
+            /* White text */
+            font-size: 20px;
+            /* Larger font size */
+            padding: 10px 20px;
+            /* Bigger button */
+            border: none;
+            /* Remove border */
+            cursor: pointer;
+            /* Pointer cursor on hover */
+            margin-right: 10px;
+            /* Space from the next button */
+        }
+
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            /* Stack buttons vertically */
+            align-items: stretch;
+            /* Stretch buttons to fill the container width */
+        }
+
+        .button-container button {
+            width: 100%;
+            /* Ensure each button stretches to fill the container */
+        }
+
+        .task-complete-container {
+            background-color: #fff;
+            /* White background */
+            padding: 20px;
+            /* Spacing inside the container */
+            width: 80%;
+            /* Adjust the width as needed */
+            margin: auto;
+            /* Center the container */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            /* Optional: Adds a subtle shadow for depth */
+            border-radius: 10px;
+            /* Optional: Rounds the corners */
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            /* Positions the checkbox to the right of the text */
+        }
+
+        #taskCompleteCheckbox {
+            transform: scale(2);
+            /* Makes the checkbox larger */
+            margin-right: 10px;
+            /* Adds some space between the checkbox and its label */
+            cursor: pointer;
+            /* Changes cursor to pointer when hovering over the checkbox */
+        }
+
+        label[for="taskCompleteCheckbox"] {
+            font-size: 1.5em;
+            /* Increases the font size of the label */
+            cursor: pointer;
+            /* Changes cursor to pointer when hovering over the label */
+            order: 2;
+            /* Positions the label to the right of the checkbox */
+            color: green;
+            /* Changes the text color to green */
         }
     </style>
 </head>
@@ -41,19 +195,33 @@
     <div id="app">
         <aside class="sidebar">
             <!-- Navigation buttons -->
-            <button class="nav-button" id="chatTab">Chat</button>
-            <button class="nav-button" id="locationTab">Unique Information</button>
-            <button class="nav-button" id="helpButton">Help</button>
+            <div class="button-container">
+                <button class="nav-button" id="raiseHandButton">Raise Hand to Participate</button>
+                <button class="nav-button" id="chatTab">Chat</button>
+                <button class="nav-button" id="locationTab">Unique Information</button>
+                <button class="nav-button" id="helpButton">Help</button>
+                <button class="nav-button" id="notesTab" aria-label="Open notes">Notes</button>
+                <div class="task-complete-container">
+                    <input type="checkbox" id="taskCompleteCheckbox" name="taskComplete" value="completed">
+                    <label for="taskCompleteCheckbox" style="order: 1;">Task Completed?</label>
+                </div>
+                <!-- Toggle Switch for Dark Mode -->
+            </div>
         </aside>
         <section class="chat-container">
             <header class="chat-header">
-                <h1>Your Information</h1>
-                <!-- Avatar image placeholder -->
-                <div class="participant-info">
-                    <img id="participantAvatar" src="default_avatar.png" alt="Participant Avatar" style="width: 50px; height: 50px;">
-                    <div id="participantDetails" class="participant-details">
-                        First Name: <span id="firstName"></span>, 
-                        Badge Name: <span id="badgeName"></span>
+                <div id="teamMembersSection" class="team-members-section">
+                    <h2>Teammate Information</h2>
+                    <div id="teamMembers" class="team-members">
+                        <div id="myInformation" class="team-member my-info">
+                            <img id="participantAvatar" src="default_avatar.png" alt="Participant Avatar"
+                                style="width: 50px; height: 50px;">
+                            <div id="participantDetails" class="participant-details">
+                                <span id="firstName">Bryan</span>,
+                                <span id="badgeName">Team Lead</span>
+                            </div>
+                        </div>
+                        <!-- Team members' information will be dynamically added here -->
                     </div>
                 </div>
             </header>
@@ -135,40 +303,91 @@
             <div class="help-section" id="helpSection">
                 <!-- Help Section Content -->
                 <h2>Help & Instructions</h2>
-                <p>Your group's goal is to rank the three locations in order of most attributes met. Each person has unique info. You cannot paste the info in the chat.</p>
+                <p>Your group's goal is to rank the three locations in order of most attributes met. Each person has
+                    unique info. You cannot paste the info in the chat.</p>
+            </div>
+            <div id="notesSection" style="display:none;">
+                <textarea id="notesPad" rows="10" cols="50">Take your notes here...</textarea>
             </div>
             <div class="input-area">
-                <button id="raiseHandButton">Raise Hand to Participate</button>
-                <input type="text" id="messageInput" placeholder="Type a message...">
+                <input type="text" id="messageInput" placeholder="Type a message..." oncopy="return false;"
+                    onpaste="return false;">
                 <button id="sendMessageButton">Send</button>
             </div>
         </section>
     </div>
+    <div class="dark-mode-toggle">
+        <button id="darkModeToggle">
+            <span class="moon">🌙</span>
+            <span class="sun" style="display:none;">☀️</span>
+        </button>
+    </div>
     <script src="js/chat.js"></script>
     <script>
-        document.getElementById('chatTab').addEventListener('click', function() {
+        document.addEventListener('DOMContentLoaded', function () {
+            if (!document.body.classList.contains('dark-mode')) {
+                console.log('Dark mode is initially off');
+            }
+        });
+        document.getElementById('raiseHandButton').addEventListener('click', function () {
             document.getElementById('chatWindow').style.display = 'block';
             document.getElementById('locationAnalysis').style.display = 'none';
             document.getElementById('helpSection').style.display = 'none';
+            document.getElementById('notesSection').style.display = 'none';
             this.classList.add('active-tab');
             document.getElementById('locationTab').classList.remove('active-tab');
             document.getElementById('helpButton').classList.remove('active-tab');
+            document.getElementById('notesTab').classList.remove('active-tab');
         });
-        document.getElementById('locationTab').addEventListener('click', function() {
+        document.getElementById('locationTab').addEventListener('click', function () {
             document.getElementById('chatWindow').style.display = 'none';
             document.getElementById('locationAnalysis').style.display = 'block';
             document.getElementById('helpSection').style.display = 'none';
+            document.getElementById('notesSection').style.display = 'none';
             this.classList.add('active-tab');
             document.getElementById('chatTab').classList.remove('active-tab');
             document.getElementById('helpButton').classList.remove('active-tab');
+            document.getElementById('notesTab').classList.remove('active-tab');
         });
-        document.getElementById('helpButton').addEventListener('click', function() {
+        document.getElementById('helpButton').addEventListener('click', function () {
             document.getElementById('chatWindow').style.display = 'none';
             document.getElementById('locationAnalysis').style.display = 'none';
             document.getElementById('helpSection').style.display = 'block';
+            document.getElementById('notesSection').style.display = 'none';
             this.classList.add('active-tab');
             document.getElementById('chatTab').classList.remove('active-tab');
             document.getElementById('locationTab').classList.remove('active-tab');
+            document.getElementById('notesTab').classList.remove('active-tab');
+        });
+        document.getElementById('notesTab').addEventListener('click', function () {
+            document.getElementById('chatWindow').style.display = 'none';
+            document.getElementById('locationAnalysis').style.display = 'none';
+            document.getElementById('helpSection').style.display = 'none';
+            document.getElementById('notesSection').style.display = 'block';
+            this.classList.add('active-tab');
+            document.getElementById('chatTab').classList.remove('active-tab');
+            document.getElementById('locationTab').classList.remove('active-tab');
+            document.getElementById('helpButton').classList.remove('active-tab');
+        });
+        document.getElementById('taskCompleteCheckbox').addEventListener('change', function () {
+            var label = document.querySelector('label[for="taskCompleteCheckbox"]');
+            if (this.checked) {
+                label.style.color = 'green';
+            } else {
+                label.style.color = 'initial'; // Change back to the default color if unchecked
+            }
+        });
+        document.getElementById('darkModeToggle').addEventListener('click', function () {
+            const moonIcon = document.querySelector('.moon');
+            const sunIcon = document.querySelector('.sun');
+            document.body.classList.toggle('dark-mode');
+            if (document.body.classList.contains('dark-mode')) {
+                moonIcon.style.display = 'none';
+                sunIcon.style.display = 'inline';
+            } else {
+                moonIcon.style.display = 'inline';
+                sunIcon.style.display = 'none';
+            }
         });
     </script>
 </body>

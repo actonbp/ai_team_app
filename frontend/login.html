@@ -1,201 +1,99 @@
 <!DOCTYPE html>
 <html lang="en">
-<meta name="viewport" content="width=device-width, initial-scale=0.5">
-
 <head>
     <meta charset="UTF-8">
     <title>Login</title>
     <link rel="stylesheet" href="css/style.css"> <!-- Link to the external CSS file for styles -->
-    <style>
-        body {
-            display: flex;
-            justify-content: flex-start; /* Align content to the top */
-            align-items: center;
-            flex-direction: column;
-            margin: 0;
-            background-color: #f0f0f0;
-            font-family: Arial, sans-serif;
-            overflow: auto; /* Ensures the page is scrollable */
-            line-height: 1.5;
-            padding-top: 20px; /* Add some padding at the top */
-            padding-bottom: 20px; /* Add some padding at the bottom */
-        }
-
-        .task-begin {
-            margin-bottom: 20px; /* Increase bottom margin */
-            width: 80%; /* Adjust width to prevent text stretching across the screen */
-            text-align: center; /* Center the text for better readability */
-        }
-
-        form {
-            background: white;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.1);
-            width: 50%; /* Adjust form width for a cleaner look */
-            display: flex; /* Use flex to align form items nicely */
-            flex-direction: column; /* Stack form items vertically */
-            gap: 10px; /* Add space between form items */
-            margin-bottom: 20px; /* Increase bottom margin */
-        }
-
-        form input, form button {
-            padding: 10px; /* Add padding for better touch targets */
-            margin: 10px 0; /* Increase margin for spacing */
-            border: 1px solid #ccc; /* Add border to inputs for distinction */
-            border-radius: 5px; /* Round the corners of inputs and button */
-        }
-
-        form button {
-            background-color: #4CAF50; /* Change button color for better visibility */
-            color: white; /* Change button text color for contrast */
-            border: none; /* Remove button border for cleaner look */
-        }
-
-        /* Adjusted styles for the table for more compact display */
-        table {
-            border: 1px solid black;
-            border-collapse: collapse;
-            margin: 0 auto; /* Center table on the page */
-            width: 60%; /* Reduced table width for a more compact layout */
-            font-size: 0.7em; /* Reduced font size for compact display */
-        }
-        th, td {
-            padding: 4px; /* Reduced padding */
-            text-align: center; /* Center text in table cells for cleaner look */
-            border: 1px solid black; /* Ensure cell borders are visible */
-        }
-
-        /* Adjusted avatar grid for multiple columns */
-        #avatarGrid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr); /* Adjust to show multiple columns */
-            gap: 10px;
-            justify-items: center;
-            padding: 20px;
-            margin-bottom: 20px; /* Increase bottom margin */
-        }
-
-        .avatarOption {
-            width: 80px; /* Adjusted size for better fit */
-            height: 80px; /* Adjusted size for better fit */
-            cursor: pointer;
-            border: 2px solid transparent; /* For highlighting */
-        }
-
-        .avatarOption.selected {
-            border-color: #6264a7; /* Highlight color */
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            .task-begin, form, table, #avatarGrid {
-                width: 90%; /* Increase width for smaller screens */
-            }
-
-            table {
-                font-size: 0.9em; /* Increase font size for legibility */
-            }
-
-            form input, form button {
-                padding: 15px; /* Increase padding for easier interaction */
-            }
-        }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="task-begin">
-        <h2>Your Info</h2>
-        <p>As mentioned above, your group's goal is to rank the three locations in order of most attributes met (i.e.
-            the highest ranked location will meet the most criteria, second-highest location will meet the second-most
-            criteria, etc.). EACH PERSON HAS UNIQUE INFO. YOU CANNOT PASTE THE INFO IN THE CHAT.</p>
-        <p> Below is your unique info for the task. You will be given this information in the chat room:</p>
-    </div>
+    <main>
+        <div class="task-begin">
+            <h2>Your Info</h2>
+            <p>As mentioned above, your group's goal is to rank the three locations in order of most attributes met (i.e.
+                the highest ranked location will meet the most criteria, second-highest location will meet the second-most
+                criteria, etc.). EACH PERSON HAS UNIQUE INFO. YOU CANNOT PASTE THE INFO IN THE CHAT.</p>
+            <p> Below is your unique info for the task. You will be given this information in the chat room:</p>
+        </div>
 
-    <h2>Location Criteria Analysis</h2>
-    <table>
-        <tr>
-            <th>Criteria</th>
-            <th>East Point Mall</th>
-            <th>Starlight Valley</th>
-            <th>Cape James Beach</th>
-        </tr>
-        <tr>
-            <td>At least 50 parking spaces</td>
-            <td>Y</td>
-            <td></td>
-            <td>N</td>
-        </tr>
-        <tr>
-            <td>Larger than 2000 square feet</td>
-            <td></td>
-            <td></td>
-            <td>N</td>
-        </tr>
-        <tr>
-            <td>Purchasing cost of less than 1MM</td>
-            <td></td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>No more than 2 direct competitors in vicinity</td>
-            <td>N</td>
-            <td></td>
-            <td>Y</td>
-        </tr>
-        <tr>
-            <td>Substantial foot traffic</td>
-            <td>Y</td>
-            <td></td>
-            <td>Y</td>
-        </tr>
-        <tr>
-            <td>Low maintenance costs</td>
-            <td></td>
-            <td>Y</td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>Large tourist population</td>
-            <td>N</td>
-            <td></td>
-            <td>Y</td>
-        </tr>
-        <tr>
-            <td>Large student population</td>
-            <td>Y</td>
-            <td>N</td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>Quick access to waste disposal</td>
-            <td>Y</td>
-            <td></td>
-            <td>N</td>
-        </tr>
-        <tr>
-            <td>Large population of employable individuals</td>
-            <td>Y</td>
-            <td>N</td>
-            <td>Y</td>
-        </tr>
-    </table>
-    <div>
-        <h2>Choose Your Avatar</h2>
-        <p>Select an avatar that you most identify with. This avatar will represent you in the chat.</p>
-    </div>
-    <div id="avatarGrid">
-    </div>
-    <div>
-        <h2>Pick Your Badge Name</h2>
-        <p>Choose a nickname that you will go by in the chat. This can be any name you like and will be how others refer to you.</p>
-    </div>
-    <form id="login-form">
-        <input type="text" id="firstNameInput" placeholder="Enter your first name...">
-        <input type="text" id="badgeNameInput" placeholder="Enter your badge name...">
-        <button type="submit">Start Chat</button>
-    </form>
-    <script src="js/login.js"></script>
+        <center><h2>Location Criteria Analysis</h2></center>
+        <div class="criteria-grid">
+            <div class="criteria-header">Criteria</div>
+            <div class="criteria-header">East Point Mall</div>
+            <div class="criteria-header">Starlight Valley</div>
+            <div class="criteria-header">Cape James Beach</div>
+            <div class="criteria-item">At least 50 parking spaces</div>
+            <div class="criteria-item">Yes</div>
+            <div class="criteria-item"></div>
+            <div class="criteria-item">No</div>
+            <div class="criteria-item">Larger than 2000 square feet</div>
+            <div class="criteria-item"></div>
+            <div class="criteria-item"></div>
+            <div class="criteria-item">No</div>
+            <div class="criteria-item">Purchasing cost of less than 1MM</div>
+            <div class="criteria-item"></div>
+            <div class="criteria-item"></div>
+            <div class="criteria-item"></div>
+            <div class="criteria-item">No more than 2 direct competitors in vicinity</div>
+            <div class="criteria-item">No</div>
+            <div class="criteria-item"></div>
+            <div class="criteria-item">Yes</div>
+            <div class="criteria-item">Substantial foot traffic</div>
+            <div class="criteria-item">Yes</div>
+            <div class="criteria-item"></div>
+            <div class="criteria-item">Yes</div>
+            <div class="criteria-item">Low maintenance costs</div>
+            <div class="criteria-item"></div>
+            <div class="criteria-item">Yes</div>
+            <div class="criteria-item"></div>
+            <div class="criteria-item">Large tourist population</div>
+            <div class="criteria-item">No</div>
+            <div class="criteria-item"></div>
+            <div class="criteria-item">Yes</div>
+            <div class="criteria-item">Large student population</div>
+            <div class="criteria-item">Yes</div>
+            <div class="criteria-item">No</div>
+            <div class="criteria-item"></div>
+            <div class="criteria-item">Quick access to waste disposal</div>
+            <div class="criteria-item">Yes</div>
+            <div class="criteria-item"></div>
+            <div class="criteria-item">No</div>
+            <div class="criteria-item">Large population of employable individuals</div>
+            <div class="criteria-item">Yes</div>
+            <div class="criteria-item">No</div>
+            <div class="criteria-item">Yes</div>
+        </div>
+        <!-- Static Avatar Selection Example -->
+        <div class="form-container" ;">
+        <form id="Choose-avatar-info">
+        <center><h2>Choose your avatar</h2></center>
+        <p class="title-description">
+                        Choosing an avatar is a unique opportunity to select a visual representation that mirrors how you see yourself in real life. This avatar will be your identity in our chat, reflecting you on a real team.
+                        This avatar will be how others in the chat perceive you, so choose one that accurately represents you. All of your team members will do the same.
+        </form>
+        </div>
+        <div class="avatar-selection-container">
+            <div class="avatar-selection-grid">
+                <!-- Avatars are dynamically loaded and appended here by the loadAndHandleAvatars function in login.js -->
+            </div>
+        </div>
+        <div class="self-reflective-title-section">
+            <h2 class="title-heading">Pick Your Self-Reflective Title</h2>
+            <p class="title-description">
+                A self-reflective title is a title you give yourself that expresses important information about who you are as a person. In the workplace, self-reflective titles give individuals the freedom to personalize a title that reflects their most important roles and identities in the organization. For example, Berkshire Hathaway’s event organizer is known as its “director of chaos,” Yahoo! spokesperson Heidi Burgett calls herself the “Yahoo! evangelist,” a receptionist at Matrix Group introduces herself as a “director of first impressions,” and IBM employees have titles such as “data detective” and “creative technologist.” A nurse who gives allergy shots to children calls herself “quick shot” and a physician who deals with infectious diseases calls himself “germ slayer.” Quicken Loans’ marketing and sales employees hold titles of “energy focuser” and “revenue raiser,” and at The Motley Fool, employees’ titles include “people & culture poet” and “chief rabble rouser of the highest order.”
+            </p>
+            <p class="title-guidelines">
+                With this information in mind, think of a personal title that reflects your identities or roles you typically fulfill when working in a team. While you are encouraged to choose an authentic title, it is important to note that using profanity or language that could be insulting to others in your title is prohibited; violators may face serious consequences.
+            </p>
+        </div>
+        <div class="form-container";">
+            <form id="login-form">
+                <input type="text" id="firstNameInput" placeholder="Enter your first name...">
+                <input type="text" id="badgeNameInput" placeholder="Enter your self-reflective title...">
+                <button type="submit"><i class="fas fa-sign-in-alt"></i> Start Chat</button>
+            </form>
+        </div>
+        <script src="js/login.js"></script>
+    </main>
 </body>
 </html>
