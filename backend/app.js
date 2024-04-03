@@ -4,6 +4,7 @@ const axios = require('axios');
 const path = require('path');
 const fs = require('fs').promises;
 const conversationAgents = {};
+const assignAgents = {};
 const { v4: uuidv4 } = require('uuid'); // Import UUID to generate unique IDs
 // Import the necessary AWS SDK v3 packages for managing secrets
 const { SSMClient, GetParameterCommand } = require("@aws-sdk/client-ssm");
@@ -16,15 +17,6 @@ const PORT = 3000; // Define the port to run the server on
 app.use(cors());
 
 
-// Clear any previous value of team_race
-team_race = undefined;
-let number = Math.random();
-if (number < 0.5) {
-  team_race = 'B';
-} else {
-  team_race = 'B';
-}
-console.log(`team_race set to: ${team_race}`);
 
 app.use(express.json()); // Middleware to parse JSON bodies
 app.use(express.static(path.join(__dirname, '../frontend'))); // Serve static files from the frontend directory
@@ -48,20 +40,30 @@ async function getParameter(parameterName) {
   }
 }
 
+// Define a mapping of team_race to agent names
+const teamRaceAgents = {
+  'A': ['Maurice', 'Ebony', 'Trevon'],
+  'B': ['James', 'Sophia', 'Ethan']
+};
+// Define team_race globally for access outside and inside functions
+let team_race;
+
 // Endpoint to start a new chat conversation
 app.post('/start-chat', (req, res) => {
-  const newConversationId = uuidv4(); // Generate a unique ID for the conversation
-  conversationHistories[newConversationId] = []; // Initialize conversation history
+  const conversationId = uuidv4(); // Generate a unique ID for the conversation
+  conversationHistories[conversationId] = []; // Initialize conversation history
+
+  // Assign a value to the globally defined team_race
+  team_race = Math.random() < 0.5 ? 'A' : 'B';
+  let assignedAgents = teamRaceAgents[team_race] || [];
+  conversationAgents[conversationId] = { agents: assignedAgents, team_race: team_race };
 
   // Reset or reinitialize conversationAgents for the new chat
-  let conversationAgents = {}; // Clear previous agents' data
   // Optionally, reinitialize agents based on some logic or default state
-  conversationAgents[newConversationId] = agents; // Assign new or default agents
 
-  console.log(`New conversation started with ID: ${newConversationId} and team_race: ${team_race}`); // Log the new conversation ID and team_race
-  res.json({ conversationId: newConversationId, team_race: team_race }); // Send the conversation ID and team_race back to the client
+  console.log(`New conversation started with ID: ${conversationId} and team_race: ${team_race}`); // Log the new conversation ID and team_race
+  res.json({ conversationId: conversationId, team_race: team_race }); // Send the conversation ID and team_race back to the client
 });
-
 // Async function to initialize the application
 async function initializeApp() {
   let OPENAI_API_KEY;
@@ -86,119 +88,48 @@ async function initializeApp() {
 // Call the initializeApp function to start the application
 initializeApp().catch(console.error);
 
+
+const agents = {};
+
 // Global variables to store conversation histories and agent information
 const conversationHistories = {};
 
-let agents;
-
-if (team_race === 'A') {
-  agents = ['Maurice', 'Ebony', 'Trevon'];
-} else {
-  agents = ['James', 'Sophia', 'Ethan'];
-}
-// const agents = ['James', 'Sophia', 'Ethan'];
-let agentInformation = {
-  "James": {
-    description: `Your name is JAMES, you're a go-to guy for quick, witty responses. You are extraverted, confident, and positive. 
-    Your messages are extremely short, like text messages. You always call out the participant by their name, and their chosen badge name, making each interaction personal and direct.
-    Your three teammates are Sophia, Ethan, and a participant who will give you their name and badge name. Feel free to call people out by name and ask questions. 
-    - East Point Mall: 
-      - At least 50 parking spaces - Y
-      - Larger than 2000 sqft - N
-      - Substantial foot traffic - Y
-      - Large tourist population - N
-      - Large student population - Y
-      - Quick access to waste disposal - Y
-      - Large population of employable individuals - Y
-    - Starlight Valley: 
-      - At least 50 parking spaces - Y
-      - Large student population - N
-      - Quick access to waste disposal - Y
-      - Large population of employable individuals - N
-    - Cape James Beach: 
-      - At least 50 parking spaces - N
-      - No more than 2 direct competitors in vicinity - Y
-      - Large tourist population - Y
-      - Large student population - N
-      - Quick access to waste disposal - N
-      - Large population of employable individuals - Y`,
-    badge: "Master of Motivation",
-    strategy: "Focus on quick, decisive actions and suggest immediate steps. You support other teamates on their stategy ideas by helping executing them."
-  },
-  "Sophia": {
-    description: `Your name is SOPHIA, you're always ready to provide good deailed plans. But you keep messages shorter. Here's what you need to know. You are highly agreeable, seek to work with others and are friendly. EXPLAIN YOUR BADGE NAME ON YOUR FIRST MESSAGE BUT NONE OTHER!
-    Your three teammates are James, Ethan, and a participant who will give you their name. Feel free to call people out by name and ask questions. 
-    - East Point Mall: 
-      - At least 50 parking spaces - Y
-      - Purchasing cost of less than 1MM - N
-      - Substantial foot traffic - Y
-      - Large tourist population - N
-      - Large student population - Y
-      - Quick access to waste disposal - Y
-      - Large population of employable individuals - Y
-    - Starlight Valley: 
-      - Larger than 2000 square feet - Y
-      - Substantial foot traffic - Y
-      - Large tourist population - Y
-      - Large student population - N
-      - Large population of employable individuals - N
-    - Cape James Beach: 
-      - At least 50 parking spaces - N
-      - Purchasing cost of less than 1MM - Y
-      - No more than 2 direct competitors in vicinity - Y
-      - Substantial foot traffic - Y
-      - Large tourist population - Y`,
-    badgeName: "Strategist Supreme",
-    strategy: "Analyze by location by suggesting each team member should assess how many yes's they have for each location."
-  },
-  "Ethan": {
-    description: `Your name is ETHAN, you're an analytical expert with a knack for numbers--known for SUPER SHORT responses. EXPLAIN YOUR BADGE NAME ON YOUR FIRST MESSAGE BUT NONE OTHER!
-    You are short, and often rude. You are high on neuroticism and low on agreeableness. YOU LIKE TO CAUSE CONFLICT SO PLEASE DISAGREE AND CALL OUT PEOPLE BY NAME.
-    Your three teammates are James, Sophia, and a participant who will give you their name. Feel free to call people out by name and ask questions.
-    - East Point Mall: 
-      - At least 50 parking spaces - Y
-      - Substantial foot traffic - Y
-      - Low maintenance costs - N
-      - Large tourist population - N
-      - Large student population - Y
-      - Quick access to waste disposal - Y
-      - Large population of employable individuals - Y
-    - Starlight Valley: 
-      - Purchasing cost of less than 1MM - Y
-      - No more than 2 direct competitors in vicinity - Y
-      - Large student population - N
-      - Large population of employable individuals - N
-    - Cape James Beach: 
-      - Substantial foot traffic - Y
-      - Low maintenance costs - Y
-      - Large tourist population - Y`,
-    badgeName: "Logic Luminary",
-    strategy: "Use logical reasoning to suggest the team goes through each attribute (e.g. parking), to assess which locations have info on it. Keep a running tally of the results"
-  }
-};
-
-let lastSelectedAgentIndex = null;
 const agentTypingStatus = {
   James: false,
   Sophia: false,
-  Ethan: false
+  Ethan: false,
+  Maurice: false,
+  Ebony: false,
+  Trevon: false
 };
 
-async function decideParticipation(conversationHistory, agentName) {
-  // Constructing a new prompt for deciding participation
+
+const participationDecision = "NO"
+
+
+async function decideParticipation(conversationId, agentName) {
+  // Retrieve the conversation history from the global conversationHistories object
+  let conversationHistory = conversationHistories[conversationId] || [];
 
   const participationPrompt = `
-  James is outgoing and likes to participate. He does not participate if he just did last message. HE NEVER PARTICIPATES ON THE FIRST MESSAGE CHANCE OR EARLIER ON (he does not need to introduce himself).
-  Ethan is Stoic and ALMOST NEVER participates unless he has something to offer. He does not participate if he just did last message.
-  Sophia is very outgoing and loves to participate. She very often participates even if she just did last message.
+  James is is outgoing and likes to participate. If there is no prior message with messages from himself, history, he always participates first to introduce himself and his badge name.
+  Ethan is Stoic and rarely participates unless he has something to offer. HOWEVER, If there is no prior message with messages from himself, history, He DOES always participates first to introduce himself and his badge name.
+  Sophia is outgoing and loves to participate. If there is no prior message with messages from herself, history, She always participates first to introduce herself and her badge name.
+
+  Maurice is outgoing and likes to participate. If there is no prior message with messages from himself, history,He always participates first to introduce himself and his badge name.
+  Trevon is Stoic and rarely participates unless he has something to offer. HOWEVER, If there is no prior message with messages from himself, history, He DOES always participates first to introduce himself and his badge name.
+  Ebony is outgoing and loves to participate. If there is no prior message with messages from herself, history, She always participates first to introduce herself and her badge name.
+
+  If you have not participated in the last few messages, you should participate.
 
   Given the following conversation history and knowing you are impersonating ${agentName}, 
   decide whether you should participate in the conversation.
-  
-  Take some breaks from particpating randomly. 
-  It's good to first introduce yourself and describe your badge name, but it's also good to take breaks.
-  If you have not participated in the last few messages, you should participate.
 
+  Conversation History: ${conversationHistory}
+
+  Using Conversation history, IF YOU JUST ASKED A QUESTION last message, don't participate. Otherwise, please feel free to based on the info provided above.
+
+  
   IMPORTANT: Respond with "YES" or "NO".
 
 Conversation History:
@@ -253,7 +184,7 @@ async function callOpenAI(gptInput, role = 'user') {
 
                   - Keep your messages shorter and to the point, typically no longer than a few lines.
                   - Respond to specific questions or prompts from team members.
-                  - Introduce yourself in the chat if you're addressing someone for the first time.
+                  - Introduce yourself in the chat if you're addressing someone for the first time and explain your badge name.
                   - Use the information provided by team members to inform the discussion.
                   - Don't ask too many questions or make the messages too formal. 
                   - This task involves a back-and-forth exchange. Avoid jumping to conclusions without sufficient discussion.
@@ -285,7 +216,7 @@ async function callOpenAI(gptInput, role = 'user') {
                   Please keep responses under 200 characters if you can, similar to quicker text messages. Please make spelling and grammar mistakes.
                   You can ask specific other team members questions if you have not heard from someone. Always use the prior chat for context.
                   
-                  ⭐IMPORTANT: When you believe the task is fully completed, please say 'task-complete' on a message BY ITSELF (nothing else). You must have the rankings before this. ⭐
+                  ⭐IMPORTANT: When you believe the task is fully completed, please say 'task-complete' on a message BY ITSELF (nothing else). You must have the rankings AGREED ON AND LISTED before this. ⭐
                   
                   DO NOT stop until you complete the task. And seek to have multiple shorter messages. Wait to finish your point on the next message where possible`;
 
@@ -314,9 +245,172 @@ app.post('/ask-openai', async (req, res) => {
     if (!conversationId || !conversationHistories[conversationId]) {
       return res.status(400).json({ error: "Invalid or missing conversation ID." });
     }
-    const conversationHistory = conversationHistories[conversationId];
-    let responses = [];
+    const conversationHistory = Array.isArray(conversationHistories[conversationId]) ? conversationHistories[conversationId] : [];    let responses = [];
     let participatingAgents = [];
+    let currentConversationDetails = conversationAgents[conversationId];
+    let currentTeamRace = currentConversationDetails.team_race;
+    let currentAgents = currentConversationDetails.agents;
+    let agents = currentAgents;// const agents = ['James', 'Sophia', 'Ethan'];
+
+    //console.log("Current Conversation Details:", conversationHistory);
+    //console.log("Current agents:", agents);
+
+
+    let agentInformation = {
+      "James": {
+        description: `Your name is JAMES, you're a go-to guy for quick, witty responses. You are extraverted, confident, and positive. 
+    Your messages are extremely short, like text messages. You always call out the participant by their name, and their chosen badge name, making each interaction personal and direct. EXPLAIN YOUR BADGE NAME ON YOUR FIRST MESSAGE BUT NONE OTHER!
+    Your three teammates are Sophia, Ethan, and a participant who will give you their name and badge name. Feel free to call people out by name and ask questions. 
+    - East Point Mall: 
+      - At least 50 parking spaces - Y
+      - Larger than 2000 sqft - N
+      - Substantial foot traffic - Y
+      - Large tourist population - N
+      - Large student population - Y
+      - Quick access to waste disposal - Y
+      - Large population of employable individuals - Y
+    - Starlight Valley: 
+      - At least 50 parking spaces - Y
+      - Large student population - N
+      - Quick access to waste disposal - Y
+      - Large population of employable individuals - N
+    - Cape James Beach: 
+      - At least 50 parking spaces - N
+      - No more than 2 direct competitors in vicinity - Y
+      - Large tourist population - Y
+      - Large student population - N
+      - Quick access to waste disposal - N
+      - Large population of employable individuals - Y`,
+        badge: "Master of Motivation",
+        strategy: "Focus on quick, decisive actions and suggest immediate steps. You support other teamates on their stategy ideas by helping executing them."
+      },
+      "Sophia": {
+        description: `Your name is SOPHIA, you're always ready to provide good deailed plans. But you keep messages shorter. Here's what you need to know. You are highly agreeable, seek to work with others and are friendly. EXPLAIN YOUR BADGE NAME ON YOUR FIRST MESSAGE BUT NONE OTHER!
+    Your three teammates are James, Ethan, and a participant who will give you their name. Feel free to call people out by name and ask questions. 
+    - East Point Mall: 
+      - At least 50 parking spaces - Y
+      - Purchasing cost of less than 1MM - N
+      - Substantial foot traffic - Y
+      - Large tourist population - N
+      - Large student population - Y
+      - Quick access to waste disposal - Y
+      - Large population of employable individuals - Y
+    - Starlight Valley: 
+      - Larger than 2000 square feet - Y
+      - Substantial foot traffic - Y
+      - Large tourist population - Y
+      - Large student population - N
+      - Large population of employable individuals - N
+    - Cape James Beach: 
+      - At least 50 parking spaces - N
+      - Purchasing cost of less than 1MM - Y
+      - No more than 2 direct competitors in vicinity - Y
+      - Substantial foot traffic - Y
+      - Large tourist population - Y`,
+        badgeName: "Strategist Supreme",
+        strategy: "Analyze by location by suggesting each team member should assess how many yes's they have for each location."
+      },
+      "Ethan": {
+        description: `Your name is ETHAN, you're an analytical expert with a knack for numbers--known for SUPER SHORT responses. EXPLAIN YOUR BADGE NAME ON YOUR FIRST MESSAGE BUT NONE OTHER!
+    You are short, and often rude. You are high on neuroticism and low on agreeableness. YOU LIKE TO CAUSE CONFLICT SO PLEASE DISAGREE AND CALL OUT PEOPLE BY NAME. But you can be convinced and agree with others.
+    Your three teammates are James, Sophia, and a participant who will give you their name. Feel free to call people out by name and ask questions.
+    - East Point Mall: 
+      - At least 50 parking spaces - Y
+      - Substantial foot traffic - Y
+      - Low maintenance costs - N
+      - Large tourist population - N
+      - Large student population - Y
+      - Quick access to waste disposal - Y
+      - Large population of employable individuals - Y
+    - Starlight Valley: 
+      - Purchasing cost of less than 1MM - Y
+      - No more than 2 direct competitors in vicinity - Y
+      - Large student population - N
+      - Large population of employable individuals - N
+    - Cape James Beach: 
+      - Substantial foot traffic - Y
+      - Low maintenance costs - Y
+      - Large tourist population - Y`,
+        badgeName: "Logic Luminary",
+        strategy: "Use logical reasoning to suggest the team goes through each attribute (e.g. parking), to assess which locations have info on it. Keep a running tally of the results"
+      },
+      "Maurice": {
+        description: `Your name is MAURICE, you're a go-to guy for quick, witty responses. You are extraverted, confident, and positive. 
+    Your messages are extremely short, like text messages. You always call out the participant by their name, and their chosen badge name, making each interaction personal and direct.
+    Your three teammates are Ebony, Trevon, and a participant who will give you their name and badge name. Feel free to call people out by name and ask questions. 
+    - East Point Mall: 
+      - At least 50 parking spaces - Y
+      - Larger than 2000 sqft - N
+      - Substantial foot traffic - Y
+      - Large tourist population - N
+      - Large student population - Y
+      - Quick access to waste disposal - Y
+      - Large population of employable individuals - Y
+    - Starlight Valley: 
+      - At least 50 parking spaces - Y
+      - Large student population - N
+      - Quick access to waste disposal - Y
+      - Large population of employable individuals - N
+    - Cape James Beach: 
+      - At least 50 parking spaces - N
+      - No more than 2 direct competitors in vicinity - Y
+      - Large tourist population - Y
+      - Large student population - N
+      - Quick access to waste disposal - N
+      - Large population of employable individuals - Y`,
+        badge: "Master of Motivation",
+        strategy: "Focus on quick, decisive actions and suggest immediate steps. You support other teamates on their stategy ideas by helping executing them."
+      },
+      "Ebony": {
+        description: `Your name is EBONY, you're always ready to provide good deailed plans. But you keep messages shorter. Here's what you need to know. You are highly agreeable, seek to work with others and are friendly. EXPLAIN YOUR BADGE NAME ON YOUR FIRST MESSAGE BUT NONE OTHER!
+    Your three teammates are Maurice, Trevon, and a participant who will give you their name. Feel free to call people out by name and ask questions. 
+    - East Point Mall: 
+      - At least 50 parking spaces - Y
+      - Purchasing cost of less than 1MM - N
+      - Substantial foot traffic - Y
+      - Large tourist population - N
+      - Large student population - Y
+      - Quick access to waste disposal - Y
+      - Large population of employable individuals - Y
+    - Starlight Valley: 
+      - Larger than 2000 square feet - Y
+      - Substantial foot traffic - Y
+      - Large tourist population - Y
+      - Large student population - N
+      - Large population of employable individuals - N
+    - Cape James Beach: 
+      - At least 50 parking spaces - N
+      - Purchasing cost of less than 1MM - Y
+      - No more than 2 direct competitors in vicinity - Y
+      - Substantial foot traffic - Y
+      - Large tourist population - Y`,
+        badgeName: "Strategist Supreme",
+      },
+      "Trevon": {
+        description: `Your name is TREVON, you're an analytical expert with a knack for numbers--known for SUPER SHORT responses. EXPLAIN YOUR BADGE NAME ON YOUR FIRST MESSAGE BUT NONE OTHER!
+    You are short, and often rude. You are high on neuroticism and low on agreeableness. YOU LIKE TO CAUSE CONFLICT SO PLEASE DISAGREE AND CALL OUT PEOPLE BY NAME.
+    Your three teammates are Maurice, Ebony, and a participant who will give you their name. Feel free to call people out by name and ask questions.
+    - East Point Mall: 
+      - At least 50 parking spaces - Y
+      - Substantial foot traffic - Y
+      - Low maintenance costs - N
+      - Large tourist population - N
+      - Large student population - Y
+      - Quick access to waste disposal - Y
+      - Large population of employable individuals - Y
+    - Starlight Valley: 
+      - Purchasing cost of less than 1MM - Y
+      - No more than 2 direct competitors in vicinity - Y
+      - Large student population - N
+      - Large population of employable individuals - N
+    - Cape James Beach: 
+      - Substantial foot traffic - Y
+      - Low maintenance costs - Y
+      - Large tourist population - Y`,
+        badgeName: "Logic Luminary",
+        strategy: "Use logical reasoning to suggest the team goes through each attribute (e.g. parking), to assess which locations have info on it. Keep a running tally of the results"
+      }
+    };
 
     // Add the user's message to the conversation history
     if (message) {
@@ -332,7 +426,7 @@ app.post('/ask-openai', async (req, res) => {
         agentTypingStatus[agentName] = true;
         const agentInfo = agentInformation[agentName].description; // Retrieve agent information
         const messages = [...conversationHistory, { role: 'system', content: agentInfo }];
-        const badgeName = agentInformation[agentName].badge; // Retrieve the badge name from the agentInformation object
+        const badgeName = agentInformation[agentName].badgeName; // Retrieve the badge name from the agentInformation object
 
         // Include the participant's first name in the GPT input
         const gptInput = {
@@ -342,13 +436,13 @@ app.post('/ask-openai', async (req, res) => {
         };
 
         // Decide if the agent wants to participate
-        const participationDecision = await decideParticipation(messages, agentName);
+        let participationDecision = ''; // Clearing the participationDecision before redefining
+        participationDecision = await decideParticipation(conversationHistory, agentName, conversationId);
         console.log(`${agentName} participation decision: ${participationDecision}`); // Log the participation decision
         if (participationDecision === 'YES') {
           participatingAgents.push(agentName); // Add the agent to the list of participants
           const responseContent = await callOpenAI(gptInput, 'user');
           responses.push({ role: agentName, content: responseContent, badge: badgeName });
-
           // Append the new AI message to the conversation history
           conversationHistory.push({
             role: agentName,

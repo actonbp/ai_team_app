@@ -3,10 +3,7 @@ if (!localStorage.getItem('badgeName')) {
     window.location.href = 'login.html';
 }
 const firstName = localStorage.getItem('firstName');
-// Import team_race from app.js
-const team_race = localStorage.getItem('team_race'); // Assuming team_race is stored in localStorage
-console.log(`Current team_race: ${team_race}`); // Add this line to print the current team_race
-// Assuming agentsOptions is defined globally or imported from another script that has access to app.js exports
+// Import team_race from app.js// Assuming agentsOptions is defined globally or imported from another script that has access to app.js exports
 const messageInput = document.getElementById('messageInput');
 const sendMessageButton = document.getElementById('sendMessageButton');
 const raiseHandButton = document.getElementById('raiseHandButton');
@@ -56,22 +53,8 @@ const agentsOptions = {
 // This function is called to initiate a new chat session
 
 document.addEventListener('DOMContentLoaded', function () {
-    fetch('/start-chat', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    })
-        .then(response => response.json())
-        .then(data => {
-            const { team_race } = data;
-            localStorage.setItem('team_race', team_race); // Store team_race in localStorage
-            // Correctly set agents based on team_race being 'A' or 'B'
-            agents = team_race === 'A' ? agentsOptions.A : agentsOptions.B;
-            displayTeamMembers(); // Call displayTeamMembers here to ensure agents are set
-        })
-        .catch(error => console.error('Error fetching team race:', error));
-    // Retrieve the first name and badge name from localStorage
+
+    // Retrieve tirst name and badge name from localStorage
     const firstName = localStorage.getItem('firstName');
     const badgeName = localStorage.getItem('badgeName');
 
@@ -111,7 +94,6 @@ document.getElementById('chatTab').addEventListener('click', function () {
     // Show the chat window
     // Add any additional logic needed for showing the chat and hiding other sections
 });
-
 function startNewChat() {
     fetch('/start-chat', {
         method: 'POST',
@@ -121,14 +103,17 @@ function startNewChat() {
     })
         .then(response => response.json())
         .then(data => {
+            const { team_race } = data;
+            localStorage.setItem('team_race', team_race); // Store team_race in localStorage
             // Store the conversationId received from the server in localStorage
             localStorage.setItem('currentConversationId', data.conversationId);
-            console.log(`OH YEAH, New chat started with ID: ${data.conversationId}`);
-            // Add James' introduction message to conversationHistory in the specified format
+            console.log(`OH YEAH, New chat started with ID: ${data.conversationId} for team race: ${team_race}`);
+            // Correctly set agents based on team_race being 'A' or 'B'
+            agents = team_race === 'A' ? agentsOptions.A : agentsOptions.B;
+            displayTeamMembers(); // Call displayTeamMembers here to ensure agents are set
         })
         .catch(error => console.error('Error starting new chat:', error));
 }
-
 function appendMessageAfterTyping(messageText, isAgent = false, agentName) {
     // Default typing speed for participants
     let typingSpeed = 200;
