@@ -104,8 +104,6 @@ const agentTypingStatus = {
 };
 
 
-const participationDecision = "NO"
-
 
 async function decideParticipation(conversationId, agentName) {
   // Retrieve the conversation history from the global conversationHistories object
@@ -113,14 +111,14 @@ async function decideParticipation(conversationId, agentName) {
 
   const participationPrompt = `
   James is is outgoing and likes to participate. If there is no prior message with messages from himself, history, he always participates first to introduce himself and his badge name.
-  Ethan is Stoic and rarely participates unless he has something to offer. HOWEVER, If there is no prior message with messages from himself, history, He DOES always participates first to introduce himself and his badge name.
+  Ethan is Stoic and sometimes participates if he something to offer. HOWEVER, If there is no prior message with messages from himself, history, He DOES always participates first to introduce himself and his badge name.
   Sophia is outgoing and loves to participate. If there is no prior message with messages from herself, history, She always participates first to introduce herself and her badge name.
 
   Maurice is outgoing and likes to participate. If there is no prior message with messages from himself, history,He always participates first to introduce himself and his badge name.
-  Trevon is Stoic and rarely participates unless he has something to offer. HOWEVER, If there is no prior message with messages from himself, history, He DOES always participates first to introduce himself and his badge name.
+  Trevon is  Stoic and sometimes participates if he something to offer. HOWEVER, If there is no prior message with messages from himself, history, He DOES always participates first to introduce himself and his badge name.
   Ebony is outgoing and loves to participate. If there is no prior message with messages from herself, history, She always participates first to introduce herself and her badge name.
 
-  If you have not participated in the last few messages, you should participate.
+  If the agent has not participated in the last few messages, you should participate.
 
   Given the following conversation history and knowing you are impersonating ${agentName}, 
   decide whether you should participate in the conversation.
@@ -129,13 +127,21 @@ async function decideParticipation(conversationId, agentName) {
 
   Using Conversation history, IF YOU JUST ASKED A QUESTION last message, don't participate. Otherwise, please feel free to based on the info provided above.
 
-  
+  ⭐AFTER THE START, YOU SHOULD TAKE BREAKS AND CHOOSE TO NOT PARTICIPATE MORE OFTEN⭐
+
+  ⭐If you have already said "task-complete" in the chat, DO NOT PARTICIPATE AGAIN⭐
+
+  AGAIN: Given the following conversation history and knowing you are impersonating ${agentName}, 
+  decide whether you should participate in the conversation.
+
+  ⭐AT THE START OF A CHAT, MOST PEOPLE TEND TO PARTICIPATE (ANSWER YES)⭐
+
   IMPORTANT: Respond with "YES" or "NO".
 
 Conversation History:
 ${conversationHistory.map(entry => `${entry.role}: ${entry.content}`).join('\n')}
 
-Should ${agentName} participate in the conversation?`;
+Should you, ${agentName} , participate in the conversation?`;
   await new Promise(resolve => setTimeout(resolve, 5000)); // Introducing a 2-second delay before making the decision
 
   const response = await axios.post('https://api.openai.com/v1/chat/completions', {
@@ -173,7 +179,17 @@ async function callOpenAI(gptInput, role = 'user') {
 
                   ⭐Don't ask too many questions or message ${gptInput.participantName} too much. INSTEAD, seek to respond to others without asking more questions⭐
 
+                  ⭐ON YOUR FIRST MESSAGE, DONT DO ANYTHING OTHER THAN INTRODUCE YOURSELF AND BADGE, NO NEED TO COMMENT ON TASK⭐
+
+                  
+                  
                   ⭐Your badge name is: ${gptInput.badge}.⭐
+
+                  ⭐THE TASK IS NOT COMPLETE UNTIL EVERYONE AGREES ON THE ORDER! YOU MUST HAVE AT LEAST 3 PEOPLE AGREE BEFORE COMPLETE⭐
+
+                  ⭐KEEP WORKING TO GET TO AN AGREEMENT WITH OTHERS AND WAIT UNTIL YOU ALL VERBALLY CONFIRM UNTIL THE TASK IS DONE⭐
+
+
 
 
                   ⭐KEEP YOUR MESSAGES SHORT AND EACH MESSAGE IS WITHIN THE CONTEXT OF OTHERS! MISPELLINGS ARE GREAT⭐
@@ -183,6 +199,8 @@ async function callOpenAI(gptInput, role = 'user') {
 
                   ⭐REMEMBER, YOUR GOAL IS TO COME TO AN AGREEMENT ON YOUR RANKING ON THE THREE LOCATIONS IN THE GROUP. DO NOT STOP UNTIL YOU AGREE ON A RANKING. ⭐
                   ⭐LIST THE RANKING IN THE CHAT BEFORE YOU ARE FINISHED ⭐
+                  ⭐DO NOT START TO RANK UNTIL YOU HAVE HAD AT LEAST 10 MESSAGES GO BY. DO NOT RUSH TO A DECISION!⭐
+
 
 
 
@@ -213,18 +231,19 @@ async function callOpenAI(gptInput, role = 'user') {
                   - DO NOT SAY YOU ARE COMPLETE UNTIL YOU ALL AGREE ON A CLEAR RANKING OF THE THREE LOCATIONS!
                   - NEVER ADMIT YOU'RE AI OR SAY YOU CANNOT FUFILL A REQUEST. IF YOU CANNOT, just say something like, I don't understand or something a human would.
 
-                  ⭐CRITERIA⭐:
-                  (1) at least 50 parking spaces, 
-                  (2) larger than 2,000 square feet, 
-                  (3) purchasing cost of less than $1MM, 
-                  (4) no more than 2 direct competitors nearby, 
-                  (5) substantial foot traffic, 
-                  (6) low maintenance costs, 
-                  (7) large tourist population, 
-                  (8) large student population, 
-                  (9) quick access to waste disposal, 
-                  (10) large employable population. 
-                  Each criterion is equally important.
+                  ⭐TEAM DIRECTIONS⭐:
+                  Your task is to evaluate three potential locations for a new restaurant opening. Rank these locations from most to least desirable based on the following criteria, treating each criterion with equal importance:
+                  1. A minimum of 50 parking spaces available,
+                  2. Space exceeding 2,000 square feet,
+                  3. A purchase cost below $1 million,
+                  4. No more than two direct competitors in the vicinity,
+                  5. High foot traffic in the area,
+                  6. Low ongoing maintenance costs,
+                  7. A significant tourist presence,
+                  8. A substantial student population,
+                  9. Convenient access to waste disposal facilities,
+                  10. A large pool of potential employees.
+                  ⭐Remember, no single attribute is more important than another. The most desirable location will meet the largest number of these criteria.⭐
 
                   Please keep responses under 200 characters if you can, similar to quicker text messages. Please make spelling and grammar mistakes.
                   You can ask specific other team members questions if you have not heard from someone. Always use the prior chat for context.
@@ -266,6 +285,8 @@ app.post('/ask-openai', async (req, res) => {
     let currentTeamRace = currentConversationDetails.team_race;
     let currentAgents = currentConversationDetails.agents;
     let agents = currentAgents;// const agents = ['James', 'Sophia', 'Ethan'];
+    let anyAgentParticipated = false;
+
 
     //console.log("Current Conversation Details:", conversationHistory);
     //console.log("Current agents:", agents);
@@ -298,7 +319,7 @@ app.post('/ask-openai', async (req, res) => {
       - Quick access to waste disposal - N
       - Large population of employable individuals - Y`,
         badgeName: "Master of Motivation",
-        strategy: "Your strategy is to try to remind the teamates that the goal of the task is to find the locations that have the most yes's and the least no's. So you should count both in order to generate a ranking."
+        strategy: "Your strategy is to try to remind the teamates that the goal of the task is to find the locations that have the most yes's and the least no's. So you should count both in order to generate a ranking. ALSO, FOCUS ON THE FACT THAT YOU ALL HAVE UNIQUE INFO AND YOU NEED TO SHARE IT."
       },
       "Sophia": {
         description: `Your name is SOPHIA, you're always ready to provide good deailed plans. But you keep messages shorter. Here's what you need to know. You are highly agreeable, seek to work with others and are friendly. EXPLAIN YOUR BADGE NAME ON YOUR FIRST MESSAGE BUT NONE OTHER!
@@ -325,7 +346,7 @@ app.post('/ask-openai', async (req, res) => {
       - Substantial foot traffic - Y
       - Large tourist population - Y`,
         badgeName: "Strategist Supreme",
-        strategy: "Analyze by location by suggesting each team member should assess how many yes's they have for each location. Your goal is to rank locations by how many yes's they have."
+        strategy: "Analyze by location by suggesting each team member should assess how many yes's they have for each location. Your goal is to rank locations by how many yes's they have. ALSO, FOCUS ON THE FACT THAT YOU ALL HAVE UNIQUE INFO AND YOU NEED TO SHARE IT."
       },
       "Ethan": {
         description: `Your name is ETHAN, you're an analytical expert with a knack for numbers--known for SUPER SHORT responses. EXPLAIN YOUR BADGE NAME ON YOUR FIRST MESSAGE BUT NONE OTHER!
@@ -350,7 +371,7 @@ app.post('/ask-openai', async (req, res) => {
       - Low maintenance costs - Y
       - Large tourist population - Y`,
         badgeName: "Logic Luminary",
-        strategy: "Your strategy is to NOT focus on one location, but remind your teammates that you want to keep a tally of both YES's and NO's for each atrribute, and rank from their"
+        strategy: "Your strategy is to NOT focus on one location, but remind your teammates that you want to keep a tally of both YES's and NO's for each atrribute, and rank their top 3. ALSO, FOCUS ON THE FACT THAT YOU ALL HAVE UNIQUE INFO AND YOU NEED TO SHARE IT."
       },
       "Maurice": {
         description: `Your name is MAURICE, you're a go-to guy for quick, witty responses. You are extraverted, confident, and positive. 
@@ -378,7 +399,7 @@ app.post('/ask-openai', async (req, res) => {
       - Quick access to waste disposal - N
       - Large population of employable individuals - Y`,
         badgeName: "Master of Motivation",
-        strategy: "Your strategy is to try to remind the teamates that the goal of the task is to find the locations that have the most yes's and the least no's. So you should count both in order to generate a ranking."
+        strategy: "Your strategy is to try to remind the teamates that the goal of the task is to find the locations that have the most yes's and the least no's. So you should count both in order to generate a ranking. ALSO, FOCUS ON THE FACT THAT YOU ALL HAVE UNIQUE INFO AND YOU NEED TO SHARE IT."
       },
       "Ebony": {
         description: `Your name is EBONY, you're always ready to provide good deailed plans. But you keep messages shorter. Here's what you need to know. You are highly agreeable, seek to work with others and are friendly. EXPLAIN YOUR BADGE NAME ON YOUR FIRST MESSAGE BUT NONE OTHER!
@@ -405,7 +426,7 @@ app.post('/ask-openai', async (req, res) => {
       - Substantial foot traffic - Y
       - Large tourist population - Y`,
         badgeName: "Strategist Supreme",
-        strategy: "Analyze by location by suggesting each team member should assess how many yes's they have for each location. Your goal is to rank locations by how many yes's they have."
+        strategy: "Analyze by location by suggesting each team member should assess how many yes's they have for each location. Your goal is to rank locations by how many yes's they have. ALSO, FOCUS ON THE FACT THAT YOU ALL HAVE UNIQUE INFO AND YOU NEED TO SHARE IT."
       },
       "Trevon": {
         description: `Your name is TREVON, you're an analytical expert with a knack for numbers--known for SUPER SHORT responses. EXPLAIN YOUR BADGE NAME ON YOUR FIRST MESSAGE BUT NONE OTHER!
@@ -430,7 +451,7 @@ app.post('/ask-openai', async (req, res) => {
       - Low maintenance costs - Y
       - Large tourist population - Y`,
         badgeName: "Logic Luminary",
-        strategy: "Your strategy is to NOT focus on one location, but remind your teammates that you want to keep a tally of both YES's and NO's for each atrribute, and rank from their"
+        strategy: "Your strategy is to NOT focus on one location, but remind your teammates that you want to keep a tally of both YES's and NO's for each atrribute, and rank their top 3. ALSO, FOCUS ON THE FACT THAT YOU ALL HAVE UNIQUE INFO AND YOU NEED TO SHARE IT."
       }
     };
 
@@ -442,30 +463,49 @@ app.post('/ask-openai', async (req, res) => {
       });
     }
 
-    // Loop through each agent to get their response
-    for (const agentName of agents) {
-      if (!agentTypingStatus[agentName]) {
+    // Initialize a flag to track if any agent has decided to participate in this turn
+
+    // Retrieve the current agents based on team_race and shuffle the order
+    let selectedAgents = conversationAgents[conversationId].agents;
+    let shuffledAgents = selectedAgents.sort(() => Math.random() - 0.5); // Randomize the order of agents
+    let participationDecision = 'FALSE'; // Clearing the participationDecision before redefining
+
+
+    // Loop through each shuffled agent to get their response
+    for (const agentName of shuffledAgents) {
+      if (!agentTypingStatus[agentName]) { // Added check for anyAgentParticipated
         agentTypingStatus[agentName] = true;
         const agentInfo = agentInformation[agentName].description; // Retrieve agent information
         const messages = [...conversationHistory, { role: 'system', content: agentInfo }];
         const badgeName = agentInformation[agentName].badgeName; // Retrieve the badge name from the agentInformation object
-        const strategy = agentInformation[agentName].strategy; // Retrieve the badge name from the agentInformation object
-
+        const strategy = agentInformation[agentName].strategy; // Retrieve the strategy from the agentInformation object
 
         // Include the participant's first name in the GPT input
         const gptInput = {
           messages: messages,
-          participantName: participantName, // Add this line to include the participant's first name
+          participantName: participantName,
           badge: badgeName,
           strategy: strategy,
           description: agentInfo
         };
 
-        // Decide if the agent wants to participate
-        let participationDecision = ''; // Clearing the participationDecision before redefining
-        participationDecision = await decideParticipation(conversationHistory, agentName, conversationId);
-        console.log(`${agentName} participation decision: ${participationDecision}`); // Log the participation decision
+        // Change the logic based on the current value of participationDecision
         if (participationDecision === 'YES') {
+          // If the last decision was YES, do not call decideParticipation and set participationDecision to 'NO' for this turn
+          participationDecision = 'NO';
+        } else {
+          // Only call decideParticipation if the current decision is not already 'YES' and no agent has participated yet
+          if (!anyAgentParticipated) {
+            participationDecision = await decideParticipation(conversationHistory, agentName, conversationId);
+          } else {
+            participationDecision = 'NO';
+          }
+        }
+
+        console.log(`${agentName} participation decision: ${participationDecision}`); // Log the participation decision
+
+        if (participationDecision === 'YES') {
+          anyAgentParticipated = true; // Set the flag since this agent has decided to participate
           participatingAgents.push(agentName); // Add the agent to the list of participants
           const responseContent = await callOpenAI(gptInput, 'user');
           responses.push({ role: agentName, content: responseContent, badge: badgeName });
@@ -477,7 +517,7 @@ app.post('/ask-openai', async (req, res) => {
         }
         agentTypingStatus[agentName] = false;
       } else {
-        // Skip or queue the message since the agent is already typing
+        // Skip or queue the message since the agent is already typing or an agent has already participated
       }
     }
 
@@ -488,7 +528,7 @@ app.post('/ask-openai', async (req, res) => {
     if (responses.length > 0) {
       res.json({ responses, participatingAgents });
     } else {
-      return res.json({ message: "No agents available to respond at this time." });
+      res.json({ message: "No agents available to respond at this time." });
     }
   } catch (error) {
     console.error(error);

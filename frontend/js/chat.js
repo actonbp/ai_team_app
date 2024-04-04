@@ -1,4 +1,5 @@
 // chat.js
+// Get the Prolific ID pop-up container and the main app container
 if (!localStorage.getItem('badgeName')) {
     window.location.href = 'login.html';
 }

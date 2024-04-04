@@ -1024,6 +1024,17 @@ label[for="taskCompleteCheckbox"] {
     z-index: 1000;
 }
 
+#prolificIdPopup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 20px;
+    border-radius: 5px;
+    z-index: 9999;
+}
+
 #darkModeToggle {
     position: relative;
     display: inline-block;
