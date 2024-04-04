@@ -14,6 +14,7 @@ function selectAvatar(avatarFileName) {
 async function loadAndHandleAvatars() {
     try {
         let avatars = await fetchAvatars(); // This should return an array of avatar file names
+        avatars = avatars.filter(avatar => avatar.endsWith('.png')); // Filter only .png files
         avatars = shuffleArray(avatars); // Shuffle avatars before appending them to the grid
         const avatarSelectionGrid = document.querySelector('.avatar-selection-grid'); // Select the avatar-selection-grid element from login.html
         avatars.forEach(avatarFileName => {
