@@ -11,6 +11,7 @@ const raiseHandButton = document.getElementById('raiseHandButton');
 const messageContainer = document.getElementById('chatWindow');
 const typingIndicator = document.createElement('div');
 const message = messageInput.value;
+const self_cond = localStorage.getItem('self_cond');
 const participantAvatar = document.getElementById('participantAvatar');
 const selectedAvatar = localStorage.getItem('selectedAvatar');
 if (selectedAvatar) {
@@ -54,6 +55,22 @@ const agentsOptions = {
 // This function is called to initiate a new chat session
 
 document.addEventListener('DOMContentLoaded', function () {
+    // Check for a valid session ID
+    if (!localStorage.getItem('sessionId')) {
+        window.location.href = 'index.html';
+    } else {
+        // Update last visited page
+        localStorage.setItem('lastVisitedPage', window.location.pathname);
+
+        const selfCond = localStorage.getItem('self_cond');
+        if (selfCond === 'public') {
+            // Execute existing logic that displays agent badges
+            displayTeamMembers(); // Assuming this function or similar logic displays agent badges
+        } else {
+            // Modify or skip displaying agent badges based on your application's needs
+            displayTeamMembersWithoutBadge(); // You might need to create this function to handle non-public conditions
+        }
+    }
 
     // Retrieve tirst name and badge name from localStorage
     const firstName = localStorage.getItem('firstName');
@@ -62,8 +79,6 @@ document.addEventListener('DOMContentLoaded', function () {
     // Find the span elements by their IDs and set their text content
     document.getElementById('firstName').textContent = firstName;
     document.getElementById('badgeName').textContent = badgeName;
-
-    displayTeamMembers();
 
     const messageInput = document.getElementById('messageInput');
     messageInput.addEventListener('copy', (e) => e.preventDefault());
@@ -100,20 +115,24 @@ function startNewChat() {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
-        }
-    })
-        .then(response => response.json())
-        .then(data => {
-            const { team_race } = data;
-            localStorage.setItem('team_race', team_race); // Store team_race in localStorage
-            // Store the conversationId received from the server in localStorage
-            localStorage.setItem('currentConversationId', data.conversationId);
-            console.log(`OH YEAH, New chat started with ID: ${data.conversationId} for team race: ${team_race}`);
-            // Correctly set agents based on team_race being 'A' or 'B'
-            agents = team_race === 'A' ? agentsOptions.A : agentsOptions.B;
-            displayTeamMembers(); // Call displayTeamMembers here to ensure agents are set
+        },
+        body: JSON.stringify({
+            self_cond: localStorage.getItem('self_cond'), // Ensure this matches what's stored in localStorage
+            prolificId: localStorage.getItem('prolificId') // Add this line to include prolificId
         })
-        .catch(error => console.error('Error starting new chat:', error));
+    })
+    .then(response => response.json())
+    .then(data => {
+        const { team_race } = data;
+        localStorage.setItem('team_race', team_race); // Store team_race in localStorage
+        // Store the conversationId received from the server in localStorage
+        localStorage.setItem('currentConversationId', data.conversationId);
+        console.log(`OH YEAH, New chat started with ID: ${data.conversationId} for team race: ${team_race}`);
+        // Correctly set agents based on team_race being 'A' or 'B'
+        agents = team_race === 'A' ? agentsOptions.A : agentsOptions.B;
+        displayTeamMembers(); // Call displayTeamMembers here to ensure agents are set
+    })
+    .catch(error => console.error('Error starting new chat:', error));
 }
 function appendMessageAfterTyping(messageText, isAgent = false, agentName) {
     // Default typing speed for participants
@@ -175,18 +194,17 @@ function appendMessage(messageText, isAgent = false, agentName, isParticipant = 
 
     const participantBadgeName = localStorage.getItem('badgeName');
     // Predefined introduction message from Agent 1 (James) including the participant's badge name
-
-    // Prepend the badge name and first name to the participant's message or use the agent's name
     if (!isAgent) {
-        textElement.innerText = `${firstName} (${participantBadgeName}): ${messageText}`;
-        // Add the participant's message to the conversation history with their badge name and first name
-        conversationHistory.push({ role: ` ${badgeName} (${firstName})`, content: messageText, isParticipant: true });
+        // Prepend the first name to the participant's message and conditionally include the badge name based on public condition
+        textElement.innerText = `${firstName} ${localStorage.getItem('self_cond') === 'public' ? `(${participantBadgeName})` : ''}: ${messageText}`;
+        // Add the participant's message to the conversation history with their first name and conditionally include the badge name based on public condition
+        conversationHistory.push({ role: `${firstName} ${localStorage.getItem('self_cond') === 'public' ? `(${badgeName})` : ''}`, content: messageText, isParticipant: true });
     } else {
-        // Retrieve the agent's badge from the agents object using the agentName
+        // Retrieve the agent's badge from the agents object using the agentName and conditionally include it based on public condition
         const agentBadge = agent ? agent.agentBadge : 'Unknown'; // Retrieve the agent's badge
-        textElement.innerText = `${agentName} (${agentBadge}): ${messageText}`; // Removed emojis from here
-        // If the message is from an agent, add it to the conversation history with the agent's name and badge
-        conversationHistory.push({ role: `${agentBadge} (${agentName})`, content: messageText, isParticipant: false });
+        textElement.innerText = `${agentName} ${localStorage.getItem('self_cond') === 'public' ? `(${agentBadge})` : ''}: ${messageText}`;
+        // If the message is from an agent, add it to the conversation history with the agent's name and conditionally include the badge based on public condition
+        conversationHistory.push({ role: `${agentName} ${localStorage.getItem('self_cond') === 'public' ? `(${agentBadge})` : ''}`, content: messageText, isParticipant: false });
     }
     messageElement.appendChild(avatarElement);
     messageElement.appendChild(textElement);
@@ -515,7 +533,7 @@ function displayTeamMembers() {
         <img src="${myInfo.avatar}" alt="${myInfo.name}" class="team-member-avatar avatar-outline-red">
         <div class="team-member-info">
             <h4>${myInfo.name}</h4>
-            <p>${myInfo.badgeName}</p>
+            ${localStorage.getItem('self_cond') === 'public' ? `<p>${myInfo.badgeName}</p>` : ''}
         </div>
     `;
     container.appendChild(myElement);
@@ -528,7 +546,7 @@ function displayTeamMembers() {
         <img src="${member.avatar}" alt="${member.agentName}" class="team-member-avatar">
         <div class="team-member-info">
             <h4>${member.agentName}</h4>
-            <p>${member.agentBadge}</p>
+            ${localStorage.getItem('self_cond') === 'public' ? `<p>${member.agentBadge}</p>` : ''}
         </div>
     `;
         // Set the text color for the team member's name or badge
@@ -553,7 +571,6 @@ function displayTeamMembers() {
 }
 
 // Call this function when the page loads or when the team members' information is available
-document.addEventListener('DOMContentLoaded', displayTeamMembers);
 
 let taskCompleteButtonClicked = false;
 let agentTaskCompleteCount = 0; // Assuming you have a way to count this
@@ -583,3 +600,38 @@ document.addEventListener('DOMContentLoaded', function () {
         console.error('Checkbox element not found');
     }
 });
+
+function displayTeamMembersWithoutBadge() {
+    const container = document.getElementById('teamMembers');
+    container.innerHTML = ''; // Clear existing content
+
+    // Add Bryan's information first, without badgeName
+    const myInfo = {
+        name: localStorage.getItem('firstName'),
+        avatar: localStorage.getItem('selectedAvatar'), // Fetch the selected avatar path
+    };
+
+    // Create an element for Bryan's information without badgeName
+    const myElement = document.createElement('div');
+    myElement.className = 'team-member my-info'; // Use 'my-info' for distinct styling
+    myElement.innerHTML = `
+        <img src="${myInfo.avatar}" alt="${myInfo.name}" class="team-member-avatar avatar-outline-red">
+        <div class="team-member-info">
+            <h4>${myInfo.name}</h4>
+        </div>
+    `;
+    container.appendChild(myElement);
+
+    // Add other team members without badgeName
+    Object.values(agents).forEach(member => {
+        const memberElement = document.createElement('div');
+        memberElement.className = 'team-member';
+        memberElement.innerHTML = `
+        <img src="${member.avatar}" alt="${member.agentName}" class="team-member-avatar">
+        <div class="team-member-info">
+            <h4>${member.agentName}</h4>
+        </div>
+        `;
+        container.appendChild(memberElement);
+    });
+}

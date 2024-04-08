@@ -51,14 +51,24 @@
                 the highest ranked location will meet the most criteria, second-highest location will meet the second-most
                 criteria, etc.). You will have 15 minutes to complete the task. Good luck!</p>
         </div>        
-        <p>ENTER YOUR UNIQUE PROLIFIC ID TO BEGIN</p>
-        <div>
-            <input type="text" id="prolificIdInput" placeholder="Enter your Prolific ID..." required>
-        </div>
-        <button class="next-button" onclick="window.location.href='login.html';"><i class="fas fa-sign-in-alt"></i> Next</button>
+        <!-- Add a form element around the input and button -->
+        <form id="prolificIdForm" action="javascript:void(0);">
+            <p>ENTER YOUR UNIQUE PROLIFIC ID TO BEGIN</p>
+            <div>
+                <input type="text" id="prolificIdInput" placeholder="Enter your Prolific ID..." required>
+            </div>
+            <button type="submit" class="next-button"><i class="fas fa-sign-in-alt"></i> Next</button>
+        </form>
     </div>
     </div>
 </main>
-<script src="/js/welcome.js" defer></script> <!-- Moved script source to the bottom to connect with the Prolific ID form -->
+    <div class="dark-mode-toggle">
+        <button id="darkModeToggle">
+            <span class="moon">🌙</span>
+            <span class="sun" style="display:none;">☀️</span>
+        </button>
+    </div>
+<script src="js/welcome.js" defer></script>
+<script src="js/darkMode.js"></script>
 </body>
 </html>

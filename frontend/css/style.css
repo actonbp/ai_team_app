@@ -819,8 +819,8 @@ html {
 }
 
 .dark-mode {
-    background-color: #fff; /* Sets background to white in day mode */
-    color: #000; /* Optional: Sets text color to black for better readability */
+    background-color: #6a0dad;
+    color: #f1ececd2;
     background: linear-gradient(to right, #240742, #32177a);
 }
 
@@ -1072,9 +1072,12 @@ label[for="taskCompleteCheckbox"] {
     background-color: #000; /* Sets background to black in dark mode */
     color: #f1ececd2; /* Optional: Sets text color to white for better readability */
 }
+
 .dark-mode .team-members-section {
-    background-color: #333; /* Change to a darker grey */
-    color: #fafcfb; /* Optional: Sets text color to white for better readability */
+    background-color: #7b68ee;
+    /* Lighter purple for contrast */
+    color: #fafcfb;
+    /* Adjust text color for readability if needed */
 }
 
 .dark-mode #chatcontainer {

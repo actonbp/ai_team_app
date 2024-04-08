@@ -9,13 +9,13 @@ const { v4: uuidv4 } = require('uuid'); // Import UUID to generate unique IDs
 // Import the necessary AWS SDK v3 packages for managing secrets
 const { SSMClient, GetParameterCommand } = require("@aws-sdk/client-ssm");
 const cors = require('cors');
+const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 
 
 const app = express();
 const PORT = 3000; // Define the port to run the server on
 
 app.use(cors());
-
 
 
 app.use(express.json()); // Middleware to parse JSON bodies
@@ -49,21 +49,50 @@ const teamRaceAgents = {
 let team_race;
 
 // Endpoint to start a new chat conversation
-app.post('/start-chat', (req, res) => {
+app.post('/start-chat', async (req, res) => {
+  const { self_cond, prolificId } = req.body; // Extract self_cond and prolificId from the request body
   const conversationId = uuidv4(); // Generate a unique ID for the conversation
   conversationHistories[conversationId] = []; // Initialize conversation history
 
   // Assign a value to the globally defined team_race
   team_race = Math.random() < 0.5 ? 'A' : 'B';
   let assignedAgents = teamRaceAgents[team_race] || [];
-  conversationAgents[conversationId] = { agents: assignedAgents, team_race: team_race };
+  conversationAgents[conversationId] = { agents: assignedAgents, team_race: team_race, self_cond: self_cond };
 
-  // Reset or reinitialize conversationAgents for the new chat
-  // Optionally, reinitialize agents based on some logic or default state
+  console.log(`New conversation started with ID: ${conversationId}, team_race: ${team_race}, self_cond: ${self_cond}, prolificID: ${prolificId}`); // Log the new conversation ID, team_race, self_cond, and prolificId
+  
+  // Respond with the conversation ID, team_race, and self_cond back to the client
+  res.json({ conversationId: conversationId, team_race: team_race, self_cond: self_cond });
 
-  console.log(`New conversation started with ID: ${conversationId} and team_race: ${team_race}`); // Log the new conversation ID and team_race
-  res.json({ conversationId: conversationId, team_race: team_race }); // Send the conversation ID and team_race back to the client
+  // Prepare session data for CSV
+  const sessionDataForCSV = {
+    prolificId: prolificId, // Use the prolificId from the request
+    sessionID: conversationId,
+    self_cond: self_cond,
+    team_race: team_race
+  };
+
+  // Append session data to CSV
+  appendSessionDataToCSV(sessionDataForCSV);
 });
+
+
+function appendSessionDataToCSV(sessionData) {
+  const csvFilePath = path.join(__dirname, 'data', 'chatSessions.csv');
+  const csvWriter = createCsvWriter({
+    path: csvFilePath,
+    header: [
+      {id: 'prolificId', title: 'ProlificID'},
+      {id: 'sessionID', title: 'SessionID'},
+      {id: 'self_cond', title: 'SelfCond'},
+      {id: 'team_race', title: 'TeamRace'}
+    ],
+    append: true
+  });
+
+  csvWriter.writeRecords([sessionData])
+    .then(() => console.log('Data was appended to file successfully.'));
+}
 // Async function to initialize the application
 async function initializeApp() {
   let OPENAI_API_KEY;
@@ -163,9 +192,13 @@ Should you, ${agentName} , participate in the conversation?`;
   return decision.toUpperCase(); // Ensuring the decision is in uppercase for consistency
 }
 
-async function callOpenAI(gptInput, role = 'user') {
-
-  // Assuming agentDescription and agentStrategy are part of gptInput
+async function callOpenAI(gptInput, role = 'user', self_cond = 'private') {
+  let badgeIntroduction = '';
+  if (self_cond === 'public') {
+    badgeIntroduction = `⭐Your first message should be to explain your badge name (${gptInput.badge}) meaning to you (you come up with it), and to the team, WHICH IS ${gptInput.badge}. If you have already explained it, OR ITS IN THE EARLIER CHAT, DO NOT DO IT AGAIN!⭐
+                      - Introduce yourself in the chat if you're addressing someone for the first time and explain your badge name.
+`;
+  }
 
   const personalizedPrompt = `You are an AI impersonating a human, who is on a research study where they are doing a team simulation. The simulation is a new team of purchasing executives for Big Restaurant in a chat-based discussion. 
                   The team is evaluating three potential locations for a new restaurant: 
@@ -176,47 +209,28 @@ async function callOpenAI(gptInput, role = 'user') {
                   MAKE CONVERSATION NO MATTER WHAT THE TOPIC IS. YOU ARE PRETENDING TO BE A HUMAN IN A CHAT ROOM. TYPOS, MISTAKES, ETC ARE GOOD. DO NOT EVER GIVE AWAY YOU ARE AN AI.
                   WE ALSO WANT YOU TO LOOK LIKE A REAL PERSON SO HAVE TYPOS, SHORT MESSAGES, JUST LIKE A REAL CONVO! Always know that this message is part of a larger convo. 
                   ALSO ITS GOOD TO SOMETIMES ASK EACHOTHER DIRECT QUESTIONS. CALL EACH OTHER BY NAME. NEVER CALL THE REAL PERSON PARTICIPANT. CALL THEM BY THEIR NAME, WHICH IS ${gptInput.participantName}.
-
-                  ⭐Don't ask too many questions or message ${gptInput.participantName} too much. INSTEAD, seek to respond to others without asking more questions⭐
-
-                  ⭐ON YOUR FIRST MESSAGE, DONT DO ANYTHING OTHER THAN INTRODUCE YOURSELF AND BADGE, NO NEED TO COMMENT ON TASK⭐
-
-                  
-                  
-                  ⭐Your badge name is: ${gptInput.badge}.⭐
+  ${badgeIntroduction} 
+  ⭐Don't ask too many questions or message ${gptInput.participantName} too much. INSTEAD, seek to respond to others without asking more questions⭐
 
                   ⭐THE TASK IS NOT COMPLETE UNTIL EVERYONE AGREES ON THE ORDER! YOU MUST HAVE AT LEAST 3 PEOPLE AGREE BEFORE COMPLETE⭐
 
                   ⭐KEEP WORKING TO GET TO AN AGREEMENT WITH OTHERS AND WAIT UNTIL YOU ALL VERBALLY CONFIRM UNTIL THE TASK IS DONE⭐
 
-
-
-
                   ⭐KEEP YOUR MESSAGES SHORT AND EACH MESSAGE IS WITHIN THE CONTEXT OF OTHERS! MISPELLINGS ARE GREAT⭐
 
-                  ⭐Your own strategy "${gptInput.strategy}", is crucial.⭐
-
+                  ⭐Your own strategy "${gptInput.strategy}", is crucial.⭐ 
 
                   ⭐REMEMBER, YOUR GOAL IS TO COME TO AN AGREEMENT ON YOUR RANKING ON THE THREE LOCATIONS IN THE GROUP. DO NOT STOP UNTIL YOU AGREE ON A RANKING. ⭐
                   ⭐LIST THE RANKING IN THE CHAT BEFORE YOU ARE FINISHED ⭐
                   ⭐DO NOT START TO RANK UNTIL YOU HAVE HAD AT LEAST 10 MESSAGES GO BY. DO NOT RUSH TO A DECISION!⭐
-
-
-
-
-
-                  ⭐YOUR FIRST MESSAGE SHOULD BE TO EXPLAIN YOUR BADGE NAME (${gptInput.badge}) meaning to you (you come up with it), and to the team, WHICH IS  ${gptInput.badge}. If you have already explained it, OR ITS IN THE EARLIER CHAT, DO NOT DO IT AGAIN!⭐
-
 
                   ⭐GUIDELINES:⭐
 
                   - USE YOUR UNIQUE INFO TO HELP RANK THE LOCATIONS. THIS UNIQUE INFORMATION IS LISTED BELOW:
                   ${gptInput.description}
 
-
                   - Keep your messages shorter and to the point, typically no longer than a few lines.
                   - Respond to specific questions or prompts from team members.
-                  - Introduce yourself in the chat if you're addressing someone for the first time and explain your badge name.
                   - Use the information provided by team members to inform the discussion.
                   - Don't ask too many questions or make the messages too formal. 
                   - This task involves a back-and-forth exchange. Avoid jumping to conclusions without sufficient discussion.
@@ -274,7 +288,7 @@ async function callOpenAI(gptInput, role = 'user') {
 
 app.post('/ask-openai', async (req, res) => {
   try {
-    const { message, conversationId, participantName } = req.body;
+    const { message, conversationId, participantName, self_cond } = req.body;
     // Validate the conversation ID
     if (!conversationId || !conversationHistories[conversationId]) {
       return res.status(400).json({ error: "Invalid or missing conversation ID." });
@@ -507,7 +521,7 @@ app.post('/ask-openai', async (req, res) => {
         if (participationDecision === 'YES') {
           anyAgentParticipated = true; // Set the flag since this agent has decided to participate
           participatingAgents.push(agentName); // Add the agent to the list of participants
-          const responseContent = await callOpenAI(gptInput, 'user');
+          const responseContent = await callOpenAI(gptInput, 'user', self_cond);
           responses.push({ role: agentName, content: responseContent, badge: badgeName });
           // Append the new AI message to the conversation history
           conversationHistory.push({
@@ -583,7 +597,7 @@ app.get('/avatars', async (req, res) => {
     res.json(files);
   } catch (error) {
     console.error('Failed to read avatars directory:', error);
-    res.status(500).send('Failed to load avatars.');
+    res.status(500).send('Failed to load avatars. Error: ' + error.message);
   }
 });
 
@@ -596,3 +610,13 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
+
+
+// Example of updated sessionData object including self_cond and team_race
+const sessionData = {
+  prolificId: 'exampleProlificID',
+  sessionID: 'exampleSessionID',
+  otherInfo: 'exampleOtherInfo',
+  self_cond: 'exampleSelfCond', // Example value for self_cond
+  team_race: 'A' // Example value for team_race
+};

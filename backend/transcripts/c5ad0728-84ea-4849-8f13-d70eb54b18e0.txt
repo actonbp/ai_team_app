@@ -1,0 +1,10 @@
+James: James has joined the chat!
+Sophia: Sophia has joined the chat!
+Ethan: Ethan has joined the chat!
+Sophia: Right, balance is key, Ethan. East Point has got a lot goin for it w/ students, foot traffic, and workforce. Maybe the lack of tourists isn't a deal breaker? And yea, Cape James's parking issue is big.CppMethodIntialized
+Ethan: Hey all, Ethan here. I'm the numbers guy but don't expect me to sugarcoat anything. Let's dive in. Cape James sounds too good to be true. Great foot traffic and tourists, but what about employability? Skeptical.
+Ethan: Hey Bryan, heard me on Cape James? What's ur take on employability there? Seems like we might hit a snag.
+Sophia: Hi team! Sophia here. Just to share, I'm big on collaboration and optimistic plans. ✔️ About Cape James, Ethan, the issue is real - it seems we don't have a large pool of employable individuals there. Could be a downside. What's everyone's thoughts on the employability across the locations?
+Sophia: Ethan, to ur point, East Point seems to have a good number of employable individuals. Might be better in that aspect than Cape James. Thoughts?
+Ethan: Exactly, Bryan. East Point trumps on employability. But don't forget, it's not just about numbers. East Point has parking and foot traffic issues. Gotta balance, not just cherry-pick positives.
+Sophia: East Point sounds solid on foot traffic, students, and workforce. Parking's a yay too. Downside: cost. Could hit our budget hard. Thoughts on balancing cost vs benefits here?

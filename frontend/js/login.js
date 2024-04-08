@@ -61,6 +61,22 @@ async function fetchAvatars() {
 document.addEventListener('DOMContentLoaded', () => {
     loadAndHandleAvatars();
 
+    // Check the self_cond value and adjust badgeNameInput visibility
+    const selfCond = localStorage.getItem('self_cond');
+    if (selfCond !== 'public') {
+        const badgeNameInput = document.getElementById('badgeNameInput');
+        if (badgeNameInput) {
+            badgeNameInput.style.display = 'none'; // Hide the badgeNameInput if condition is not 'public'
+        }
+    }
+
+    // Check the self_cond value and adjust self-reflective-title-section visibility
+    const selfReflectiveTitleSection = document.querySelector('.self-reflective-title-section');
+    if (selfCond !== 'public') {
+        if (selfReflectiveTitleSection) {
+            selfReflectiveTitleSection.style.display = 'none'; // Hide the section if condition is not 'public'
+        }
+    }
 
     // Check if the table exists before attempting to modify it
     const table = document.querySelector('table');
@@ -82,18 +98,30 @@ document.addEventListener('DOMContentLoaded', () => {
 loginForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const firstName = firstNameInput.value.trim();
-    const badgeName = badgeNameInput.value.trim();
     const selectedAvatar = localStorage.getItem('selectedAvatar');
+    const selfCond = localStorage.getItem('self_cond');
+    let badgeName = '';
 
-    // Validate inputs to ensure they are not empty
-    if (!firstName || !badgeName || !selectedAvatar) {
-        alert('Your first name, badge name, and an avatar selection are required.');
-        return;
+    // Only require badgeName if self_cond is 'public'
+    if (selfCond === 'public') {
+        badgeName = badgeNameInput.value.trim();
+        if (!firstName || !badgeName || !selectedAvatar) {
+            alert('Your first name, badge name, and an avatar selection are required.');
+            return;
+        }
+    } else {
+        if (!firstName || !selectedAvatar) {
+            alert('Your first name and an avatar selection are required.');
+            return;
+        }
     }
 
     // Persist user details in localStorage
     localStorage.setItem('firstName', firstName);
-    localStorage.setItem('badgeName', badgeName); // Ensure badgeName is correctly stored in localStorage
+    if (selfCond === 'public') {
+        localStorage.setItem('badgeName', badgeName);
+    }
+    localStorage.setItem('lastVisitedPage', 'chat.html');
 
     // Navigate user to the chat interface
     window.location.href = 'chat.html';
