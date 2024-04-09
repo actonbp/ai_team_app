@@ -21,34 +21,30 @@ document.addEventListener('DOMContentLoaded', (event) => {
     document.body.appendChild(conditionDisplayElement);
 
     // Simplified code to redirect to login.html on Next button click, only if Prolific ID is entered
-    nextButton.addEventListener('click', function() {
+    nextButton.addEventListener('click', function () {
         const prolificIdInput = document.getElementById('prolificIdInput');
         if (prolificIdInput && prolificIdInput.value.trim() !== '') {
-            localStorage.setItem('prolificId', prolificIdInput.value.trim()); // Save prolificIdInput into localStorage
-            // Code to send prolificIdInput to the backend for saving in chatSessions.csv
+            localStorage.setItem('prolificId', prolificIdInput.value.trim()); // Save the Prolific ID to localStorage
+            // Start a new chat session by sending a POST request to '/start-chat'
             fetch('/start-chat', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    prolificId: prolificIdInput.value.trim(), // Ensure this matches the backend expectation
-                    self_cond: self_cond // Assuming self_cond is defined earlier
-                }),
+                    self_cond: localStorage.getItem('self_cond'), // Retrieve self_cond from localStorage
+                    prolificId: localStorage.getItem('prolificId') // Retrieve the Prolific ID from localStorage
+                })
             })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Success:', data);
-                window.location.href = '/login.html';
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-            });
+                .then(response => response.json())
+                .then(data => {
+                    localStorage.setItem('team_race', data.team_race); // Store team_race in localStorage
+                    localStorage.setItem('currentConversationId', data.conversationId); // Store the conversationId in localStorage
+                    console.log(`New chat started with ID: ${data.conversationId} for team race: ${data.team_race}`);
+                    // Redirect to the chat page or perform other actions as needed
+                    window.location.href = '/login.html'; // Redirect to the chat page
+                })
+                .catch(error => console.error('Error starting new chat:', error));
         } else {
             alert('Please enter your Prolific ID to proceed.');
         }

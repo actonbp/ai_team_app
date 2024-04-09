@@ -45,17 +45,31 @@ const teamRaceAgents = {
   'A': ['Maurice', 'Ebony', 'Trevon'],
   'B': ['James', 'Sophia', 'Ethan']
 };
-// Define team_race globally for access outside and inside functions
-let team_race;
+
+
+// Function to retrieve parameters securely from AWS SSM
+async function getParameter(parameterName) {
+  const command = new GetParameterCommand({
+    Name: parameterName,
+    WithDecryption: true,
+  });
+
+  try {
+    const response = await ssmClient.send(command);
+    return response.Parameter.Value;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}
 
 // Endpoint to start a new chat conversation
 app.post('/start-chat', async (req, res) => {
   const { self_cond, prolificId } = req.body; // Extract self_cond and prolificId from the request body
   const conversationId = uuidv4(); // Generate a unique ID for the conversation
-  conversationHistories[conversationId] = []; // Initialize conversation history
 
   // Assign a value to the globally defined team_race
-  team_race = Math.random() < 0.5 ? 'A' : 'B';
+  let team_race = Math.random() < 0.5 ? 'A' : 'B';
   let assignedAgents = teamRaceAgents[team_race] || [];
   conversationAgents[conversationId] = { agents: assignedAgents, team_race: team_race, self_cond: self_cond };
 
@@ -132,14 +146,37 @@ const agentTypingStatus = {
   Trevon: false
 };
 
+const agentTaskComplete = {
+  James: false,
+  Sophia: false,
+  Ethan: false,
+  Maurice: false,
+  Ebony: false,
+  Trevon: false
+};
 
+// Endpoint to retrieve chat details for a specific conversation
+app.get('/get-chat-details', async (req, res) => {
+  const { conversationId } = req.query; // Extract conversationId from query parameters
+
+  // Check if conversationId is provided and valid
+  if (!conversationId || !conversationAgents[conversationId]) {
+    return res.status(400).json({ error: 'Invalid or missing conversationId.' });
+  }
+
+  // Retrieve chat details for the given conversationId
+  const chatDetails = conversationAgents[conversationId];
+
+  // Return the chat details to the client
+  res.json(chatDetails);
+});
 
 async function decideParticipation(conversationId, agentName) {
   // Retrieve the conversation history from the global conversationHistories object
   let conversationHistory = conversationHistories[conversationId] || [];
 
   const participationPrompt = `
-  James is is outgoing and likes to participate. If there is no prior message with messages from himself, history, he always participates first to introduce himself and his badge name.
+  James is outgoing and likes to participate. If there is no prior message with messages from himself, history, he always participates first to introduce himself and his badge name.
   Ethan is Stoic and sometimes participates if he something to offer. HOWEVER, If there is no prior message with messages from himself, history, He DOES always participates first to introduce himself and his badge name.
   Sophia is outgoing and loves to participate. If there is no prior message with messages from herself, history, She always participates first to introduce herself and her badge name.
 
@@ -160,8 +197,6 @@ async function decideParticipation(conversationId, agentName) {
   Using Conversation history, IF YOU JUST ASKED A QUESTION last message, don't participate. Otherwise, please feel free to based on the info provided above.
 
   ⭐AFTER THE START, YOU SHOULD TAKE BREAKS AND CHOOSE TO NOT PARTICIPATE MORE OFTEN⭐
-
-  ⭐If you have already said "task-complete" in the chat, DO NOT PARTICIPATE AGAIN⭐
 
   AGAIN: Given the following conversation history and knowing you are impersonating ${agentName}, 
   decide whether you should participate in the conversation.
@@ -228,6 +263,9 @@ Before finalizing the decision, ensure all bots have actively participated and t
 
   ⭐Don't ask too many questions or message ${gptInput.participantName} too much. INSTEAD, seek to respond to others without asking more questions⭐
 
+                    ⭐YOU ARE JUST A PERSON DOING A TASK ON PROLIFIC SO DON"T GET TOO SERIOUS OR TOO INTO THE TASK. JUST GET IT DONE AND YOU GET PAID⭐
+
+
                   ⭐THE TASK IS NOT COMPLETE UNTIL EVERYONE AGREES ON THE ORDER! YOU MUST HAVE AT LEAST 3 PEOPLE AGREE BEFORE COMPLETE⭐
 
                   ⭐KEEP WORKING TO GET TO AN AGREEMENT WITH OTHERS AND WAIT UNTIL YOU ALL VERBALLY CONFIRM UNTIL THE TASK IS DONE⭐
@@ -235,6 +273,8 @@ Before finalizing the decision, ensure all bots have actively participated and t
                   ⭐KEEP YOUR MESSAGES SHORT AND EACH MESSAGE IS WITHIN THE CONTEXT OF OTHERS! MISPELLINGS ARE GREAT⭐
 
                   ⭐Your own strategy "${gptInput.strategy}", is crucial.⭐ 
+
+                  ⭐FOCUS ON EFFICENT STATEGIES SUCH AS LISTING THE YES OR NOS that you have for each location. DO NOT BE TOO WORDY. ⭐
 
                   ⭐REMEMBER, YOUR GOAL IS TO COME TO AN AGREEMENT ON YOUR RANKING ON THE THREE LOCATIONS IN THE GROUP. DO NOT STOP UNTIL YOU AGREE ON A RANKING. ⭐
                   ⭐LIST THE RANKING IN THE CHAT BEFORE YOU ARE FINISHED ⭐
@@ -314,11 +354,18 @@ Before finalizing the decision, ensure all bots have actively participated and t
   
   ⭐Don't ask too many questions or message ${gptInput.participantName} too much. INSTEAD, seek to respond to others without asking more questions⭐
 
+                      ⭐YOU ARE JUST A PERSON DOING A TASK ON PROLIFIC SO DON"T GET TOO SERIOUS OR TOO INTO THE TASK. JUST GET IT DONE AND YOU GET PAID⭐
+
+
                   ⭐THE TASK IS NOT COMPLETE UNTIL EVERYONE AGREES ON THE ORDER! YOU MUST HAVE AT LEAST 3 PEOPLE AGREE BEFORE COMPLETE⭐
 
                   ⭐KEEP WORKING TO GET TO AN AGREEMENT WITH OTHERS AND WAIT UNTIL YOU ALL VERBALLY CONFIRM UNTIL THE TASK IS DONE⭐
 
                   ⭐KEEP YOUR MESSAGES SHORT AND EACH MESSAGE IS WITHIN THE CONTEXT OF OTHERS! MISPELLINGS ARE GREAT⭐
+
+
+                  ⭐FOCUS ON EFFICENT STRATEGIES SUCH AS ⭐
+
 
                   ⭐Your own strategy "${gptInput.strategy}", is crucial.⭐ 
 
@@ -399,7 +446,6 @@ app.post('/ask-openai', async (req, res) => {
     let currentConversationDetails = conversationAgents[conversationId];
     let currentTeamRace = currentConversationDetails.team_race;
     let currentAgents = currentConversationDetails.agents;
-    let agents = currentAgents;// const agents = ['James', 'Sophia', 'Ethan'];
     let anyAgentParticipated = false;
 
 
@@ -578,6 +624,60 @@ app.post('/ask-openai', async (req, res) => {
       });
     }
 
+
+    async function evaluateMessageAndTaskCompletion(message, conversationHistory) {
+      const evaluationPrompt = `
+          Given the current conversation history and the new message, evaluate the following:
+
+          1. Does the new message contribute positively to the ongoing conversation, considering relevance, new information, engagement, and consistency with human conversation norms?
+
+          2. Does the new message indicate that the participants believe the task has been completed satisfactorily?
+
+
+          Consider the following when evaluating the message:
+            - Does it build on previous messages, adding new information or perspectives?
+            - Is it relevant to the conversation's goal and the task at hand?
+            - Does it maintain the flow of conversation, encouraging further discussion?
+            - Does it avoid repetition and correct any misinformation from previous exchanges?
+            - Is it phrased in a manner consistent with human conversation, avoiding AI disclosures?
+            - If this agent just responded last message. The answer should be NO.
+            - Does it make the conversation look like a realistic team chat that is trying to solve the problem?
+            - Always say no to the first question if the response looks like it's from a GPT like AI
+            - If it's a task complete message, don't say yes to the first question
+            - If it's the first agent's message, it is allowed to explain their badge or introduce themselves to the group.
+
+
+          Conversation History:
+          ${conversationHistory.map(entry => `${entry.role}: ${entry.content}`).join('\n')}
+
+          New Message:
+          ${message.role}: ${message.content}
+
+          For each question, answer YES or NO, separated by a comma (e.g., "YES, NO").
+          `;
+
+      const response = await axios.post('https://api.openai.com/v1/chat/completions', {
+        model: 'gpt-4-0125-preview',
+        messages: [
+          {
+            role: 'system',
+            content: evaluationPrompt
+          }
+        ]
+      }, {
+        headers: {
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+        }
+      });
+
+      const decisions = response.data.choices[0].message.content.trim().split(',').map(decision => decision.trim().toUpperCase());
+      const contributesToConversation = decisions[0] === 'YES';
+      const indicatesTaskCompletion = decisions.length > 1 && decisions[1] === 'YES';
+
+      return { contributesToConversation, indicatesTaskCompletion };
+    }
+
+
     // Initialize a flag to track if any agent has decided to participate in this turn
 
     // Retrieve the current agents based on team_race and shuffle the order
@@ -624,12 +724,24 @@ app.post('/ask-openai', async (req, res) => {
           participatingAgents.push(agentName); // Add the agent to the list of participants
           const responseContent = await callOpenAI(gptInput, 'user', self_cond);
           console.log("Badge from gptInput:", gptInput.badge);
-          responses.push({ role: agentName, content: responseContent, badge: badgeName });
-          // Append the new AI message to the conversation history
-          conversationHistory.push({
-            role: agentName,
-            content: responseContent
-          });
+
+          const evaluationResult = await evaluateMessageAndTaskCompletion({ role: agentName, content: responseContent }, conversationHistory);
+
+          // Use evaluationResult.indicatesTaskCompletion to set the agent's task-complete parameter
+          if (evaluationResult.indicatesTaskCompletion) {
+            agentTaskComplete[agentName] = true;
+            // Continue the chat iteration even if the agent's task is marked as complete
+            participationDecision = 'NO'; // Reset participation decision to allow further agent participation
+            anyAgentParticipated = false; // Reset the flag to allow further agent participation in the same turn
+          }
+          // Update handling of the return values to match the new function's output
+          if (evaluationResult.contributesToConversation) {
+            responses.push({ role: agentName, content: responseContent, badge: badgeName });
+            conversationHistory.push({ role: agentName, content: responseContent });
+          } else {
+            console.log("Message was not added to the conversation as it does not contribute positively.");
+          }
+
         }
         agentTypingStatus[agentName] = false;
       } else {
@@ -640,11 +752,15 @@ app.post('/ask-openai', async (req, res) => {
     // Update the stored conversation history
     conversationHistories[conversationId] = conversationHistory;
 
-    // Send back the responses
+    // Check for task completion after all agents have had a chance to participate
+    const completedTasks = Object.values(agentTaskComplete).filter(complete => complete).length;
+    const taskCompleted = completedTasks >= 2;
+
+    // When sending back the responses
     if (responses.length > 0) {
-      res.json({ responses, participatingAgents });
+      res.json({ responses, participatingAgents, taskCompleted });
     } else {
-      res.json({ message: "No agents available to respond at this time." });
+      res.json({ message: "No agents available to respond at this time.", taskCompleted });
     }
   } catch (error) {
     console.error(error);

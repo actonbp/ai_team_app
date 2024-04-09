@@ -3,8 +3,6 @@
 if (!localStorage.getItem('badgeName')) {
     window.location.href = 'login.html';
 }// Retrieve first name and badge name from localStorage
-const firstName = localStorage.getItem('firstName');
-const badgeName = localStorage.getItem('badgeName');
 // Import team_race from app.js// Assuming agentsOptions is defined globally or imported from another script that has access to app.js exports
 const messageInput = document.getElementById('messageInput');
 const sendMessageButton = document.getElementById('sendMessageButton');
@@ -18,6 +16,28 @@ const selectedAvatar = localStorage.getItem('selectedAvatar');
 if (selectedAvatar) {
     participantAvatar.src = selectedAvatar;
 }
+
+function fetchChatDetails(conversationId) {
+    console.log(`Fetching chat details for conversationId: ${conversationId}`);
+    return fetch(`/get-chat-details?conversationId=${conversationId}`)
+        .then(response => response.json())
+        .then(data => {
+            // Assuming data contains team_race and agents
+            const { team_race } = data;
+
+            // Update the global agents variable based on the team_race
+            agents = agentsOptions[team_race];
+
+            // Additional logic to initialize the chat environment based on fetched details
+            // For example, displaying team members, setting avatars, etc.
+            displayTeamMembersWithoutBadge(); // Call this function here if it depends on the agents
+
+            return data; // Return the fetched data for further use if needed
+        })
+        .catch(error => console.error('Error fetching chat details:', error));
+}
+
+
 typingIndicator.innerText = 'Agent is typing...';
 
 // Disable the message input field and the send message button initially
@@ -107,29 +127,22 @@ document.getElementById('chatTab').addEventListener('click', function () {
     // Show the chat window
     // Add any additional logic needed for showing the chat and hiding other sections
 });
+
 function startNewChat() {
-    fetch('/start-chat', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            self_cond: localStorage.getItem('self_cond'), // Ensure this matches what's stored in localStorage
-            prolificId: localStorage.getItem('prolificId') // Add this line to include prolificId
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        const { team_race } = data;
-        localStorage.setItem('team_race', team_race); // Store team_race in localStorage
-        // Store the conversationId received from the server in localStorage
-        localStorage.setItem('currentConversationId', data.conversationId);
-        console.log(`OH YEAH, New chat started with ID: ${data.conversationId} for team race: ${team_race}`);
-        // Correctly set agents based on team_race being 'A' or 'B'
-        agents = team_race === 'A' ? agentsOptions.A : agentsOptions.B;
-        displayTeamMembers(); // Call displayTeamMembers here to ensure agents are set
-    })
-    .catch(error => console.error('Error starting new chat:', error));
+    // Before calling fetchChatDetails, ensure conversationId is available
+    const conversationId = localStorage.getItem('currentConversationId');
+    if (!conversationId) {
+        console.error('No conversationId found in localStorage.');
+        // Handle the missing conversationId appropriately, e.g., redirect to start a new chat
+    } else {
+        console.log(`Current conversationId: ${conversationId}`); // Print the current conversationId to verify it has one
+        fetchChatDetails(conversationId);
+    }
+    const team_race = localStorage.getItem('team_race');
+    // Assuming agentsOptions is defined globally or imported
+    agents = team_race === 'A' ? agentsOptions.A : agentsOptions.B;
+    displayTeamMembers(); // Refresh or display team members based on the existing chat details
+    console.log(`Using existing chat with ID: ${conversationId} for team race: ${team_race}`);
 }
 function appendMessageAfterTyping(messageText, isAgent = false, agentName) {
     // Default typing speed for participants
@@ -279,7 +292,7 @@ function simulateTyping(agentKey, message) {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-    startNewChat(); // This will trigger the startNewChat function as soon as the DOM is fully loaded
+    startNewChat(); // This will trigger the useExistingChatDetails function as soon as the DOM is fully loaded
     var chatWindow = document.getElementById("chatWindow");
     var analysisWindow = document.getElementById("locationAnalysis");
     var helpButton = document.getElementById("helpButton");
@@ -335,7 +348,13 @@ sendMessageButton.addEventListener('click', () => {
                 participantName: firstName
             })
         })
-            .then(response => response.json())
+            .then(response => {
+                if (response.headers.get("Content-Type").includes("application/json")) {
+                    return response.json();
+                } else {
+                    throw new Error('Received non-JSON response from the server');
+                }
+            })
             .then(data => {
                 // Now remove the "typing..." message
                 hideTypingIndicator(`${badgeName} (${firstName})`);
@@ -356,6 +375,9 @@ sendMessageButton.addEventListener('click', () => {
                     });
                 } else {
                     console.error('Unexpected response structure:', data);
+                }
+                if (data.taskCompleted) {
+                    window.location.href = '/simulation_end.html';
                 }
             })
             .catch(error => {
@@ -468,7 +490,13 @@ function fetchResponses() {
             participantName: firstName // Include the participant's name in the request
         })
     })
-        .then(response => response.json())
+        .then(response => {
+            if (response.headers.get("Content-Type").includes("application/json")) {
+                return response.json();
+            } else {
+                throw new Error('Received non-JSON response from the server');
+            }
+        })
         .then(data => {
             if (data && data.responses) {
                 // Process responses
@@ -476,9 +504,13 @@ function fetchResponses() {
                     simulateTyping(response.role, `${response.content}`); // Removed emojis from here
                     conversationHistory.push({ role: response.role, content: response.content, participantName: firstName }); // Append participant's name to the content
                 });
-
-                // Call simulateChat again to keep the messages going
-                simulateChat();
+                // Check if the chat should end
+                if (data.taskCompleted) {
+                    window.location.href = '/simulation_end.html';
+                } else {
+                    // Call simulateChat again to keep the messages going
+                    simulateChat();
+                }
             } else {
                 simulateChat(); // no responses, so runs again
             }
@@ -567,11 +599,6 @@ function displayTeamMembers() {
     });
 }
 
-// Call this function when the page loads or when the team members' information is available
-
-let taskCompleteButtonClicked = false;
-let agentTaskCompleteCount = 0; // Assuming you have a way to count this
-
 document.getElementById('taskCompleteCheckbox').addEventListener('change', function () {
     if (this.checked) {
         window.location.href = 'simulation_end.html';
@@ -601,6 +628,11 @@ document.addEventListener('DOMContentLoaded', function () {
 function displayTeamMembersWithoutBadge() {
     const container = document.getElementById('teamMembers');
     container.innerHTML = ''; // Clear existing content
+
+    // Initialize agents as an empty object if it's undefined
+    if (typeof agents === 'undefined') {
+        agents = {};
+    }
 
     // Add Bryan's information first, without badgeName
     const myInfo = {
