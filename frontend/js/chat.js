@@ -2,8 +2,9 @@
 // Get the Prolific ID pop-up container and the main app container
 if (!localStorage.getItem('badgeName')) {
     window.location.href = 'login.html';
-}
+}// Retrieve first name and badge name from localStorage
 const firstName = localStorage.getItem('firstName');
+const badgeName = localStorage.getItem('badgeName');
 // Import team_race from app.js// Assuming agentsOptions is defined globally or imported from another script that has access to app.js exports
 const messageInput = document.getElementById('messageInput');
 const sendMessageButton = document.getElementById('sendMessageButton');
@@ -56,7 +57,7 @@ const agentsOptions = {
 
 document.addEventListener('DOMContentLoaded', function () {
     // Check for a valid session ID
-    if (!localStorage.getItem('sessionId')) {
+    if (!localStorage.getItem('prolificId')) {
         window.location.href = 'index.html';
     } else {
         // Update last visited page
@@ -72,14 +73,10 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Retrieve tirst name and badge name from localStorage
-    const firstName = localStorage.getItem('firstName');
-    const badgeName = localStorage.getItem('badgeName');
 
-    // Find the span elements by their IDs and set their text content
-    document.getElementById('firstName').textContent = firstName;
-    document.getElementById('badgeName').textContent = badgeName;
-
+    // Find the span elements by their IDs and set their text content using variables defined at the start of chat.js
+    document.getElementById('firstName').textContent = localStorage.getItem('firstName');
+    document.getElementById('badgeName').textContent = localStorage.getItem('badgeName');
     const messageInput = document.getElementById('messageInput');
     messageInput.addEventListener('copy', (e) => e.preventDefault());
     messageInput.addEventListener('paste', (e) => e.preventDefault());
