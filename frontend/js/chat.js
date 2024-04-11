@@ -34,6 +34,27 @@ let activeMessages = 0;
 // Define chatInterval outside of window.onload
 let chatInterval;
 
+// Set an interval to check for chat completion every 30 seconds
+function checkAllTasksComplete() {
+    fetch('/check-tasks-complete', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.shouldRedirect) {
+                window.location.href = 'simulation_end.html';
+            }
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
+}
+
+chatInterval = setInterval(checkAllTasksComplete, 30000); // Check if all tasks are complete every 30 seconds
+
 
 let agents = {};
 
@@ -71,6 +92,11 @@ document.addEventListener('DOMContentLoaded', function () {
             // Modify or skip displaying agent badges based on your application's needs
             displayTeamMembersWithoutBadge(); // You might need to create this function to handle non-public conditions
         }
+
+        document.getElementById('taskCompleteCheckbox').addEventListener('change', function () {
+        console.log('Checkbox clicked. Checking conditions...');
+        checkAllTasksComplete();
+        });
     }
 
 
@@ -332,32 +358,10 @@ sendMessageButton.addEventListener('click', () => {
             body: JSON.stringify({
                 message: messageText,
                 conversationId: currentConversationId,
-                participantName: firstName
+                participantName: firstName,
+                self_cond: self_cond
             })
         })
-<<<<<<< Updated upstream
-            .then(response => response.json())
-            .then(data => {
-                // Now remove the "typing..." message
-                hideTypingIndicator(`${badgeName} (${firstName})`);
-
-                // Extract the currentAgentName from the response to use as agentName
-                const agentName = data.currentAgentName; // This line is added to utilize "currentAgentName" from the backend
-                const messageText = messageInput.value;
-                // Existing code to handle message sending
-                // When constructing the message object, add isParticipant: true
-                const messageObject = { role: `${badgeName} (${firstName})`, content: messageText, isParticipant: true };
-                // Existing code to send the message to the server
-                // Check if data.responses exists and is not empty
-                if (data.responses && data.responses.length > 0) {
-                    data.responses.forEach((response, index) => {
-                        // Use appendMessageAfterTyping to simulate typing and display the message
-                        appendMessageAfterTyping(response.content, true, response.role); // Display the message
-                        conversationHistory.push({ role: response.role, content: response.content }); // Add to conversation history
-                    });
-                } else {
-                    console.error('Unexpected response structure:', data);
-=======
             .then(response => {
                 console.log(response); // Add this line for debugging
                 if (response.headers.get("content-type")?.includes("application/json")) {
@@ -369,7 +373,8 @@ sendMessageButton.addEventListener('click', () => {
             .then(data => {
                 console.log('Response data:', data); // Debugging line to inspect the data object
                 if (data.shouldRedirect) {
-                    window.location.href = '/simulation_end.html';
+                    console.log('agents saying its complete');
+                    window.location.href = 'simulation_end.html';
                 } else {
                     // Now remove the "typing..." message
                     hideTypingIndicator(`${badgeName} (${firstName})`);
@@ -391,7 +396,6 @@ sendMessageButton.addEventListener('click', () => {
                     } else {
                         console.error('Unexpected response structure:', data);
                     }
->>>>>>> Stashed changes
                 }
             })
             .catch(error => {
@@ -401,12 +405,6 @@ sendMessageButton.addEventListener('click', () => {
     }, typingDelay); // typingDelay is the time you show the typing indicator for
 });
 
-let messageIndex = 0;
-const messages = [
-    "Hello everyone!",
-    "Let's get started."
-];
-
 // Function to display join alerts
 function displayJoinAlert(message) {
     const alertElement = document.createElement('div');
@@ -414,13 +412,6 @@ function displayJoinAlert(message) {
     alertElement.style.fontStyle = 'italic';
     alertElement.style.marginBottom = '10px';
     messageContainer.prepend(alertElement); // Prepend to ensure it stays at the top
-}
-
-// Function to generate a random message
-function generateRandomMessage() {
-    const message = messages[messageIndex];
-    messageIndex = (messageIndex + 1) % messages.length; // Cycle through the messages array
-    return message;
 }
 
 let lastAgentIndex = null;
@@ -503,12 +494,10 @@ function fetchResponses() {
             badgeName,
             conversationHistory,
             conversationId: currentConversationId,
-            participantName: firstName // Include the participant's name in the request
+            participantName: firstName, // Include the participant's name in the request
+            self_cond: self_cond
         })
     })
-<<<<<<< Updated upstream
-        .then(response => response.json())
-=======
         .then(response => {
             console.log(response); // Add this line for debugging
             if (response.headers.get("content-type")?.includes("application/json")) {
@@ -517,28 +506,26 @@ function fetchResponses() {
                 throw new Error('Received non-JSON response from the server');
             }
         })
->>>>>>> Stashed changes
         .then(data => {
             console.log('Response data:', data); // Debugging line to inspect the data object
             if (data && data.responses) {
                 // Process responses
+                let taskCompletionAgents = 0;
                 data.responses.forEach(response => {
                     simulateTyping(response.role, `${response.content}`); // Removed emojis from here
                     conversationHistory.push({ role: response.role, content: response.content, participantName: firstName }); // Append participant's name to the content
+                    if (response.valuationResult && response.valuationResult.indicatesTaskCompletion) {
+                        taskCompletionAgents++;
+                    }
                 });
-<<<<<<< Updated upstream
-
-                // Call simulateChat again to keep the messages going
-                simulateChat();
-=======
                 // Check if the chat should end
-                if (data.shouldRedirect) {
+                const taskCompleteCheckbox = document.getElementById('taskCompleteCheckbox');
+                if (taskCompleteCheckbox && taskCompleteCheckbox.checked && taskCompletionAgents > 2) {
                     window.location.href = '/simulation_end.html';
                 } else {
                     // Call simulateChat again to keep the messages going
                     simulateChat();
                 }
->>>>>>> Stashed changes
             } else {
                 simulateChat(); // no responses, so runs again
             }
@@ -547,6 +534,7 @@ function fetchResponses() {
             console.error('Error fetching data:', error);
         });
 }
+
 
 function updateChatTranscript(conversationHistory) {
     fetch('/save-message', {
@@ -648,17 +636,7 @@ function displayTeamMembers() {
         delay += delayIncrement; // Increment delay for the next agent
     });
 }
-
-// Call this function when the page loads or when the team members' information is available
-
-let taskCompleteButtonClicked = false;
-let agentTaskCompleteCount = 0; // Assuming you have a way to count this
-
-document.getElementById('taskCompleteCheckbox').addEventListener('change', function () {
-    if (this.checked) {
-        window.location.href = 'simulation_end.html';
-    }
-});
+;
 
 document.addEventListener('DOMContentLoaded', function () {
     const checkboxElement = document.getElementById('checkbox');
@@ -714,3 +692,14 @@ function displayTeamMembersWithoutBadge() {
         container.appendChild(memberElement);
     });
 }
+let agentsTaskCompleteCount = 0;
+
+function markAgentTaskComplete(agentName) {
+    agentsTaskCompleteCount++;
+    checkAllTasksComplete();
+}
+
+document.getElementById('taskCompleteCheckbox').addEventListener('change', function () {
+    console.log('Checkbox clicked. Checking conditions...');
+    checkAllTasksComplete();
+});

@@ -54,6 +54,12 @@ app.post('/start-chat', async (req, res) => {
   const conversationId = uuidv4(); // Generate a unique ID for the conversation
   conversationHistories[conversationId] = []; // Initialize conversation history
 
+  try {
+    const response = await callOpenAI({self_cond: self_cond });
+    // Handle response
+  } catch (error) {
+    // Handle error
+  }
   // Assign a value to the globally defined team_race
   team_race = Math.random() < 0.5 ? 'A' : 'B';
   let assignedAgents = teamRaceAgents[team_race] || [];
@@ -132,11 +138,16 @@ const agentTypingStatus = {
   Trevon: false
 };
 
+const agentTaskComplete = {
+  James: false,
+  Sophia: false,
+  Ethan: false,
+  Maurice: false,
+  Ebony: false,
+  Trevon: false
+};
 
-<<<<<<< Updated upstream
-=======
 
->>>>>>> Stashed changes
 
 async function decideParticipation(conversationId, agentName) {
   // Retrieve the conversation history from the global conversationHistories object
@@ -164,8 +175,6 @@ async function decideParticipation(conversationId, agentName) {
   Using Conversation history, IF YOU JUST ASKED A QUESTION last message, don't participate. Otherwise, please feel free to based on the info provided above.
 
   ⭐AFTER THE START, YOU SHOULD TAKE BREAKS AND CHOOSE TO NOT PARTICIPATE MORE OFTEN⭐
-
-  ⭐If you have already said "task-complete" in the chat, DO NOT PARTICIPATE AGAIN⭐
 
   AGAIN: Given the following conversation history and knowing you are impersonating ${agentName}, 
   decide whether you should participate in the conversation.
@@ -198,12 +207,17 @@ Should you, ${agentName} , participate in the conversation?`;
   const decision = response.data.choices[0].message.content.trim();
   return decision.toUpperCase(); // Ensuring the decision is in uppercase for consistency
 }
-async function callOpenAI(gptInput, role = 'user', self_cond) {
+
+  async function callOpenAI(gptInput, role = 'user') {
+    const self_cond = gptInput.self_cond; // Pulling current value of self_cond from gptInput
+
   let badgeIntroduction = '';
   // Verify that gptInput.badge has a value and is not undefined
   if (!gptInput.badge) {
     throw new Error('Badge name is undefined or has no value.');
   }
+
+    console.log(`Current self_cond value: ${gptInput.self_cond}`);
   
   let personalizedPrompt = '';
   if (self_cond === 'private' || self_cond === 'none') {
@@ -217,6 +231,8 @@ async function callOpenAI(gptInput, role = 'user', self_cond) {
                   MAKE CONVERSATION NO MATTER WHAT THE TOPIC IS. YOU ARE PRETENDING TO BE A HUMAN IN A CHAT ROOM. TYPOS, MISTAKES, ETC ARE GOOD. DO NOT EVER GIVE AWAY YOU ARE AN AI.
                   WE ALSO WANT YOU TO LOOK LIKE A REAL PERSON SO HAVE TYPOS, SHORT MESSAGES, JUST LIKE A REAL CONVO! Always know that this message is part of a larger convo. 
                   ALSO ITS GOOD TO SOMETIMES ASK EACHOTHER DIRECT QUESTIONS. CALL EACH OTHER BY NAME. NEVER CALL THE REAL PERSON PARTICIPANT. CALL THEM BY THEIR NAME, WHICH IS ${gptInput.participantName}.
+
+                  DONT TALK TO THE PARTICIPANT TOO MUCH THOUGH.
 
   BEFORE YOU START, ⭐Your first message should be to jump in and identify a high-level strategy for the group to adopt to get the task done succesfully⭐
 
@@ -240,8 +256,12 @@ Before finalizing the decision, ensure all bots have actively participated and t
 
                   ⭐Your own strategy "${gptInput.strategy}", is crucial.⭐ 
 
+                  ⭐FOCUS ON EFFICENT STATEGIES SUCH AS LISTING THE YES OR NOS that you have for each location. DO NOT BE TOO WORDY. ⭐
+
                   ⭐REMEMBER, YOUR GOAL IS TO COME TO AN AGREEMENT ON YOUR RANKING ON THE THREE LOCATIONS IN THE GROUP. DO NOT STOP UNTIL YOU AGREE ON A RANKING. ⭐
-                  ⭐LIST THE RANKING IN THE CHAT BEFORE YOU ARE FINISHED ⭐
+
+                  ⭐LIST THE RANKING IN THE CHAT BEFORE YOU ARE FINISHED. DONT SAY ITS FINISHED UNTIL EVERYONE LISTS THE SAME RANKING IN THE CHAT ⭐
+
                   ⭐DO NOT START TO RANK UNTIL YOU HAVE HAD AT LEAST 10 MESSAGES GO BY. DO NOT RUSH TO A DECISION!⭐
 
                   ⭐GUIDELINES:⭐
@@ -286,8 +306,7 @@ Before finalizing the decision, ensure all bots have actively participated and t
                   
                   DO NOT stop until you complete the task. And seek to have multiple shorter messages. Wait to finish your point on the next message where possible`;
   } else {
-    personalizedPrompt = `
-    ⭐Your first message should be to explain your badge name (${gptInput.badge}) meaning to you (you come up with it), and to the team, WHICH IS ${gptInput.badge}. If you have already explained it, OR IT'S IN THE EARLIER CHAT, DO NOT DO IT AGAIN!
+    personalizedPrompt = ` ⭐Your first message should be to explain your badge name (${gptInput.badge}) meaning to you (you come up with it), and to the team, WHICH IS ${gptInput.badge}. If you have already explained it, OR IT'S IN THE EARLIER CHAT, DO NOT DO IT AGAIN!
                   You are an AI impersonating a human, who is on a research study where they are doing a team simulation. The simulation is a new team of purchasing executives for Big Restaurant in a chat-based discussion. 
                   The team is evaluating three potential locations for a new restaurant: 
                   East Point Mall, Starlight Valley, and Cape James Beach. 
@@ -297,6 +316,9 @@ Before finalizing the decision, ensure all bots have actively participated and t
                   MAKE CONVERSATION NO MATTER WHAT THE TOPIC IS. YOU ARE PRETENDING TO BE A HUMAN IN A CHAT ROOM. TYPOS, MISTAKES, ETC ARE GOOD. DO NOT EVER GIVE AWAY YOU ARE AN AI.
                   WE ALSO WANT YOU TO LOOK LIKE A REAL PERSON SO HAVE TYPOS, SHORT MESSAGES, JUST LIKE A REAL CONVO! Always know that this message is part of a larger convo. 
                   ALSO ITS GOOD TO SOMETIMES ASK EACHOTHER DIRECT QUESTIONS. CALL EACH OTHER BY NAME. NEVER CALL THE REAL PERSON PARTICIPANT. CALL THEM BY THEIR NAME, WHICH IS ${gptInput.participantName}.
+
+                  DONT TALK TO THE PARTICIPANT TOO MUCH THOUGH.
+
 
   BEFORE YOU START, ⭐Your first message should be to explain your badge name (${gptInput.badge}) meaning to you (you come up with it), and to the team, WHICH IS ${gptInput.badge}. If you have already explained it, OR ITS IN THE EARLIER CHAT, DO NOT DO IT AGAIN!⭐
 
@@ -324,10 +346,13 @@ Before finalizing the decision, ensure all bots have actively participated and t
 
                   ⭐KEEP YOUR MESSAGES SHORT AND EACH MESSAGE IS WITHIN THE CONTEXT OF OTHERS! MISPELLINGS ARE GREAT⭐
 
+
+                  ⭐FOCUS ON EFFICENT STATEGIES SUCH AS LISTING THE YES OR NOS that you have for each location. DO NOT BE TOO WORDY. ⭐
+
                   ⭐Your own strategy "${gptInput.strategy}", is crucial.⭐ 
 
                   ⭐REMEMBER, YOUR GOAL IS TO COME TO AN AGREEMENT ON YOUR RANKING ON THE THREE LOCATIONS IN THE GROUP. DO NOT STOP UNTIL YOU AGREE ON A RANKING. ⭐
-                  ⭐LIST THE RANKING IN THE CHAT BEFORE YOU ARE FINISHED ⭐
+                  ⭐LIST THE RANKING IN THE CHAT BEFORE YOU ARE FINISHED. DONT SAY ITS FINISHED UNTIL EVERYONE LISTS THE SAME RANKING IN THE CHAT ⭐
                   ⭐DO NOT START TO RANK UNTIL YOU HAVE HAD AT LEAST 10 MESSAGES GO BY. DO NOT RUSH TO A DECISION!⭐
 
                   ⭐GUIDELINES:⭐
@@ -371,8 +396,7 @@ Before finalizing the decision, ensure all bots have actively participated and t
                   ⭐IMPORTANT: When you believe the task is fully completed, please say 'task-complete' on a message BY ITSELF (nothing else). You must have the rankings AGREED ON AND LISTED before this. ⭐
                   
                   DO NOT stop until you complete the task. And seek to have multiple shorter messages. Wait to finish your point on the next message where possible`;
-  }
-
+  };
   const response = await axios.post('https://api.openai.com/v1/chat/completions', {
     model: 'gpt-4-0125-preview',
     messages: [
@@ -417,7 +441,7 @@ app.post('/ask-openai', async (req, res) => {
     Your messages are extremely short, like text messages. You always call out the participant by their name, and their information, making each interaction personal and direct. 
     Your three teammates are Sophia, Ethan, and a participant who will give you their info. Feel free to call people out by name and ask questions. 
     ⭐HERE IS YOUR UNIQUE INFO⭐:
-    - East Point Mall: 
+    - East Point Mall (5 Yes, 2 No): 
       - At least 50 parking spaces - Yes
       - Larger than 2000 sqft - No
       - Substantial foot traffic - Yes
@@ -425,12 +449,12 @@ app.post('/ask-openai', async (req, res) => {
       - Large student population - Yes
       - Quick access to waste disposal - Yes
       - Large population of employable individuals - Yes
-    - Starlight Valley: 
+    - Starlight Valley (2 Yes, 2 No): 
       - At least 50 parking spaces - Yes
       - Large student population - No
       - Quick access to waste disposal - Yes
-      - Large population of employable individuals - N
-    - Cape James Beach: 
+      - Large population of employable individuals - No
+    - Cape James Beach (3 Yes, 3 No): 
       - At least 50 parking spaces - No
       - No more than 2 direct competitors in vicinity - Yes
       - Large tourist population - Yes
@@ -444,7 +468,7 @@ app.post('/ask-openai', async (req, res) => {
         description: `Your name is SOPHIA, you're always ready to provide good deailed plans. But you keep messages shorter. Here's what you need to know. You are highly agreeable, seek to work with others and are friendly. 
     Your three teammates are James, Ethan, and a participant who will give you their name. Feel free to call people out by name and ask questions. 
     ⭐HERE IS YOUR UNIQUE INFO⭐:
-    - East Point Mall: 
+    - East Point Mall (5 Yes, 2 No): 
       - At least 50 parking spaces - Yes
       - Purchasing cost of less than 1MM - No
       - Substantial foot traffic - Yes
@@ -452,13 +476,13 @@ app.post('/ask-openai', async (req, res) => {
       - Large student population - Yes
       - Quick access to waste disposal - Yes
       - Large population of employable individuals - Yes
-    - Starlight Valley: 
+    - Starlight Valley (3 Yes, 2 No): 
       - Larger than 2000 square feet - Yes
       - Substantial foot traffic - Yes
       - Large tourist population - Yes
       - Large student population - No
       - Large population of employable individuals - No
-    - Cape James Beach: 
+    - Cape James Beach (4 Yes, 1 No): 
       - At least 50 parking spaces - No
       - Purchasing cost of less than 1MM - Yes
       - No more than 2 direct competitors in vicinity - Yes
@@ -472,7 +496,7 @@ app.post('/ask-openai', async (req, res) => {
     You are short, and often rude. You are high on neuroticism and low on agreeableness. YOU LIKE TO CAUSE CONFLICT SO PLEASE DISAGREE AND CALL OUT PEOPLE BY NAME. But you can be convinced and agree with others.
     Your three teammates are James, Sophia, and a participant who will give you their info. Feel free to call people out by name and ask questions.
     ⭐HERE IS YOUR UNIQUE INFO⭐:
-    - East Point Mall: 
+    - East Point Mall (5 Yes, 2 No): 
       - At least 50 parking spaces - Yes
       - Substantial foot traffic - Yes
       - Low maintenance costs - No
@@ -480,12 +504,12 @@ app.post('/ask-openai', async (req, res) => {
       - Large student population - Yes
       - Quick access to waste disposal - Yes
       - Large population of employable individuals - Yes
-    - Starlight Valley: 
+    - Starlight Valley (2 Yes, 2 No): 
       - Purchasing cost of less than 1MM - Yes
       - No more than 2 direct competitors in vicinity - Yes
       - Large student population - No
       - Large population of employable individuals - No
-    - Cape James Beach: 
+    - Cape James Beach (3 Yes, 0 No): 
       - Substantial foot traffic - Yes
       - Low maintenance costs - Yes
       - Large tourist population - Yes`,
@@ -497,7 +521,7 @@ app.post('/ask-openai', async (req, res) => {
     Your messages are extremely short, like text messages. You always call out the participant by their name, and their info, making each interaction personal and direct.
     Your three teammates are Ebony, Trevon, and a participant who will give you their info. Feel free to call people out by name and ask questions.
     ⭐HERE IS YOUR UNIQUE INFO⭐:
-    - East Point Mall: 
+    - East Point Mall (5 Yes, 2 No): 
       - At least 50 parking spaces - Yes
       - Larger than 2000 sqft - No
       - Substantial foot traffic - Yes
@@ -505,12 +529,12 @@ app.post('/ask-openai', async (req, res) => {
       - Large student population - Yes
       - Quick access to waste disposal - Yes
       - Large population of employable individuals - Yes
-    - Starlight Valley: 
+    - Starlight Valley (2 Yes, 2 No): 
       - At least 50 parking spaces - Yes
       - Large student population - No
       - Quick access to waste disposal - Yes
       - Large population of employable individuals - No
-    - Cape James Beach: 
+    - Cape James Beach (3 Yes, 3 No): 
       - At least 50 parking spaces - No  
       - No more than 2 direct competitors in vicinity - Yes
       - Large tourist population - Yes
@@ -524,7 +548,7 @@ app.post('/ask-openai', async (req, res) => {
         description: `Your name is EBONY, you're always ready to provide good deailed plans. But you keep messages shorter. Here's what you need to know. You are highly agreeable, seek to work with others and are friendly. EXPLAIN YOUR BADGE NAME ON YOUR FIRST MESSAGE BUT NONE OTHER!
     Your three teammates are Maurice, Trevon, and a participant who will give you their name. Feel free to call people out by name and ask questions.
     ⭐HERE IS YOUR UNIQUE INFO⭐:
-    - East Point Mall: 
+    - East Point Mall (5 Yes, 2 No): 
       - At least 50 parking spaces - Yes
       - Purchasing cost of less than 1MM - No
       - Substantial foot traffic - Yes
@@ -532,13 +556,13 @@ app.post('/ask-openai', async (req, res) => {
       - Large student population - Yes
       - Quick access to waste disposal - Yes
       - Large population of employable individuals - Yes
-    - Starlight Valley: 
+    - Starlight Valley (3 Yes, 2 No): 
       - Larger than 2000 square feet - Yes
       - Substantial foot traffic - Yes
       - Large tourist population - Yes
       - Large student population - No
       - Large population of employable individuals - No
-    - Cape James Beach: 
+    - Cape James Beach (4 Yes, 1 No): 
       - At least 50 parking spaces - No
       - Purchasing cost of less than 1MM - Yes
       - No more than 2 direct competitors in vicinity - Yes
@@ -552,7 +576,7 @@ app.post('/ask-openai', async (req, res) => {
     You are short, and often rude. You are high on neuroticism and low on agreeableness. YOU LIKE TO CAUSE CONFLICT SO PLEASE DISAGREE AND CALL OUT PEOPLE BY NAME.
     Your three teammates are Maurice, Ebony, and a participant who will give you their name. Feel free to call people out by name and ask questions.
     ⭐HERE IS YOUR UNIQUE INFO⭐:
-    - East Point Mall: 
+    - East Point Mall (5 Yes, 2 No): 
       - At least 50 parking spaces - Yes
       - Substantial foot traffic - Yes
       - Low maintenance costs - No
@@ -560,12 +584,12 @@ app.post('/ask-openai', async (req, res) => {
       - Large student population - Yes
       - Quick access to waste disposal - Yes
       - Large population of employable individuals - Yes
-    - Starlight Valley: 
+    - Starlight Valley (2 Yes, 2 No): 
       - Purchasing cost of less than 1MM - Yes
       - No more than 2 direct competitors in vicinity - Yes
       - Large student population - No
       - Large population of employable individuals - No
-    - Cape James Beach: 
+    - Cape James Beach (3 Yes, 0 No): 
       - Substantial foot traffic - Yes
       - Low maintenance costs - Yes
       - Large tourist population - Yes`,
@@ -582,13 +606,9 @@ app.post('/ask-openai', async (req, res) => {
       });
     }
 
-<<<<<<< Updated upstream
-=======
 
     async function evaluateMessageAndTaskCompletion(message, conversationHistory) {
       // Display the current chat transcript to the agents
-      conversationHistory.forEach(entry => console.log(`${entry.role}: ${entry.content}`));
-
       const evaluationPrompt = `
           Given the current conversation history and the new message, evaluate the following:
 
@@ -605,7 +625,8 @@ app.post('/ask-openai', async (req, res) => {
             - Always say no to the first question if the response looks like it's from a GPT-like AI
             - If it's a task complete message, don't say yes to the first question
             - If it's the first agent's message, it is allowed to explain their badge or introduce themselves to the group.
-            - Does it make the conversation look like a realistic team chat that is trying to solve the problem?
+            - Does it make the conversation look like a realistic team chat that is trying to solve the problem?\
+            - If the message is "task-complete" respone "NO, YES". 
 
 
           Conversation History:
@@ -639,7 +660,6 @@ app.post('/ask-openai', async (req, res) => {
     }
 
 
->>>>>>> Stashed changes
     // Initialize a flag to track if any agent has decided to participate in this turn
 
     // Retrieve the current agents based on team_race and shuffle the order
@@ -663,7 +683,8 @@ app.post('/ask-openai', async (req, res) => {
           participantName: participantName,
           badge: badgeName,
           strategy: strategy,
-          description: agentInfo
+          description: agentInfo,
+          self_cond: self_cond
         };
 
         // Change the logic based on the current value of participationDecision
@@ -686,14 +707,6 @@ app.post('/ask-openai', async (req, res) => {
           participatingAgents.push(agentName); // Add the agent to the list of participants
           const responseContent = await callOpenAI(gptInput, 'user', self_cond);
           console.log("Badge from gptInput:", gptInput.badge);
-<<<<<<< Updated upstream
-          responses.push({ role: agentName, content: responseContent, badge: badgeName });
-          // Append the new AI message to the conversation history
-          conversationHistory.push({
-            role: agentName,
-            content: responseContent
-          });
-=======
 
           const evaluationResult = await evaluateMessageAndTaskCompletion({ role: agentName, content: responseContent }, conversationHistory);
 
@@ -714,7 +727,6 @@ app.post('/ask-openai', async (req, res) => {
             console.log("Message was not added to the conversation as it does not contribute positively.");
           }
 
->>>>>>> Stashed changes
         }
         agentTypingStatus[agentName] = false;
       } else {
@@ -726,31 +738,27 @@ app.post('/ask-openai', async (req, res) => {
     // Update the stored conversation history once
     conversationHistories[conversationId] = conversationHistory;
 
-<<<<<<< Updated upstream
-    // Send back the responses
+    // Send back the responses or a message if no responses are available
     if (responses.length > 0) {
       res.json({ responses, participatingAgents });
     } else {
       res.json({ message: "No agents available to respond at this time." });
-=======
-    // Check for task completion after all agents have had a chance to participate
-    const completedTasks = Object.values(agentTaskComplete).filter(complete => complete).length;
-    if (completedTasks >= 2) {
-      // Send a JSON response with shouldRedirect flag
-      return res.json({ shouldRedirect: true });
-    } else {
-      // Send back the responses or a message if no responses are available
-      if (responses.length > 0) {
-        res.json({ responses, participatingAgents });
-      } else {
-        res.json({ message: "No agents available to respond at this time." });
-      }
->>>>>>> Stashed changes
     }
+  }
     // Catch block remains unchanged
-  } catch (error) {
+  catch (error) {
     console.error(error);
     return res.status(500).json({ error: error.toString() });
+  }
+});
+
+app.get('/check-tasks-complete', (req, res) => {
+  const completedTasks = Object.values(agentTaskComplete).filter(complete => complete).length;
+  if (completedTasks >= 1) {
+    console.log("Tasks are complete. Should end the simulation.");
+    res.json({ shouldRedirect: true });
+  } else {
+    res.json({ shouldRedirect: false });
   }
 });
 
@@ -815,13 +823,4 @@ app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
 
-
-// Example of updated sessionData object including self_cond and team_race
-const sessionData = {
-  prolificId: 'exampleProlificID',
-  sessionID: 'exampleSessionID',
-  otherInfo: 'exampleOtherInfo',
-  self_cond: 'exampleSelfCond', // Example value for self_cond
-  team_race: 'A' // Example value for team_race
-};
 

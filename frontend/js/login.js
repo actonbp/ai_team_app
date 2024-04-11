@@ -93,6 +93,18 @@ document.addEventListener('DOMContentLoaded', () => {
             cell.classList.add('styled-cell');
         });
     }
+
+    // Display the .self-reflective-title-section-2 based on self_cond value
+    if (selfCond === 'private') {
+        document.querySelector('.self-reflective-title-section-2').style.display = 'block';
+    }
+
+    // Add event listener for the form submission if needed
+    document.getElementById('title-thought-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        // Handle the confirmation of thinking about the title
+        alert('Title thought confirmed.');
+    });
 });
 
 loginForm.addEventListener('submit', (e) => {
