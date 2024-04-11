@@ -131,7 +131,7 @@ function startNewChat() {
     })
     .catch(error => console.error('Error starting new chat:', error));
 }
-function appendMessageAfterTyping(messageText, isAgent = false, agentName) {
+function appendMessageAfterTyping(messageText, isAgent = false, agentName, avatar = null) {
     // Default typing speed for participants
     let typingSpeed = 200;
 
@@ -149,11 +149,11 @@ function appendMessageAfterTyping(messageText, isAgent = false, agentName) {
     showTypingIndicator(agentName);
     setTimeout(() => {
         hideTypingIndicator(agentName); // Hide typing indicator when message is ready to appear
-        appendMessage(messageText, isAgent, agentName); // Append the message after the typing indicator ends
+        appendMessage(messageText, isAgent, agentName, avatar); // Append the message after the typing indicator ends, passing the avatar if available
     }, typingDuration);
 }
 
-function appendMessage(messageText, isAgent = false, agentName, isParticipant = false, badgeName) {
+function appendMessage(messageText, isAgent = false, agentName, avatar = null, isParticipant = false, badgeName) {
     const messageElement = document.createElement('div');
     messageElement.classList.add('message');
 
@@ -179,7 +179,7 @@ function appendMessage(messageText, isAgent = false, agentName, isParticipant = 
     // Determine the avatar image source based on the agent's name or if it's the participant
     let avatarSrc;
     if (isAgent) {
-        avatarSrc = agent ? agent.avatar : 'default_agent_avatar.png'; // Fallback to a default agent avatar if not found
+        avatarSrc = avatar ? avatar : 'default_agent_avatar.png'; // Use the passed avatar URL if available, otherwise fallback to a default
     } else {
         avatarSrc = localStorage.getItem('selectedAvatar'); // Use the participant's selected avatar
         messageElement.style.backgroundColor = 'rgba(255, 0, 0, 0.25)'; // Lighter red whitish opacity hue
@@ -271,7 +271,7 @@ function simulateTyping(agentKey, message) {
 
         showTypingIndicator(agent.agentName);
         setTimeout(() => {
-            appendMessage(message, true, agent.agentName); // Ensure isAgent is true for agents
+            appendMessage(message, true, agent.agentName, agent.avatar); // Ensure isAgent is true for agents and pass the agent's avatar
             hideTypingIndicator(agent.agentName); // Hide the typing indicator after the message is appended
             resolve(); // Resolve the promise after the delay and actions are completed
         }, typingDuration); // Use the calculated typing duration
@@ -335,6 +335,7 @@ sendMessageButton.addEventListener('click', () => {
                 participantName: firstName
             })
         })
+<<<<<<< Updated upstream
             .then(response => response.json())
             .then(data => {
                 // Now remove the "typing..." message
@@ -356,6 +357,41 @@ sendMessageButton.addEventListener('click', () => {
                     });
                 } else {
                     console.error('Unexpected response structure:', data);
+=======
+            .then(response => {
+                console.log(response); // Add this line for debugging
+                if (response.headers.get("content-type")?.includes("application/json")) {
+                    return response.json();
+                } else {
+                    throw new Error('Received non-JSON response from the server');
+                }
+            })
+            .then(data => {
+                console.log('Response data:', data); // Debugging line to inspect the data object
+                if (data.shouldRedirect) {
+                    window.location.href = '/simulation_end.html';
+                } else {
+                    // Now remove the "typing..." message
+                    hideTypingIndicator(`${badgeName} (${firstName})`);
+
+                    // Extract the currentAgentName from the response to use as agentName
+                    const agentName = data.currentAgentName; // This line is added to utilize "currentAgentName" from the backend
+                    const messageText = messageInput.value;
+                    // Existing code to handle message sending
+                    // When constructing the message object, add isParticipant: true
+                    const messageObject = { role: `${badgeName} (${firstName})`, content: messageText, isParticipant: true };
+                    // Existing code to send the message to the server
+                    // Check if data.responses exists and is not empty
+                    if (data.responses && data.responses.length > 0) {
+                        data.responses.forEach((response, index) => {
+                            // Use appendMessageAfterTyping to simulate typing and display the message
+                            appendMessageAfterTyping(response.content, true, response.role); // Display the message
+                            conversationHistory.push({ role: response.role, content: response.content }); // Add to conversation history
+                        });
+                    } else {
+                        console.error('Unexpected response structure:', data);
+                    }
+>>>>>>> Stashed changes
                 }
             })
             .catch(error => {
@@ -389,63 +425,65 @@ function generateRandomMessage() {
 
 let lastAgentIndex = null;
 
-function simulateChat(intro_on = false) {
-    // Clear the previous interval
+function simulateChat() {
     clearInterval(chatInterval);
-    const currentConversationId = localStorage.getItem('currentConversationId'); // Retrieve the stored ID
+    const currentConversationId = localStorage.getItem('currentConversationId');
+    const self_cond = localStorage.getItem('self_cond'); // Load self_cond from localStorage
 
-    if (intro_on) {
-        // Check if it's the first call to simulateChat by checking the length of conversationHistory
+    if (self_cond === 'public') { // Ensure self_cond is checked against a string value
         if (conversationHistory.length === 0) {
-            // Fetch the participant's badge name from localStorage
             const participantBadgeName = localStorage.getItem('badgeName');
-            // Predefined introduction message from Agent 1 (James) including the participant's badge name
+            
+            displayTeamMembers(); // Call displayTeamMembers here to ensure agents are set
+
+            // Import agents from earlier in the chat.js code
+            const team_race = localStorage.getItem('team_race'); // Retrieve team_race from localStorage
+            const agentsToUse = team_race === 'A' ? agentsOptions.A : agentsOptions.B; // Determine which agents to use based on team_race
+            const agentKeys = Object.keys(agentsToUse); // Get the keys of the agents object
+            const randomAgentKey = agentKeys[Math.floor(Math.random() * agentKeys.length)]; // Select a random agent key
+            const randomAgent = agentsToUse[randomAgentKey]; // Use the key to get the agent details
+
+            // Load agents and their avatars before the introductory message
+            setTimeout(() => {}, 10000)
+            // Construct the introduction message with the selected agent's details
             const introductionMessage = {
-                role: 'Agent 1',
-                content: `Hey team, James here! I see ${participantBadgeName} just joined the chat. Welcome to the team! I'll start us off since I've been here the longest.... Hey y'all! It's James here, the Master of Motivation! Think of me as your personal hype man. Ready to dive in and make this project shine.`
+                role: randomAgent.agentName,
+                content: `Hey team, ${randomAgent.agentName} here! I see ${participantBadgeName} just joined the chat. Welcome to the team! Should we all first introduce ourselves and explain our badge name like the task directions said?`
             };
 
-            // Display "typing..." message with James's name
-            let messageElement = appendMessage(`James is typing...`, true, "James");
-
-            // Replace the "typing..." message with the actual message after a delay
+            // Add a delay before displaying the typing indicator for the intro message
             setTimeout(() => {
-                // Ensure the first message starts with James:
-                let firstResponse = `James (Master of Motivation): ${introductionMessage.content}`;
-                let textElement = messageElement.querySelector('.text');
-                textElement.textContent = firstResponse;
-                conversationHistory.push({ role: "James", content: introductionMessage.content });
+                let messageElement = appendMessage(`${randomAgent.agentName} is typing...`, true, randomAgent.agentName, randomAgent.avatar);
 
-                // Create a chat transcript file and save the introduction message as the first line
-                const currentConversationId = localStorage.getItem('currentConversationId');
-                fetch('/save-message', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        conversationId: currentConversationId,
-                        message: { role: "James", content: introductionMessage.content }
+                setTimeout(() => {
+                    let firstResponse = `${randomAgent.agentName} (${randomAgent.agentBadge}): ${introductionMessage.content}`;
+                    let textElement = messageElement.querySelector('.text');
+                    textElement.textContent = firstResponse;
+                    conversationHistory.push({ role: randomAgent.agentName, content: introductionMessage.content });
+
+                    // Save the introduction message to the conversation transcript
+                    fetch('/save-message', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            conversationId: currentConversationId,
+                            message: { role: randomAgent.agentName, content: introductionMessage.content }
+                        })
                     })
-                })
-                    .then(response => response.json())
-                    .then(data => console.log('Message saved:', data))
-                    .catch(error => console.error('Error saving message:', error));
+                        .then(response => response.json())
+                        .then(data => console.log('Message saved:', data))
+                        .catch(error => console.error('Error saving message:', error));
 
-                // Fetch the response after displaying the introduction message
-                fetchResponses();
-            }, 10000); // Adjust delay as needed
+                    fetchResponses();
+                }, 10000); // Delay before showing the intro message
+            }, 5000); // Delay before showing the typing indicator for the intro message
         } else {
-            // If not the first call, directly fetch responses
             fetchResponses();
         }
     } else {
-        // If intro_on is false, directly fetch responses without displaying the introduction message
         fetchResponses();
     }
 }
-
-
 
 function fetchResponses() {
     if (activeMessages > 0) {
@@ -468,17 +506,39 @@ function fetchResponses() {
             participantName: firstName // Include the participant's name in the request
         })
     })
+<<<<<<< Updated upstream
         .then(response => response.json())
+=======
+        .then(response => {
+            console.log(response); // Add this line for debugging
+            if (response.headers.get("content-type")?.includes("application/json")) {
+                return response.json();
+            } else {
+                throw new Error('Received non-JSON response from the server');
+            }
+        })
+>>>>>>> Stashed changes
         .then(data => {
+            console.log('Response data:', data); // Debugging line to inspect the data object
             if (data && data.responses) {
                 // Process responses
                 data.responses.forEach(response => {
                     simulateTyping(response.role, `${response.content}`); // Removed emojis from here
                     conversationHistory.push({ role: response.role, content: response.content, participantName: firstName }); // Append participant's name to the content
                 });
+<<<<<<< Updated upstream
 
                 // Call simulateChat again to keep the messages going
                 simulateChat();
+=======
+                // Check if the chat should end
+                if (data.shouldRedirect) {
+                    window.location.href = '/simulation_end.html';
+                } else {
+                    // Call simulateChat again to keep the messages going
+                    simulateChat();
+                }
+>>>>>>> Stashed changes
             } else {
                 simulateChat(); // no responses, so runs again
             }
@@ -511,6 +571,25 @@ function updateChatTranscript(conversationHistory) {
 
 // Assuming you have an object with team members' details
 const teamMembers = agents
+
+function createTeamMemberElement(member, isMyInfo = false) {
+    const memberElement = document.createElement('div');
+    memberElement.className = `team-member ${isMyInfo ? 'my-info' : ''}`;
+    memberElement.innerHTML = `
+        <img src="${member.avatar}" alt="${member.name}" class="team-member-avatar ${isMyInfo ? 'avatar-outline-red' : ''}">
+        <div class="team-member-info">
+            <h4>${member.name}</h4>
+            ${localStorage.getItem('self_cond') === 'public' ? `<p>${member.badgeName || member.agentBadge}</p>` : ''}
+        </div>
+    `;
+    if (!isMyInfo) {
+        // Apply color styling for other team members
+        memberElement.querySelector('.team-member-info').style.color = 'black';
+        memberElement.style.backgroundColor = `rgba(${member.colorRGB.r}, ${member.colorRGB.g}, ${member.colorRGB.b}, 0.1)`;
+        memberElement.style.borderColor = member.color;
+    }
+    return memberElement;
+}
 
 function displayTeamMembers() {
     const container = document.getElementById('teamMembers');
@@ -560,8 +639,11 @@ function displayTeamMembers() {
 
     Object.values(agents).forEach(agent => {
         setTimeout(() => {
-            const joinMessage = `${agent.agentName} has joined the chat!`;
-            appendMessage(joinMessage, true, agent.agentName); // Display the agent join message in the chat
+            const joinMessageText = `${agent.agentName} has joined the chat!`;
+            const plainTextElement = document.createElement('p'); // Create a paragraph element for plain text
+            plainTextElement.textContent = joinMessageText;
+            plainTextElement.style.color = 'gray'; // Optional: Style as needed
+            container.appendChild(plainTextElement); // Append the plain text element to the container
         }, delay);
         delay += delayIncrement; // Increment delay for the next agent
     });

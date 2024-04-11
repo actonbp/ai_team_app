@@ -133,6 +133,10 @@ const agentTypingStatus = {
 };
 
 
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 
 async function decideParticipation(conversationId, agentName) {
   // Retrieve the conversation history from the global conversationHistories object
@@ -578,6 +582,64 @@ app.post('/ask-openai', async (req, res) => {
       });
     }
 
+<<<<<<< Updated upstream
+=======
+
+    async function evaluateMessageAndTaskCompletion(message, conversationHistory) {
+      // Display the current chat transcript to the agents
+      conversationHistory.forEach(entry => console.log(`${entry.role}: ${entry.content}`));
+
+      const evaluationPrompt = `
+          Given the current conversation history and the new message, evaluate the following:
+
+          1. Does the new message contribute positively to the ongoing conversation, considering relevance, new information, engagement, and consistency with human conversation norms?
+
+          2. Does the new message indicate that the participants believe the task has been completed satisfactorily?
+
+
+          Consider the following when evaluating the message for #1:
+            - Does it build on previous messages, adding new information or perspectives?
+            - Is it relevant to the conversation's goal and the task at hand?
+            - Does it maintain the flow of conversation, and look like a message that would come next?
+            - Is it phrased in a manner consistent with human conversation, avoiding AI disclosures?
+            - Always say no to the first question if the response looks like it's from a GPT-like AI
+            - If it's a task complete message, don't say yes to the first question
+            - If it's the first agent's message, it is allowed to explain their badge or introduce themselves to the group.
+            - Does it make the conversation look like a realistic team chat that is trying to solve the problem?
+
+
+          Conversation History:
+          ${conversationHistory.map(entry => `${entry.role}: ${entry.content}`).join('\n')}
+
+          New Message:
+          ${message.role}: ${message.content}
+
+          For each question, answer YES or NO, separated by a comma (e.g., "YES, NO").
+          `;
+
+      const response = await axios.post('https://api.openai.com/v1/chat/completions', {
+        model: 'gpt-3.5-turbo',
+        messages: [
+          {
+            role: 'system',
+            content: evaluationPrompt
+          }
+        ]
+      }, {
+        headers: {
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+        }
+      });
+
+      const decisions = response.data.choices[0].message.content.trim().split(',').map(decision => decision.trim().toUpperCase());
+      const contributesToConversation = decisions[0] === 'YES';
+      const indicatesTaskCompletion = decisions.length > 1 && decisions[1] === 'YES';
+
+      return { contributesToConversation, indicatesTaskCompletion };
+    }
+
+
+>>>>>>> Stashed changes
     // Initialize a flag to track if any agent has decided to participate in this turn
 
     // Retrieve the current agents based on team_race and shuffle the order
@@ -624,12 +686,35 @@ app.post('/ask-openai', async (req, res) => {
           participatingAgents.push(agentName); // Add the agent to the list of participants
           const responseContent = await callOpenAI(gptInput, 'user', self_cond);
           console.log("Badge from gptInput:", gptInput.badge);
+<<<<<<< Updated upstream
           responses.push({ role: agentName, content: responseContent, badge: badgeName });
           // Append the new AI message to the conversation history
           conversationHistory.push({
             role: agentName,
             content: responseContent
           });
+=======
+
+          const evaluationResult = await evaluateMessageAndTaskCompletion({ role: agentName, content: responseContent }, conversationHistory);
+
+          // Use evaluationResult.indicatesTaskCompletion to set the agent's task-complete parameter
+          if (evaluationResult.indicatesTaskCompletion) {
+            agentTaskComplete[agentName] = true;
+            // Continue the chat iteration even if the agent's task is marked as complete
+            participationDecision = 'NO'; // Reset participation decision to allow further agent participation
+            anyAgentParticipated = false; // Reset the flag to allow further agent participation in the same turn
+            console.log("This agent said the task is complete");
+
+          }
+          // Update handling of the return values to match the new function's output
+          if (evaluationResult.contributesToConversation) {
+            responses.push({ role: agentName, content: responseContent, badge: badgeName });
+            conversationHistory.push({ role: agentName, content: responseContent });
+          } else {
+            console.log("Message was not added to the conversation as it does not contribute positively.");
+          }
+
+>>>>>>> Stashed changes
         }
         agentTypingStatus[agentName] = false;
       } else {
@@ -637,15 +722,32 @@ app.post('/ask-openai', async (req, res) => {
       }
     }
 
-    // Update the stored conversation history
+    // After processing all agents
+    // Update the stored conversation history once
     conversationHistories[conversationId] = conversationHistory;
 
+<<<<<<< Updated upstream
     // Send back the responses
     if (responses.length > 0) {
       res.json({ responses, participatingAgents });
     } else {
       res.json({ message: "No agents available to respond at this time." });
+=======
+    // Check for task completion after all agents have had a chance to participate
+    const completedTasks = Object.values(agentTaskComplete).filter(complete => complete).length;
+    if (completedTasks >= 2) {
+      // Send a JSON response with shouldRedirect flag
+      return res.json({ shouldRedirect: true });
+    } else {
+      // Send back the responses or a message if no responses are available
+      if (responses.length > 0) {
+        res.json({ responses, participatingAgents });
+      } else {
+        res.json({ message: "No agents available to respond at this time." });
+      }
+>>>>>>> Stashed changes
     }
+    // Catch block remains unchanged
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: error.toString() });
@@ -722,3 +824,4 @@ const sessionData = {
   self_cond: 'exampleSelfCond', // Example value for self_cond
   team_race: 'A' // Example value for team_race
 };
+
