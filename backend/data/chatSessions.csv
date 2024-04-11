@@ -1,4 +1,4 @@
-ProlificID,SessionID,SelfCond,TeamRace
+ProlificID,SessionID,SelfCond,TeamRace, Started
 ,53bc6239-e086-46e4-b993-d70e2819b61e,private,A
 ,215dc479-b304-4e71-ae1e-08879219f01c,private,A
 ,6beb7de3-b9ed-4305-91b9-a4fe9e76a388,public,A
@@ -260,3 +260,10 @@ reyeryrey,db006a3c-59bb-4590-b12f-104c4afbc26f,private,B
 124123,4be2928b-dfdc-458b-97e7-20d391d58117,none,B
 frbhdtnbherh,247bd137-7fba-45da-96cf-bdd837f09aa1,public,B
 frbhdtnbherh,aa50dc8a-dc3b-4e60-ab63-d5cafe316346,public,B
+vsdbgerh,5d1cb3d1-a475-4bf4-a5a0-0456e21c49c3,none,B
+vsdbgerh,1b00270b-1a08-4232-8416-4430bedc8ec6,none,A
+vsdbgerh,3289f98b-9982-46e8-b6a4-ba690c27b58f,none,B
+fsbfsdbfsw,fd64b1b5-bdd0-4a23-ae02-73a804d9c775,private,A,2024-04-11T20:59:30.001Z
+fsbfsdbfsw,59d8d0b8-02fb-41dd-9812-087ce085cd55,private,B,2024-04-11T21:01:07.516Z
+fsbfsdbfsw,e354ef25-b77d-4a54-9edd-dc02ff572604,private,B,2024-04-11T21:01:21.728Z
+fsbfsdbfsw,7fd01526-106c-4fb7-9417-6b1b85d3283c,private,A,2024-04-11T21:03:22.507Z

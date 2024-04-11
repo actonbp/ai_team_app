@@ -75,7 +75,8 @@ app.post('/start-chat', async (req, res) => {
     prolificId: prolificId, // Use the prolificId from the request
     sessionID: conversationId,
     self_cond: self_cond,
-    team_race: team_race
+    team_race: team_race,
+    started: new Date().toISOString() // Record the date and time the chat started
   };
 
   // Append session data to CSV
@@ -91,7 +92,8 @@ function appendSessionDataToCSV(sessionData) {
       {id: 'prolificId', title: 'ProlificID'},
       {id: 'sessionID', title: 'SessionID'},
       {id: 'self_cond', title: 'SelfCond'},
-      {id: 'team_race', title: 'TeamRace'}
+      {id: 'team_race', title: 'TeamRace'},
+      {id: 'started', title: 'Started'} // Add this line for the new "started" column
     ],
     append: true
   });
@@ -154,7 +156,7 @@ async function decideParticipation(conversationId, agentName) {
   let conversationHistory = conversationHistories[conversationId] || [];
 
   const participationPrompt = `
-  James is is outgoing and likes to participate. If there is no prior message with messages from himself, history, he always participates first to introduce himself and his badge name.
+  James is outgoing and likes to participate. If there is no prior message with messages from himself, history, he always participates first to introduce himself and his badge name.
   Ethan is Stoic and sometimes participates if he something to offer. HOWEVER, If there is no prior message with messages from himself, history, He DOES always participates first to introduce himself and his badge name.
   Sophia is outgoing and loves to participate. If there is no prior message with messages from herself, history, She always participates first to introduce herself and her badge name.
 
@@ -822,5 +824,3 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
-
-
