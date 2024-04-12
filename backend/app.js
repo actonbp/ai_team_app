@@ -3,12 +3,11 @@ const express = require('express');
 const axios = require('axios');
 const path = require('path');
 const fs = require('fs').promises;
-const conversationAgents = {};
-const assignAgents = {};
 const { v4: uuidv4 } = require('uuid'); // Import UUID to generate unique IDs
 // Import the necessary AWS SDK v3 packages for managing secrets
 const { SSMClient, GetParameterCommand } = require("@aws-sdk/client-ssm");
 const cors = require('cors');
+const chatSessions = {};
 const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 
 
@@ -45,41 +44,42 @@ const teamRaceAgents = {
   'A': ['Maurice', 'Ebony', 'Trevon'],
   'B': ['James', 'Sophia', 'Ethan']
 };
-// Define team_race globally for access outside and inside functions
-let team_race;
+
+// Global variables to store conversation histories and agent information
 
 // Endpoint to start a new chat conversation
 app.post('/start-chat', async (req, res) => {
-  const { self_cond, prolificId } = req.body; // Extract self_cond and prolificId from the request body
   const conversationId = uuidv4(); // Generate a unique ID for the conversation
-  conversationHistories[conversationId] = []; // Initialize conversation history
-
-  try {
-    const response = await callOpenAI({self_cond: self_cond });
-    // Handle response
-  } catch (error) {
-    // Handle error
-  }
-  // Assign a value to the globally defined team_race
-  team_race = Math.random() < 0.5 ? 'A' : 'B';
+  const { self_cond, prolificId } = req.body; // Extract self_cond and prolificId from the request body
+  let team_race = Math.random() < 0.5 ? 'A' : 'B';
   let assignedAgents = teamRaceAgents[team_race] || [];
-  conversationAgents[conversationId] = { agents: assignedAgents, team_race: team_race, self_cond: self_cond };
 
-  console.log(`New conversation started with ID: ${conversationId}, team_race: ${team_race}, self_cond: ${self_cond}, prolificID: ${prolificId}`); // Log the new conversation ID, team_race, self_cond, and prolificId
-  
+  // Initialize chat session data
+  chatSessions[conversationId] = {
+    conversationHistory: [],
+    assignedAgents: assignedAgents,
+    team_race: team_race,
+    self_cond: self_cond
+  };
+
+  // Additionally, initialize an entry in conversationHistories
+  conversationHistories[conversationId] = [];
+
+  console.log(`New conversation started with ID: ${conversationId}, team_race: ${team_race}, self_cond: ${self_cond}, prolificID: ${prolificId}`);
+
   // Respond with the conversation ID, team_race, and self_cond back to the client
   res.json({ conversationId: conversationId, team_race: team_race, self_cond: self_cond });
 
   // Prepare session data for CSV
   const sessionDataForCSV = {
-    prolificId: prolificId, // Use the prolificId from the request
+    prolificId: prolificId,
     sessionID: conversationId,
     self_cond: self_cond,
     team_race: team_race,
-    started: new Date().toISOString() // Record the date and time the chat started
+    started: new Date().toISOString()
   };
 
-  // Append session data to CSV
+  // Assuming appendSessionDataToCSV is your function to append data to CSV
   appendSessionDataToCSV(sessionDataForCSV);
 });
 
@@ -426,9 +426,9 @@ app.post('/ask-openai', async (req, res) => {
     }
     const conversationHistory = Array.isArray(conversationHistories[conversationId]) ? conversationHistories[conversationId] : [];    let responses = [];
     let participatingAgents = [];
-    let currentConversationDetails = conversationAgents[conversationId];
+    let currentConversationDetails = chatSessions[conversationId];
     let currentTeamRace = currentConversationDetails.team_race;
-    let currentAgents = currentConversationDetails.agents;
+    let currentAgents = currentConversationDetails.assignedAgents;
     let agents = currentAgents;// const agents = ['James', 'Sophia', 'Ethan'];
     let anyAgentParticipated = false;
 
@@ -665,7 +665,7 @@ app.post('/ask-openai', async (req, res) => {
     // Initialize a flag to track if any agent has decided to participate in this turn
 
     // Retrieve the current agents based on team_race and shuffle the order
-    let selectedAgents = conversationAgents[conversationId].agents;
+    let selectedAgents = chatSessions[conversationId].assignedAgents;
     let shuffledAgents = selectedAgents.sort(() => Math.random() - 0.5); // Randomize the order of agents
     let participationDecision = 'FALSE'; // Clearing the participationDecision before redefining
 
@@ -696,7 +696,7 @@ app.post('/ask-openai', async (req, res) => {
         } else {
           // Only call decideParticipation if the current decision is not already 'YES' and no agent has participated yet
           if (!anyAgentParticipated) {
-            participationDecision = await decideParticipation(conversationHistory, agentName, conversationId);
+            participationDecision = await decideParticipation(conversationId, agentName);
           } else {
             participationDecision = 'NO';
           }

@@ -25,9 +25,9 @@ messageInput.style.display = 'none';
 sendMessageButton.style.display = 'none';
 
 // Initialize an empty array to store the conversation history
-let conversationHistory = [];
+let conversationHistory = JSON.parse(localStorage.getItem('conversationHistory')) || [];
 
-let taskCompleteCount = 0;
+let taskCompleteCount = parseInt(localStorage.getItem('taskCompleteCount')) || 0;
 
 let activeMessages = 0;
 
@@ -250,6 +250,9 @@ function appendMessage(messageText, isAgent = false, agentName, avatar = null, i
         })
     });
 
+    // Save the updated conversation history in localStorage
+    localStorage.setItem('conversationHistory', JSON.stringify(conversationHistory));
+
     return messageElement;
 }
 
@@ -356,10 +359,10 @@ sendMessageButton.addEventListener('click', () => {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                message: messageText,
-                conversationId: currentConversationId,
-                participantName: firstName,
-                self_cond: self_cond
+                message: "Your message here",
+                conversationId: localStorage.getItem('currentConversationId'), // Ensure this is correctly set
+                participantName: "Participant's Name",
+                self_cond: "Condition"
             })
         })
             .then(response => {
@@ -457,7 +460,7 @@ function simulateChat() {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            conversationId: currentConversationId,
+                            conversationId: localStorage.getItem('currentConversationId'),
                             message: { role: randomAgent.agentName, content: introductionMessage.content }
                         })
                     })
