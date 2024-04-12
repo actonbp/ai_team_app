@@ -1,4 +1,10 @@
 document.addEventListener('DOMContentLoaded', (event) => {
+    // Clear specific localStorage items for a fresh start
+    localStorage.removeItem('sessionId');
+    localStorage.removeItem('self_cond');
+    localStorage.removeItem('prolificId');
+    localStorage.removeItem('team_race');
+    localStorage.removeItem('currentConversationId');
     // This code runs when the DOM is fully loaded
     const nextButton = document.querySelector('.next-button');
     
@@ -46,7 +52,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
                 // Store team_race and conversationId received from the server in localStorage
                 localStorage.setItem('team_race', data.team_race);
                 localStorage.setItem('currentConversationId', data.conversationId);
-                console.log(`New chat started with ID: ${data.conversationId} for team race: ${data.team_race}`);
+                // console.log(`New chat started with ID: ${data.conversationId} for team race: ${data.team_race}`);
                 window.location.href = '/login.html';
             })
             .catch((error) => {

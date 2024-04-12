@@ -1,4 +1,4 @@
-ProlificID,SessionID,SelfCond,TeamRace, Started
+ProlificID,SessionID,SelfCond,TeamRace, Started, Finished
 ,53bc6239-e086-46e4-b993-d70e2819b61e,private,A
 ,215dc479-b304-4e71-ae1e-08879219f01c,private,A
 ,6beb7de3-b9ed-4305-91b9-a4fe9e76a388,public,A
@@ -277,3 +277,5 @@ fdhsrgftnhrsyt,ed7c581f-efdc-4dab-8602-36bae73d534c,none,A,2024-04-11T23:04:13.7
 fdhsrgftnhrsyt,95ace71b-bb02-4a2b-a01f-12e4d1a798f2,none,B,2024-04-11T23:05:16.762Z
 fdhsrgftnhrsyt,1909ec80-2a62-4e2a-a146-c78dc0b7b9da,none,A,2024-04-11T23:08:19.408Z
 fdhsrgftnhrsyt,0bbf20ef-91f9-440f-80dc-271c490d2000,none,B,2024-04-11T23:56:52.882Z
+dsvsfvdfsv87,a1baabdb-93ad-47dd-8532-c3a89000a42b,private,B,2024-04-12T00:34:20.885Z
+dsvsfvdfsv87,2d192667-b4d5-471b-aefd-1d7e8ef3d182,private,B,2024-04-12T00:35:06.116Z

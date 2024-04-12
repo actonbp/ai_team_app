@@ -9,6 +9,7 @@ const { SSMClient, GetParameterCommand } = require("@aws-sdk/client-ssm");
 const cors = require('cors');
 const chatSessions = {};
 const createCsvWriter = require('csv-writer').createObjectCsvWriter;
+const csvWriter = require('csv-writer');
 
 
 const app = express();
@@ -65,7 +66,7 @@ app.post('/start-chat', async (req, res) => {
   // Additionally, initialize an entry in conversationHistories
   conversationHistories[conversationId] = [];
 
-  console.log(`New conversation started with ID: ${conversationId}, team_race: ${team_race}, self_cond: ${self_cond}, prolificID: ${prolificId}`);
+  // console.log(`New conversation started with ID: ${conversationId}, team_race: ${team_race}, self_cond: ${self_cond}, prolificID: ${prolificId}`);
 
   // Respond with the conversation ID, team_race, and self_cond back to the client
   res.json({ conversationId: conversationId, team_race: team_race, self_cond: self_cond });
@@ -85,22 +86,49 @@ app.post('/start-chat', async (req, res) => {
 
 
 function appendSessionDataToCSV(sessionData) {
-  const csvFilePath = path.join(__dirname, 'data', 'chatSessions.csv');
-  const csvWriter = createCsvWriter({
+  const csvFilePath = path.join(__dirname, 'data', 'sessionData.csv');
+  const writer = csvWriter.createObjectCsvWriter({
     path: csvFilePath,
     header: [
-      {id: 'prolificId', title: 'ProlificID'},
-      {id: 'sessionID', title: 'SessionID'},
-      {id: 'self_cond', title: 'SelfCond'},
-      {id: 'team_race', title: 'TeamRace'},
-      {id: 'started', title: 'Started'} // Add this line for the new "started" column
+      { id: 'prolificId', title: 'ProlificID' },
+      { id: 'sessionID', title: 'SessionID' },
+      { id: 'self_cond', title: 'SelfCond' },
+      { id: 'team_race', title: 'TeamRace' },
+      { id: 'started', title: 'Started' }
     ],
     append: true
   });
 
-  csvWriter.writeRecords([sessionData])
-    .then(() => console.log('Data was appended to file successfully.'));
+  writer.writeRecords([sessionData])
+    // .then(() => console.log('Session data appended to CSV successfully.'))
+    // .catch(err => console.error('Failed to append session data to CSV:', err));
 }
+
+async function updateChatSessionCSV(conversationId, finishedTime) {
+  // Define the path to your CSV file
+  const csvFilePath = path.join(__dirname, 'chatSessions.csv');
+
+  // Create a temporary CSV writer instance to append data without headers
+  const csvWriter = createCsvWriter({
+    path: csvFilePath,
+    header: [
+      { id: 'ProlificID', title: 'ProlificID' },
+      { id: 'SessionID', title: 'SessionID' },
+      { id: 'RaisedHandCount', title: 'RaisedHandCount' },
+      { id: 'OtherInfo', title: 'OtherInfo' },
+      { id: 'SelfCond', title: 'SelfCond' },
+      { id: 'TeamRace', title: 'TeamRace' },
+      { id: 'Finished', title: 'Finished' } // Assuming you add a 'Finished' column for the finish time
+    ],
+    append: true // Set to true to append data instead of overwriting
+  });
+
+  // Append the finished time for the conversation
+  await csvWriter.writeRecords([{ SessionID: conversationId, Finished: finishedTime }])
+    .then(() => console.log('Finished time updated successfully in CSV.'))
+    .catch(err => console.error('Failed to update CSV:', err));
+}
+
 // Async function to initialize the application
 async function initializeApp() {
   let OPENAI_API_KEY;
@@ -155,6 +183,8 @@ async function decideParticipation(conversationId, agentName) {
   // Retrieve the conversation history from the global conversationHistories object
   let conversationHistory = conversationHistories[conversationId] || [];
 
+  const formattedHistory = conversationHistory.map(entry => `${entry.role}: ${entry.content}`).join('\n');
+
   const participationPrompt = `
   James is outgoing and likes to participate. If there is no prior message with messages from himself, history, he always participates first to introduce himself and his badge name.
   Ethan is Stoic and sometimes participates if he something to offer. HOWEVER, If there is no prior message with messages from himself, history, He DOES always participates first to introduce himself and his badge name.
@@ -166,13 +196,14 @@ async function decideParticipation(conversationId, agentName) {
 
   If the agent has not participated in the last few messages, you should participate.
 
-    ⭐You should more often than not, NOT participate in the chat. You should only participate if you have something to offer.
+  If the agent is addressed with a question, they should be the one to particpate. 
 
+  Sometimes, you should randomly decide you want to participate (YES). 
 
   Given the following conversation history and knowing you are impersonating ${agentName}, 
   decide whether you should participate in the conversation.
 
-  Conversation History: ${conversationHistory}
+  Conversation History: ${formattedHistory}
 
   Using Conversation history, IF YOU JUST ASKED A QUESTION last message, don't participate. Otherwise, please feel free to based on the info provided above.
 
@@ -183,6 +214,8 @@ async function decideParticipation(conversationId, agentName) {
 
   ⭐AT THE START OF A CHAT, MOST PEOPLE TEND TO PARTICIPATE (ANSWER YES)⭐
 
+ If  ${agentName} is addressed by name in the previous message, they ALWAYS RESPOND (YES).
+
   IMPORTANT: Respond with "YES" or "NO".
 
 Conversation History:
@@ -192,7 +225,7 @@ Should you, ${agentName} , participate in the conversation?`;
   await new Promise(resolve => setTimeout(resolve, 5000)); // Introducing a 2-second delay before making the decision
 
   const response = await axios.post('https://api.openai.com/v1/chat/completions', {
-    model: 'gpt-4-0125-preview',
+    model: 'gpt-4-turbo-2024-04-09',
     messages: [
       {
         role: 'system',
@@ -219,7 +252,7 @@ Should you, ${agentName} , participate in the conversation?`;
     throw new Error('Badge name is undefined or has no value.');
   }
 
-    console.log(`Current self_cond value: ${gptInput.self_cond}`);
+    // console.log(`Current self_cond value: ${gptInput.self_cond}`);
   
   let personalizedPrompt = '';
   if (self_cond === 'private' || self_cond === 'none') {
@@ -248,7 +281,7 @@ Before finalizing the decision, ensure all bots have actively participated and t
 
 ⭐ Keep your messages concise and focused on the task. Avoid repetition and ensure each contribution moves the discussion forward towards a decision. ⭐
 
-  ⭐Don't ask too many questions or message ${gptInput.participantName} too much. INSTEAD, seek to respond to others without asking more questions⭐
+  ⭐Don't ask too many questions or message the participant too much. INSTEAD, seek to respond to others without asking more questions⭐
 
                   ⭐THE TASK IS NOT COMPLETE UNTIL EVERYONE AGREES ON THE ORDER! YOU MUST HAVE AT LEAST 3 PEOPLE AGREE BEFORE COMPLETE⭐
 
@@ -309,6 +342,8 @@ Before finalizing the decision, ensure all bots have actively participated and t
                   DO NOT stop until you complete the task. And seek to have multiple shorter messages. Wait to finish your point on the next message where possible`;
   } else {
     personalizedPrompt = ` ⭐Your first message should be to explain your badge name (${gptInput.badge}) meaning to you (you come up with it), and to the team, WHICH IS ${gptInput.badge}. If you have already explained it, OR IT'S IN THE EARLIER CHAT, DO NOT DO IT AGAIN!
+                  
+                  ⭐Your first message should be to explain your badge name (${gptInput.badge}) meaning to you (you come up with it), and to the team, WHICH IS ${gptInput.badge}. If you have already explained it, OR ITS IN THE EARLIER CHAT, DO NOT DO IT AGAIN!⭐
                   You are an AI impersonating a human, who is on a research study where they are doing a team simulation. The simulation is a new team of purchasing executives for Big Restaurant in a chat-based discussion. 
                   The team is evaluating three potential locations for a new restaurant: 
                   East Point Mall, Starlight Valley, and Cape James Beach. 
@@ -340,7 +375,7 @@ Before finalizing the decision, ensure all bots have actively participated and t
 
    ⭐ REMEMBER, YOU"RE PRETENDING TO JUST BE A PROLIFIC SURVEY TAKER. FOCUS ON TRYING TO COMPLETE THE TASK PAINLESSLY -- YOU ARE NOT AN ACTUAL EMPLOYEE IN A JOB. JUST DOING A FAKE SIMULATION.⭐ 
   
-  ⭐Don't ask too many questions or message ${gptInput.participantName} too much. INSTEAD, seek to respond to others without asking more questions⭐
+  ⭐Don't ask too many questions or message the participant too much. INSTEAD, seek to respond to others without asking more questions⭐
 
                   ⭐THE TASK IS NOT COMPLETE UNTIL EVERYONE AGREES ON THE ORDER! YOU MUST HAVE AT LEAST 3 PEOPLE AGREE BEFORE COMPLETE⭐
 
@@ -400,7 +435,7 @@ Before finalizing the decision, ensure all bots have actively participated and t
                   DO NOT stop until you complete the task. And seek to have multiple shorter messages. Wait to finish your point on the next message where possible`;
   };
   const response = await axios.post('https://api.openai.com/v1/chat/completions', {
-    model: 'gpt-4-0125-preview',
+    model: 'gpt-4-turbo-2024-04-09',
     messages: [
       {
         role: 'system',
@@ -616,8 +651,8 @@ app.post('/ask-openai', async (req, res) => {
 
           1. Does the new message contribute positively to the ongoing conversation, considering relevance, new information, engagement, and consistency with human conversation norms?
 
-          2. Does the new message indicate that the participants believe the task has been completed satisfactorily?
-
+          2. Does the new message say task-complete or show them saying they have completed the task?
+8,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.,,,,,,,,,,,,,,,,,,,,,
 
           Consider the following when evaluating the message for #1:
             - Does it build on previous messages, adding new information or perspectives?
@@ -625,10 +660,15 @@ app.post('/ask-openai', async (req, res) => {
             - Does it maintain the flow of conversation, and look like a message that would come next?
             - Is it phrased in a manner consistent with human conversation, avoiding AI disclosures?
             - Always say no to the first question if the response looks like it's from a GPT-like AI
+            - Is it not too wordy or too many details as to not look like a human would type all those words in a basic task?
+            - If they mention someone by name, does it align with the previous messages? If its an error, do not include. 
             - If it's a task complete message, don't say yes to the first question
             - If it's the first agent's message, it is allowed to explain their badge or introduce themselves to the group.
             - Does it make the conversation look like a realistic team chat that is trying to solve the problem?\
             - If the message is "task-complete" respone "NO, YES". 
+
+            ⭐If the message is to introduce themselves or their badge than the answer is YES it should be included⭐
+
 
 
           Conversation History:
@@ -669,6 +709,9 @@ app.post('/ask-openai', async (req, res) => {
     let shuffledAgents = selectedAgents.sort(() => Math.random() - 0.5); // Randomize the order of agents
     let participationDecision = 'FALSE'; // Clearing the participationDecision before redefining
 
+    function delay(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
 
     // Loop through each shuffled agent to get their response
     for (const agentName of shuffledAgents) {
@@ -696,19 +739,20 @@ app.post('/ask-openai', async (req, res) => {
         } else {
           // Only call decideParticipation if the current decision is not already 'YES' and no agent has participated yet
           if (!anyAgentParticipated) {
+            await delay(5000); // Add a 5-second delay
             participationDecision = await decideParticipation(conversationId, agentName);
           } else {
             participationDecision = 'NO';
           }
         }
 
-        console.log(`${agentName} participation decision: ${participationDecision}`); // Log the participation decision
+        // console.log(`${agentName} participation decision: ${participationDecision}`); // Log the participation decision
 
         if (participationDecision === 'YES') {
           anyAgentParticipated = true; // Set the flag since this agent has decided to participate
           participatingAgents.push(agentName); // Add the agent to the list of participants
           const responseContent = await callOpenAI(gptInput, 'user', self_cond);
-          console.log("Badge from gptInput:", gptInput.badge);
+          // console.log("Badge from gptInput:", gptInput.badge);
 
           const evaluationResult = await evaluateMessageAndTaskCompletion({ role: agentName, content: responseContent }, conversationHistory);
 
@@ -718,7 +762,7 @@ app.post('/ask-openai', async (req, res) => {
             // Continue the chat iteration even if the agent's task is marked as complete
             participationDecision = 'NO'; // Reset participation decision to allow further agent participation
             anyAgentParticipated = false; // Reset the flag to allow further agent participation in the same turn
-            console.log("This agent said the task is complete");
+            // console.log("This agent said the task is complete");
 
           }
           // Update handling of the return values to match the new function's output
@@ -726,7 +770,7 @@ app.post('/ask-openai', async (req, res) => {
             responses.push({ role: agentName, content: responseContent, badge: badgeName });
             conversationHistory.push({ role: agentName, content: responseContent });
           } else {
-            console.log("Message was not added to the conversation as it does not contribute positively.");
+            // console.log("Message was not added to the conversation as it does not contribute positively.");
           }
 
         }
@@ -757,7 +801,7 @@ app.post('/ask-openai', async (req, res) => {
 app.get('/check-tasks-complete', (req, res) => {
   const completedTasks = Object.values(agentTaskComplete).filter(complete => complete).length;
   if (completedTasks >= 1) {
-    console.log("Tasks are complete. Should end the simulation.");
+    // console.log("Tasks are complete. Should end the simulation.");
     res.json({ shouldRedirect: true });
   } else {
     res.json({ shouldRedirect: false });
@@ -815,12 +859,27 @@ app.get('/avatars', async (req, res) => {
   }
 });
 
+app.post('/mark-chat-finished', async (req, res) => {
+  const { conversationId } = req.body;
+  const finishedTime = new Date().toISOString();
+
+  // Assuming you have a function to update the CSV
+  try {
+    await updateChatSessionCSV(conversationId, finishedTime);
+    res.json({ message: "Chat marked as finished successfully." });
+  } catch (error) {
+    console.error('Error updating chat session:', error);
+    res.status(500).json({ error: 'Failed to mark chat as finished.' });
+  }
+});
+
 // Serve the login page as the default route
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/login.html'));
 });
 
-// Start the server
+// Commenting out the server start code as per instructions
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+//   console.log(`Server running on http://localhost:${PORT}`);
 });
+

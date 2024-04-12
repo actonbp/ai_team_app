@@ -90,3 +90,39 @@ body {
     /* Different color for received messages */
     /* Received messages are left-aligned by default */
 }
+
+/* Add media queries for smaller screens */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 30%; /* Increase sidebar width on smaller screens */
+    }
+
+    .chat-area {
+        width: 70%; /* Adjust chat area width accordingly */
+    }
+
+    #messageInput, #sendMessageButton, #raiseHandButton {
+        padding: 8px; /* Reduce padding */
+        font-size: 14px; /* Reduce font size */
+    }
+
+    .message {
+        padding: 8px; /* Reduce padding inside message bubbles */
+        margin-bottom: 8px; /* Reduce margin between messages */
+        max-width: 70%; /* Increase max-width for better readability */
+    }
+}
+
+/* Further adjustments for very small screens */
+@media (max-width: 480px) {
+    .sidebar {
+        display: none; /* Hide sidebar on very small screens */
+    }
+
+    .chat-area {
+        width: 100%; /* Chat area takes full width */
+    }
+
+    #messageInput, #sendMessageButton, #raiseHandButton {
+        padding: 6px; /* Further reduce padding */
+        font-size: 12px; /* Further reduce font size */

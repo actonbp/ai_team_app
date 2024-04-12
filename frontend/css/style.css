@@ -22,18 +22,18 @@ body {
     /* Ensures the page is scrollable */
     line-height: 1.6;
     /* Improve line spacing */
-    font-size: 18px;
-    /* Increase base font size for better readability */
+    font-size: 14px;
+    /* Decrease base font size for better readability */
     padding: 0 20px;
     /* Add horizontal padding */
 }
 
 form {
     background: white;
-    padding: 20px;
+    padding: 10px;
     border-radius: 5px;
     box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.1);
-    width: 50%;
+    width: 80%;
     /* Adjust form width for a cleaner look */
     display: flex;
     /* Use flex to align form items nicely */
@@ -47,15 +47,15 @@ form {
 
 form input,
 form button {
-    padding: 10px;
-    /* Add padding for better touch targets */
-    margin: 10px 0;
-    /* Increase margin for spacing */
+    padding: 6px;
+    /* Decrease padding for better touch targets */
+    margin: 6px 0;
+    /* Decrease margin for spacing */
     border: 2px solid #ccc;
     /* Solid border for inputs */
     border-radius: 5px;
     /* Round the corners of inputs and button */
-    width: calc(100% - 24px); /* Adjust width to account for padding */
+    width: calc(100% - 16px); /* Adjust width to account for padding */
 }
 
 form button {
@@ -136,8 +136,19 @@ form button:hover {
     display: flex;
     flex-direction: column;
     background-color: #D3D3D3; /* Light grey background */
-    width: 800px;
+    width: 70%;
+        /* Decrease the width to make the chat window smaller */
+        max-width: 1000px;
+        /* Adjust max-width for better control over the chat window size */
     height: 1000px;
+}
+
+/* Increase the base font size for the chat area */
+.chat-container .message,
+.chat-container .message input,
+.chat-container .message button {
+font-size: 16px;
+    /* Increase the font size for better readability */
 }
 
 .sidebar {
@@ -342,6 +353,7 @@ form button:hover {
             /* Align items in a column */
             align-items: center;
             width: 100%;
+            font-size: 14px;
             /* Ensure the container spans the full width */
         }
     

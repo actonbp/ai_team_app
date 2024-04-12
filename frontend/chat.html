@@ -3,6 +3,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <head>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Team Chat</title>
@@ -211,8 +212,10 @@
         <section class="chat-container">
             <header class="chat-header">
                 <div id="teamMembersSection" class="team-members-section">
-                    <h2>Teammate Information</h2>
-                    <div id="teamMembers" class="team-members">
+            <div class="warning-message">
+            DO NOT CLOSE OR REFRESH THIS PAGE AS YOU MAY LOSE YOUR ABILITY TO FINISH SURVEY FOR PROLIFIC
+            </div>                    
+                        <div id="teamMembers" class="team-members">
                         <div id="myInformation" class="team-member my-info">
                             <img id="participantAvatar" src="default_avatar.png" alt="Participant Avatar"
                                 style="width: 50px; height: 50px;">
@@ -302,9 +305,9 @@
             </div>
             <div class="help-section" id="helpSection">
                 <!-- Help Section Content -->
-                <h2>Help & Instructions</h2>
-                <p>Your group's goal is to rank the three locations in order of most attributes met. Each person has
-                    unique info. You cannot paste the info in the chat.</p>
+                <h2>Task Directions & Help</h2>
+                <p>Your group's goal is to rank the three locations in order of most attributes met. Each person has unique info. You cannot paste the info in the chat.</p>
+                <p>Once you have discussed and come to an agreement on the ranking of the three locations, based on which one meets the most attributes, check the "Done" box. Remember, no attribute is more important than any other, and each team member has both unique and shared information. It's crucial to work together to achieve the best outcome.</p>
             </div>
             <div id="notesSection" style="display:none;">
                 <textarea id="notesPad" rows="10" cols="50">Take your notes here...</textarea>
@@ -390,6 +393,7 @@
             }
         });
     </script>
+
 </body>
 <script src="js/darkMode.js"></script>
 </html>

@@ -25,9 +25,11 @@ messageInput.style.display = 'none';
 sendMessageButton.style.display = 'none';
 
 // Initialize an empty array to store the conversation history
-let conversationHistory = JSON.parse(localStorage.getItem('conversationHistory')) || [];
+const conversationId = localStorage.getItem('currentConversationId');
+let conversationHistory = JSON.parse(localStorage.getItem(`conversationHistory_${conversationId}`)) || [];
 
-let taskCompleteCount = parseInt(localStorage.getItem('taskCompleteCount')) || 0;
+
+let taskCompleteCount = parseInt(localStorage.getItem(`taskCompleteCount_${conversationId}`)) || 0;
 
 let activeMessages = 0;
 
@@ -134,29 +136,38 @@ document.getElementById('chatTab').addEventListener('click', function () {
     // Add any additional logic needed for showing the chat and hiding other sections
 });
 function startNewChat() {
-    fetch('/start-chat', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            self_cond: localStorage.getItem('self_cond'), // Ensure this matches what's stored in localStorage
-            prolificId: localStorage.getItem('prolificId') // Add this line to include prolificId
+    const existingConversationId = localStorage.getItem('currentConversationId');
+    if (!existingConversationId) {
+        fetch('/start-chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                self_cond: localStorage.getItem('self_cond'), // Ensure this matches what's stored in localStorage
+                prolificId: localStorage.getItem('prolificId') // Correctly include prolificId
+                // Remove the incorrect line setting team_race to prolificId
+            })
         })
-    })
-    .then(response => response.json())
-    .then(data => {
-        const { team_race } = data;
-        localStorage.setItem('team_race', team_race); // Store team_race in localStorage
-        // Store the conversationId received from the server in localStorage
-        localStorage.setItem('currentConversationId', data.conversationId);
-        console.log(`OH YEAH, New chat started with ID: ${data.conversationId} for team race: ${team_race}`);
-        // Correctly set agents based on team_race being 'A' or 'B'
+            .then(response => response.json())
+            .then(data => {
+                // Assuming the server response includes conversationId and team_race
+                localStorage.setItem('team_race', data.team_race); // Store team_race in localStorage
+                localStorage.setItem('currentConversationId', data.conversationId); // Store the conversationId in localStorage
+                console.log(`New chat started with ID: ${data.conversationId} for team race: ${data.team_race}`);
+                // Set agents based on team_race
+                agents = data.team_race === 'A' ? agentsOptions.A : agentsOptions.B;
+                displayTeamMembers(); // Ensure agents are set
+            })
+            .catch(error => console.error('Error starting new chat:', error));
+    } else {
+        // If a conversationId exists, use the existing session data
+        const team_race = localStorage.getItem('team_race');
         agents = team_race === 'A' ? agentsOptions.A : agentsOptions.B;
-        displayTeamMembers(); // Call displayTeamMembers here to ensure agents are set
-    })
-    .catch(error => console.error('Error starting new chat:', error));
+        displayTeamMembers(); // Ensure agents are set based on existing team_race
+    }
 }
+
 function appendMessageAfterTyping(messageText, isAgent = false, agentName, avatar = null) {
     // Default typing speed for participants
     let typingSpeed = 200;
@@ -179,7 +190,7 @@ function appendMessageAfterTyping(messageText, isAgent = false, agentName, avata
     }, typingDuration);
 }
 
-function appendMessage(messageText, isAgent = false, agentName, avatar = null, isParticipant = false, badgeName) {
+function appendMessage(messageText, isAgent = false, agentName, avatar = null, isParticipant = false, badgeName, isJoinMessage = false) {
     const messageElement = document.createElement('div');
     messageElement.classList.add('message');
 
@@ -214,6 +225,15 @@ function appendMessage(messageText, isAgent = false, agentName, avatar = null, i
 
     const textElement = document.createElement('div');
     textElement.classList.add('text');
+    if (isJoinMessage) {
+        // Create a simple text element for join messages
+        const joinTextElement = document.createElement('div');
+        joinTextElement.innerText = messageText;
+        joinTextElement.style.color = 'gray';
+        joinTextElement.classList.add('join-message-plain'); // Ensure this class does not add bubble-like styles
+        messageContainer.appendChild(joinTextElement); // Append directly to the message container
+        return; // Skip the rest of the function to avoid adding bubble styling
+    }
 
     const participantBadgeName = localStorage.getItem('badgeName');
     // Predefined introduction message from Agent 1 (James) including the participant's badge name
@@ -222,6 +242,9 @@ function appendMessage(messageText, isAgent = false, agentName, avatar = null, i
         textElement.innerText = `${firstName} ${localStorage.getItem('self_cond') === 'public' ? `(${participantBadgeName})` : ''}: ${messageText}`;
         // Add the participant's message to the conversation history with their first name and conditionally include the badge name based on public condition
         conversationHistory.push({ role: `${firstName} ${localStorage.getItem('self_cond') === 'public' ? `(${badgeName})` : ''}`, content: messageText, isParticipant: true });
+
+        console.log('Participant message appended:', messageText);
+
     } else {
         // Retrieve the agent's badge from the agents object using the agentName and conditionally include it based on public condition
         const agentBadge = agent ? agent.agentBadge : 'Unknown'; // Retrieve the agent's badge
@@ -251,7 +274,7 @@ function appendMessage(messageText, isAgent = false, agentName, avatar = null, i
     });
 
     // Save the updated conversation history in localStorage
-    localStorage.setItem('conversationHistory', JSON.stringify(conversationHistory));
+    localStorage.setItem(`conversationHistory_${conversationId}`, JSON.stringify(conversationHistory));
 
     return messageElement;
 }
@@ -359,10 +382,10 @@ sendMessageButton.addEventListener('click', () => {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                message: "Your message here",
+                message: messageText, // Use the actual message content variable
                 conversationId: localStorage.getItem('currentConversationId'), // Ensure this is correctly set
-                participantName: "Participant's Name",
-                self_cond: "Condition"
+                participantName: firstName, // Use the participant's actual name variable
+                self_cond: localStorage.getItem('self_cond') // Use the actual condition
             })
         })
             .then(response => {
@@ -631,10 +654,8 @@ function displayTeamMembers() {
     Object.values(agents).forEach(agent => {
         setTimeout(() => {
             const joinMessageText = `${agent.agentName} has joined the chat!`;
-            const plainTextElement = document.createElement('p'); // Create a paragraph element for plain text
-            plainTextElement.textContent = joinMessageText;
-            plainTextElement.style.color = 'gray'; // Optional: Style as needed
-            container.appendChild(plainTextElement); // Append the plain text element to the container
+            // Use appendMessage to add the join message to the chat window
+            appendMessage(joinMessageText, true, agent.agentName, agent.avatar, false, '', true);
         }, delay);
         delay += delayIncrement; // Increment delay for the next agent
     });
