@@ -23,8 +23,8 @@ document.addEventListener('DOMContentLoaded', (event) => {
     // Display the self_cond value for testing
     const selfCond = localStorage.getItem('self_cond');
     const conditionDisplayElement = document.createElement('p');
-    conditionDisplayElement.textContent = `Current Condition: ${selfCond}`;
-    document.body.appendChild(conditionDisplayElement);
+    // conditionDisplayElement.textContent = `Current Condition: ${selfCond}`;
+    // document.body.appendChild(conditionDisplayElement);
 
     // Simplified code to redirect to login.html on Next button click, only if Prolific ID is entered
     nextButton.addEventListener('click', function() {

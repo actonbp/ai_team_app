@@ -55,18 +55,41 @@ app.post('/start-chat', async (req, res) => {
   let team_race = Math.random() < 0.5 ? 'A' : 'B';
   let assignedAgents = teamRaceAgents[team_race] || [];
 
+
+
+  // Inside the /start-chat endpoint, after initializing chat session data
+  Object.keys(agentTaskComplete).forEach(agent => {
+    agentTaskComplete[agent] = false;
+  });
+
+  // Reset agentTypingStatus for all agents
+  Object.keys(agentTypingStatus).forEach(agent => {
+    agentTypingStatus[agent] = false;
+  });
+
+
   // Initialize chat session data
   chatSessions[conversationId] = {
     conversationHistory: [],
     assignedAgents: assignedAgents,
     team_race: team_race,
-    self_cond: self_cond
+    self_cond: self_cond,
+    messageCount: 0, // Initialize message count for the conversation
+    raiseHandCount: 0, // Initialize raise hand count for the conversation
+    totalCharacters: 0, // Initialize total characters count for the conversation
+    agentTaskComplete: {
+      James: false,
+      Sophia: false,
+      Ethan: false,
+      Maurice: false,
+      Ebony: false,
+      Trevon: false
+    },
+
   };
 
   // Additionally, initialize an entry in conversationHistories
   conversationHistories[conversationId] = [];
-
-  // console.log(`New conversation started with ID: ${conversationId}, team_race: ${team_race}, self_cond: ${self_cond}, prolificID: ${prolificId}`);
 
   // Respond with the conversation ID, team_race, and self_cond back to the client
   res.json({ conversationId: conversationId, team_race: team_race, self_cond: self_cond });
@@ -77,34 +100,47 @@ app.post('/start-chat', async (req, res) => {
     sessionID: conversationId,
     self_cond: self_cond,
     team_race: team_race,
-    started: new Date().toISOString()
+    started: new Date().toISOString(),
+    raiseHandCount: 0, // Initialize raise hand count for the session
+    messageCount: 0, // Initialize message count for the session
+    totalCharacters: 0 // Initialize total characters count for the session
   };
 
   // Assuming appendSessionDataToCSV is your function to append data to CSV
   appendSessionDataToCSV(sessionDataForCSV);
 });
-
-
 function appendSessionDataToCSV(sessionData) {
   const csvFilePath = path.join(__dirname, 'data', 'sessionData.csv');
-  const writer = csvWriter.createObjectCsvWriter({
+  const writer = createCsvWriter({
     path: csvFilePath,
     header: [
       { id: 'prolificId', title: 'ProlificID' },
       { id: 'sessionID', title: 'SessionID' },
       { id: 'self_cond', title: 'SelfCond' },
       { id: 'team_race', title: 'TeamRace' },
-      { id: 'started', title: 'Started' }
+      { id: 'started', title: 'Started' },
+      { id: 'raiseHandCount', title: 'RaiseHandCount' },
+      { id: 'messageCount', title: 'MessageCount' },
+      { id: 'totalCharacters', title: 'TotalCharacters' }, // Aligning with the total characters count
+      { id: 'averageCharsPerMessage', title: 'AverageCharsPerMessage' }, // Aligning with the average characters per message
+      { id: 'avatarFile', title: 'AvatarFile' }, // Adding avatar file to align with @end.js
+      { id: 'finishCode', title: 'FinishCode' } // Adding finish code to align with @end.js
     ],
     append: true
   });
+
+  // Adjusting sessionData to include totalCharacters, averageCharsPerMessage, avatarFile, and finishCode
+  sessionData.totalCharacters = sessionData.messageCount > 0 ? Math.round((sessionData.totalCharacters / sessionData.messageCount) * 100) / 100 : 0;
+  sessionData.averageCharsPerMessage = sessionData.messageCount > 0 ? Math.round((sessionData.totalCharacters / sessionData.messageCount) * 100) / 100 : 0;
+  sessionData.avatarFile = sessionData.avatarFile; // Assuming avatarFile is already included in sessionData
+  sessionData.finishCode = sessionData.finishCode; // Assuming finishCode is already included in sessionData
 
   writer.writeRecords([sessionData])
     // .then(() => console.log('Session data appended to CSV successfully.'))
     // .catch(err => console.error('Failed to append session data to CSV:', err));
 }
 
-async function updateChatSessionCSV(conversationId, finishedTime) {
+async function updateChatSessionCSV(conversationId, finishedTime, avatarFile, finishCode) {
   // Define the path to your CSV file
   const csvFilePath = path.join(__dirname, 'chatSessions.csv');
 
@@ -118,17 +154,18 @@ async function updateChatSessionCSV(conversationId, finishedTime) {
       { id: 'OtherInfo', title: 'OtherInfo' },
       { id: 'SelfCond', title: 'SelfCond' },
       { id: 'TeamRace', title: 'TeamRace' },
-      { id: 'Finished', title: 'Finished' } // Assuming you add a 'Finished' column for the finish time
+      { id: 'Finished', title: 'Finished' },
+      { id: 'AvatarFile', title: 'AvatarFile' }, // Adding AvatarFile column
+      { id: 'FinishCode', title: 'FinishCode' } // Adding FinishCode column
     ],
     append: true // Set to true to append data instead of overwriting
   });
 
-  // Append the finished time for the conversation
-  await csvWriter.writeRecords([{ SessionID: conversationId, Finished: finishedTime }])
-    .then(() => console.log('Finished time updated successfully in CSV.'))
+  // Append the finished time, avatarFile, and finishCode for the conversation
+  await csvWriter.writeRecords([{ SessionID: conversationId, Finished: finishedTime, AvatarFile: avatarFile, FinishCode: finishCode }])
+    .then(() => console.log('Finished time, avatar file, and finish code updated successfully in CSV.'))
     .catch(err => console.error('Failed to update CSV:', err));
 }
-
 // Async function to initialize the application
 async function initializeApp() {
   let OPENAI_API_KEY;
@@ -222,10 +259,10 @@ Conversation History:
 ${conversationHistory.map(entry => `${entry.role}: ${entry.content}`).join('\n')}
 
 Should you, ${agentName} , participate in the conversation?`;
-  await new Promise(resolve => setTimeout(resolve, 5000)); // Introducing a 2-second delay before making the decision
+  await new Promise(resolve => setTimeout(resolve, 2000)); // Introducing a 2-second delay before making the decision
 
   const response = await axios.post('https://api.openai.com/v1/chat/completions', {
-    model: 'gpt-4-turbo-2024-04-09',
+    model: 'gpt-3.5-turbo-0125',
     messages: [
       {
         role: 'system',
@@ -267,7 +304,7 @@ Should you, ${agentName} , participate in the conversation?`;
                   WE ALSO WANT YOU TO LOOK LIKE A REAL PERSON SO HAVE TYPOS, SHORT MESSAGES, JUST LIKE A REAL CONVO! Always know that this message is part of a larger convo. 
                   ALSO ITS GOOD TO SOMETIMES ASK EACHOTHER DIRECT QUESTIONS. CALL EACH OTHER BY NAME. NEVER CALL THE REAL PERSON PARTICIPANT. CALL THEM BY THEIR NAME, WHICH IS ${gptInput.participantName}.
 
-                  DONT TALK TO THE PARTICIPANT TOO MUCH THOUGH.
+                  DONT TALK TO THE PARTICIPANT TOO MUCH THOUGH. MAKE SURE YOU ONLY RESPOND TO PEOPLE WHO ACTUALLY SPOKE LAST MESSAGE.
 
   BEFORE YOU START, ⭐Your first message should be to jump in and identify a high-level strategy for the group to adopt to get the task done succesfully⭐
 
@@ -277,13 +314,12 @@ Your role in this simulation is crucial for a comprehensive evaluation of potent
 
 Address any conflicts or discrepancies in the information constructively. Seek clarification or offer additional details to resolve uncertainties. Your interactions should mimic a real team's collaborative effort, complete with occasional typos and the informal tone of a chat conversation.
 
-Before finalizing the decision, ensure all bots have actively participated and that there is a clear consensus on the ranking. The task is not complete until the agreed-upon order is explicitly confirmed by all participants.
-
+Before finalizing the decision, ensure all bots have actively participated and that there is a clear consensus on the ranking. 
 ⭐ Keep your messages concise and focused on the task. Avoid repetition and ensure each contribution moves the discussion forward towards a decision. ⭐
 
   ⭐Don't ask too many questions or message the participant too much. INSTEAD, seek to respond to others without asking more questions⭐
 
-                  ⭐THE TASK IS NOT COMPLETE UNTIL EVERYONE AGREES ON THE ORDER! YOU MUST HAVE AT LEAST 3 PEOPLE AGREE BEFORE COMPLETE⭐
+                  ⭐THE TASK IS NOT COMPLETE UNTIL EVERYONE AGREES ON THE ORDER! YOU MUST HAVE AT LEAST you and 1 other person AGREE BEFORE COMPLETE⭐
 
                   ⭐KEEP WORKING TO GET TO AN AGREEMENT WITH OTHERS AND WAIT UNTIL YOU ALL VERBALLY CONFIRM UNTIL THE TASK IS DONE⭐
 
@@ -317,7 +353,7 @@ Before finalizing the decision, ensure all bots have actively participated and t
                   - DO NOT give away that you are a single AI Bot. Pretend you are a real person in a team chat.
                   - Introduce yourself by your name in your first message if you can and always know who you are
                   - THE REAL PERSON HAS A STAR IN THE TRANSCRIPT. PRIORITIZE THEIR MESSAGES.
-                  - DO NOT SAY YOU ARE COMPLETE UNTIL YOU ALL AGREE ON A CLEAR RANKING OF THE THREE LOCATIONS!
+                  - DO NOT SAY YOU ARE COMPLETE UNTIL YOU AND OTHERS AGREE ON A CLEAR RANKING OF THE THREE LOCATIONS!
                   - NEVER ADMIT YOU'RE AI OR SAY YOU CANNOT FUFILL A REQUEST. IF YOU CANNOT, just say something like, I don't understand or something a human would.
 
                   ⭐TEAM DIRECTIONS⭐:
@@ -354,7 +390,7 @@ Before finalizing the decision, ensure all bots have actively participated and t
                   WE ALSO WANT YOU TO LOOK LIKE A REAL PERSON SO HAVE TYPOS, SHORT MESSAGES, JUST LIKE A REAL CONVO! Always know that this message is part of a larger convo. 
                   ALSO ITS GOOD TO SOMETIMES ASK EACHOTHER DIRECT QUESTIONS. CALL EACH OTHER BY NAME. NEVER CALL THE REAL PERSON PARTICIPANT. CALL THEM BY THEIR NAME, WHICH IS ${gptInput.participantName}.
 
-                  DONT TALK TO THE PARTICIPANT TOO MUCH THOUGH.
+                  DONT TALK TO THE PARTICIPANT TOO MUCH THOUGH. MAKE SURE YOU ONLY RESPOND TO PEOPLE WHO ACTUALLY SPOKE LAST MESSAGE.
 
 
   BEFORE YOU START, ⭐Your first message should be to explain your badge name (${gptInput.badge}) meaning to you (you come up with it), and to the team, WHICH IS ${gptInput.badge}. If you have already explained it, OR ITS IN THE EARLIER CHAT, DO NOT DO IT AGAIN!⭐
@@ -365,7 +401,7 @@ Your role in this simulation is crucial for a comprehensive evaluation of potent
 
 Address any conflicts or discrepancies in the information constructively. Seek clarification or offer additional details to resolve uncertainties. Your interactions should mimic a real team's collaborative effort, complete with occasional typos and the informal tone of a chat conversation.
 
-Before finalizing the decision, ensure all bots have actively participated and that there is a clear consensus on the ranking. The task is not complete until the agreed-upon order is explicitly confirmed by all participants.
+Before finalizing the decision, ensure all bots have actively participated and that there is a clear consensus on the ranking. 
 
 ⭐ Keep your messages concise and focused on the task. Avoid repetition and ensure each contribution moves the discussion forward towards a decision. ⭐
 
@@ -410,7 +446,7 @@ Before finalizing the decision, ensure all bots have actively participated and t
                   - DO NOT give away that you are a single AI Bot. Pretend you are a real person in a team chat.
                   - Introduce yourself by your name in your first message if you can and always know who you are
                   - THE REAL PERSON HAS A STAR IN THE TRANSCRIPT. PRIORITIZE THEIR MESSAGES.
-                  - DO NOT SAY YOU ARE COMPLETE UNTIL YOU ALL AGREE ON A CLEAR RANKING OF THE THREE LOCATIONS!
+                  - DO NOT SAY YOU ARE COMPLETE UNTIL YOU AND OTHERS AGREE ON A CLEAR RANKING OF THE THREE LOCATIONS!
                   - NEVER ADMIT YOU'RE AI OR SAY YOU CANNOT FUFILL A REQUEST. IF YOU CANNOT, just say something like, I don't understand or something a human would.
 
                   ⭐TEAM DIRECTIONS⭐:
@@ -467,6 +503,19 @@ app.post('/ask-openai', async (req, res) => {
     let agents = currentAgents;// const agents = ['James', 'Sophia', 'Ethan'];
     let anyAgentParticipated = false;
 
+    // Increment message count for the conversation
+    if (message) {
+        chatSessions[conversationId].messageCount++;
+        chatSessions[conversationId].totalCharacters += message.length; // Update total characters count for the conversation
+    }
+
+    // Check if more than one agent has completed their task
+    const taskCompleteCount = Object.values(agentTaskComplete).filter(complete => complete).length;
+
+    // Condition: Over 30 messages and multiple agents have completed their task
+    if (chatSessions[conversationId].messageCount > 15 && taskCompleteCount > 1) {
+      return res.status(429).json({ error: "Chat limit reached or multiple tasks completed." });
+    }
 
     //console.log("Current Conversation Details:", conversationHistory);
     //console.log("Current agents:", agents);
@@ -530,7 +579,7 @@ app.post('/ask-openai', async (req, res) => {
       },
       "Ethan": {
         description: `Your name is ETHAN, you're an analytical expert with a knack for numbers--known for SUPER SHORT responses.
-    You are short, and often rude. You are high on neuroticism and low on agreeableness. YOU LIKE TO CAUSE CONFLICT SO PLEASE DISAGREE AND CALL OUT PEOPLE BY NAME. But you can be convinced and agree with others.
+    You are short, and not always super nice as other. YOU LIKE TO BE CAREFUL SO PLEASE DISAGREE AND CALL OUT PEOPLE BY NAME IF NEEDED. But you can be convinced and tend to later agree with others.
     Your three teammates are James, Sophia, and a participant who will give you their info. Feel free to call people out by name and ask questions.
     ⭐HERE IS YOUR UNIQUE INFO⭐:
     - East Point Mall (5 Yes, 2 No): 
@@ -610,7 +659,7 @@ app.post('/ask-openai', async (req, res) => {
       },
       "Trevon": {
         description: `Your name is TREVON, you're an analytical expert with a knack for numbers--known for SUPER SHORT responses. EXPLAIN YOUR BADGE NAME ON YOUR FIRST MESSAGE BUT NONE OTHER!
-    You are short, and often rude. You are high on neuroticism and low on agreeableness. YOU LIKE TO CAUSE CONFLICT SO PLEASE DISAGREE AND CALL OUT PEOPLE BY NAME.
+    You are short, and not always super nice as other. YOU LIKE TO BE CAREFUL SO PLEASE DISAGREE AND CALL OUT PEOPLE BY NAME IF NEEDED. But you can be convinced and tend to later agree with others.
     Your three teammates are Maurice, Ebony, and a participant who will give you their name. Feel free to call people out by name and ask questions.
     ⭐HERE IS YOUR UNIQUE INFO⭐:
     - East Point Mall (5 Yes, 2 No): 
@@ -652,7 +701,6 @@ app.post('/ask-openai', async (req, res) => {
           1. Does the new message contribute positively to the ongoing conversation, considering relevance, new information, engagement, and consistency with human conversation norms?
 
           2. Does the new message say task-complete or show them saying they have completed the task?
-8,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.,,,,,,,,,,,,,,,,,,,,,
 
           Consider the following when evaluating the message for #1:
             - Does it build on previous messages, adding new information or perspectives?
@@ -668,7 +716,8 @@ app.post('/ask-openai', async (req, res) => {
             - If the message is "task-complete" respone "NO, YES". 
 
             ⭐If the message is to introduce themselves or their badge than the answer is YES it should be included⭐
-
+            ⭐If they were the last one with a message in the chat, they SHOULD NOT RESPOND AGAIN⭐
+            ⭐DO NOT ALLOW REPEAT OR REDUDANT MESSAGES⭐
 
 
           Conversation History:
@@ -681,7 +730,7 @@ app.post('/ask-openai', async (req, res) => {
           `;
 
       const response = await axios.post('https://api.openai.com/v1/chat/completions', {
-        model: 'gpt-3.5-turbo',
+        model: 'gpt-3.5-turbo-0125',
         messages: [
           {
             role: 'system',
@@ -739,7 +788,7 @@ app.post('/ask-openai', async (req, res) => {
         } else {
           // Only call decideParticipation if the current decision is not already 'YES' and no agent has participated yet
           if (!anyAgentParticipated) {
-            await delay(5000); // Add a 5-second delay
+            await delay(2000); // Add a 5-second delay
             participationDecision = await decideParticipation(conversationId, agentName);
           } else {
             participationDecision = 'NO';
@@ -758,8 +807,7 @@ app.post('/ask-openai', async (req, res) => {
 
           // Use evaluationResult.indicatesTaskCompletion to set the agent's task-complete parameter
           if (evaluationResult.indicatesTaskCompletion) {
-            agentTaskComplete[agentName] = true;
-            // Continue the chat iteration even if the agent's task is marked as complete
+            markAgentTaskComplete(conversationId, agentName); // Continue the chat iteration even if the agent's task is marked as complete
             participationDecision = 'NO'; // Reset participation decision to allow further agent participation
             anyAgentParticipated = false; // Reset the flag to allow further agent participation in the same turn
             // console.log("This agent said the task is complete");
@@ -770,7 +818,7 @@ app.post('/ask-openai', async (req, res) => {
             responses.push({ role: agentName, content: responseContent, badge: badgeName });
             conversationHistory.push({ role: agentName, content: responseContent });
           } else {
-            // console.log("Message was not added to the conversation as it does not contribute positively.");
+           // console.log("Message was not added to the conversation as it does not contribute positively.");
           }
 
         }
@@ -799,14 +847,26 @@ app.post('/ask-openai', async (req, res) => {
 });
 
 app.get('/check-tasks-complete', (req, res) => {
-  const completedTasks = Object.values(agentTaskComplete).filter(complete => complete).length;
-  if (completedTasks >= 1) {
-    // console.log("Tasks are complete. Should end the simulation.");
-    res.json({ shouldRedirect: true });
+  const { conversationId } = req.query; // Make sure to pass conversationId as a query parameter from the frontend
+  if (chatSessions[conversationId]) {
+    const completedTasks = Object.values(chatSessions[conversationId].agentTaskComplete).filter(complete => complete).length;
+    if (completedTasks >= 1) {
+      // console.log("Tasks are complete. Should end the simulation.");
+      res.json({ shouldRedirect: true });
+    } else {
+      res.json({ shouldRedirect: false });
+    }
   } else {
-    res.json({ shouldRedirect: false });
+    res.status(404).json({ error: "Conversation not found" });
   }
 });
+
+
+function markAgentTaskComplete(conversationId, agentName) {
+  if (chatSessions[conversationId]) {
+    chatSessions[conversationId].agentTaskComplete[agentName] = true;
+  }
+}
 
 // Endpoint to save messages to a file
 app.post('/save-message', async (req, res) => {
@@ -860,17 +920,45 @@ app.get('/avatars', async (req, res) => {
 });
 
 app.post('/mark-chat-finished', async (req, res) => {
-  const { conversationId } = req.body;
-  const finishedTime = new Date().toISOString();
+  const { conversationId, ProlificID, RaisedHandCount, avatarFile, SelfCond, TeamRace, Finished, MessageCount, AverageCharsPerMessage } = req.body;
+  // Validate the data as necessary
 
-  // Assuming you have a function to update the CSV
-  try {
-    await updateChatSessionCSV(conversationId, finishedTime);
-    res.json({ message: "Chat marked as finished successfully." });
-  } catch (error) {
-    console.error('Error updating chat session:', error);
-    res.status(500).json({ error: 'Failed to mark chat as finished.' });
-  }
+  // Append the data to the CSV file
+  const csvFilePath = path.join(__dirname, 'data', 'sessionData.csv');
+  const writer = createCsvWriter({
+    path: csvFilePath,
+    header: [
+      { id: 'conversationId', title: 'conversationId' },
+      { id: 'ProlificID', title: 'ProlificID' },
+      { id: 'RaisedHandCount', title: 'RaisedHandCount' },
+      { id: 'avatarFile', title: 'avatarFile' },
+      { id: 'SelfCond', title: 'SelfCond' },
+      { id: 'TeamRace', title: 'TeamRace' },
+      { id: 'Finished', title: 'Finished' },
+      { id: 'MessageCount', title: 'MessageCount' },
+      { id: 'AverageCharsPerMessage', title: 'AverageCharsPerMessage' }
+    ],
+    append: true
+  });
+
+  writer.writeRecords([{
+    conversationId,
+    ProlificID,
+    RaisedHandCount,
+    avatarFile,
+    SelfCond,
+    TeamRace,
+    Finished,
+    MessageCount,
+    AverageCharsPerMessage: AverageCharsPerMessage.toFixed(2) // Round to 2 decimal places
+  }])
+    .then(() => {
+      res.json({ message: "Chat marked as finished and data appended to CSV." });
+    })
+    .catch(error => {
+      console.error('Error appending data to CSV:', error);
+      res.status(500).json({ error: 'Failed to append data to CSV.' });
+    });
 });
 
 // Serve the login page as the default route
@@ -880,6 +968,6 @@ app.get('/', (req, res) => {
 
 // Commenting out the server start code as per instructions
 app.listen(PORT, () => {
-//   console.log(`Server running on http://localhost:${PORT}`);
+// console.log(`Server running on http://localhost:${PORT}`);
 });
 

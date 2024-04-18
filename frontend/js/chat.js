@@ -1,10 +1,13 @@
 // chat.js
 // Get the Prolific ID pop-up container and the main app container
-if (!localStorage.getItem('badgeName')) {
-    window.location.href = 'login.html';
-}// Retrieve first name and badge name from localStorage
+
 const firstName = localStorage.getItem('firstName');
 const badgeName = localStorage.getItem('badgeName');
+
+if (!localStorage.getItem('firstName')) {
+    window.location.href = 'login.html';
+}// Retrieve first name and badge name from localStorage
+
 // Import team_race from app.js// Assuming agentsOptions is defined globally or imported from another script that has access to app.js exports
 const messageInput = document.getElementById('messageInput');
 const sendMessageButton = document.getElementById('sendMessageButton');
@@ -38,7 +41,8 @@ let chatInterval;
 
 // Set an interval to check for chat completion every 30 seconds
 function checkAllTasksComplete() {
-    fetch('/check-tasks-complete', {
+    const conversationId = localStorage.getItem('currentConversationId'); // Retrieve the current conversation ID from localStorage
+    fetch(`/check-tasks-complete?conversationId=${conversationId}`, { // Add the conversationID as a query parameter
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -47,7 +51,7 @@ function checkAllTasksComplete() {
         .then(response => response.json())
         .then(data => {
             if (data.shouldRedirect) {
-                window.location.href = 'simulation_end.html';
+                window.location.href = 'end.html';
             }
         })
         .catch((error) => {
@@ -55,24 +59,25 @@ function checkAllTasksComplete() {
         });
 }
 
-chatInterval = setInterval(checkAllTasksComplete, 30000); // Check if all tasks are complete every 30 seconds
-
+setTimeout(() => {
+    chatInterval = setInterval(checkAllTasksComplete, 5000); // Start checking if all tasks are complete every 10 seconds, beginning 3 minutes after page load
+}, 60000); // 180000 milliseconds = 3 minutes
 
 let agents = {};
 
-typingDelay = 10000
+typingDelay = 5000
 // Clearing the agents object before redefining it
 
 const agentsOptions = {
     B: {
         'James': { agentName: 'James', avatar: 'avatars/majority/avatar_1.png', isAgent: true, typingSpeed: 130, agentBadge: 'Master of Motivation', color: 'rgba(255, 215, 0, 0.5)', colorRGB: { r: 255, g: 215, b: 0 } },
-        'Sophia': { agentName: 'Sophia', avatar: 'avatars/majority/avatar_2.png', isAgent: true, typingSpeed: 180, agentBadge: 'Strategist Supreme', color: 'rgba(255, 105, 180, 0.5)', colorRGB: { r: 255, g: 105, b: 180 } },
-        'Ethan': { agentName: 'Ethan', avatar: 'avatars/majority/avatar_3.png', isAgent: true, typingSpeed: 220, agentBadge: 'Logic Luminary', color: 'rgba(30, 144, 255, 0.5)', colorRGB: { r: 30, g: 144, b: 255 } }
+        'Sophia': { agentName: 'Sophia', avatar: 'avatars/majority/avatar_2.png', isAgent: true, typingSpeed: 150, agentBadge: 'Strategist Supreme', color: 'rgba(255, 105, 180, 0.5)', colorRGB: { r: 255, g: 105, b: 180 } },
+        'Ethan': { agentName: 'Ethan', avatar: 'avatars/majority/avatar_3.png', isAgent: true, typingSpeed: 170, agentBadge: 'Logic Luminary', color: 'rgba(30, 144, 255, 0.5)', colorRGB: { r: 30, g: 144, b: 255 } }
     },
     A: {
         'Maurice': { agentName: 'Maurice', avatar: 'avatars/minority/avatar_10.png', isAgent: true, typingSpeed: 130, agentBadge: 'Master of Motivation', color: 'rgba(255, 215, 0, 0.5)', colorRGB: { r: 255, g: 215, b: 0 } },
-        'Ebony': { agentName: 'Ebony', avatar: 'avatars/minority/avatar_11.png', isAgent: true, typingSpeed: 180, agentBadge: 'Strategist Supreme', color: 'rgba(255, 105, 180, 0.5)', colorRGB: { r: 255, g: 105, b: 180 } },
-        'Trevon': { agentName: 'Trevon', avatar: 'avatars/minority/avatar_13.png', isAgent: true, typingSpeed: 220, agentBadge: 'Logic Luminary', color: 'rgba(30, 144, 255, 0.5)', colorRGB: { r: 30, g: 144, b: 255 } }
+        'Ebony': { agentName: 'Ebony', avatar: 'avatars/minority/avatar_11.png', isAgent: true, typingSpeed: 150, agentBadge: 'Strategist Supreme', color: 'rgba(255, 105, 180, 0.5)', colorRGB: { r: 255, g: 105, b: 180 } },
+        'Trevon': { agentName: 'Trevon', avatar: 'avatars/minority/avatar_13.png', isAgent: true, typingSpeed: 270, agentBadge: 'Logic Luminary', color: 'rgba(30, 144, 255, 0.5)', colorRGB: { r: 30, g: 144, b: 255 } }
     }
 };
 // Corrected avatar paths to be consistent with the appendMessage function, added typingSpeed for each agent, and added agentBadge name to match @app.js
@@ -96,8 +101,11 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         document.getElementById('taskCompleteCheckbox').addEventListener('change', function () {
-        console.log('Checkbox clicked. Checking conditions...');
+        // console.log('Checkbox clicked. Checking conditions...');
         checkAllTasksComplete();
+        if (agentsTaskCompleteCount < 1) { // Assuming there are 2 agents, adjust condition as necessary
+            alert("Waiting for one other person to indicate task-complete");
+        }
         });
     }
 
@@ -105,6 +113,9 @@ document.addEventListener('DOMContentLoaded', function () {
     // Find the span elements by their IDs and set their text content using variables defined at the start of chat.js
     document.getElementById('firstName').textContent = localStorage.getItem('firstName');
     document.getElementById('badgeName').textContent = localStorage.getItem('badgeName');
+
+
+
     const messageInput = document.getElementById('messageInput');
     messageInput.addEventListener('copy', (e) => e.preventDefault());
     messageInput.addEventListener('paste', (e) => e.preventDefault());
@@ -154,7 +165,7 @@ function startNewChat() {
                 // Assuming the server response includes conversationId and team_race
                 localStorage.setItem('team_race', data.team_race); // Store team_race in localStorage
                 localStorage.setItem('currentConversationId', data.conversationId); // Store the conversationId in localStorage
-                console.log(`New chat started with ID: ${data.conversationId} for team race: ${data.team_race}`);
+                // console.log(`New chat started with ID: ${data.conversationId} for team race: ${data.team_race}`);
                 // Set agents based on team_race
                 agents = data.team_race === 'A' ? agentsOptions.A : agentsOptions.B;
                 displayTeamMembers(); // Ensure agents are set
@@ -170,7 +181,7 @@ function startNewChat() {
 
 function appendMessageAfterTyping(messageText, isAgent = false, agentName, avatar = null) {
     // Default typing speed for participants
-    let typingSpeed = 200;
+    let typingSpeed = 100;
 
     // If it's an agent's message, find the agent and use their typing speed
     if (isAgent && agentName) {
@@ -180,8 +191,7 @@ function appendMessageAfterTyping(messageText, isAgent = false, agentName, avata
         }
     }
 
-    const typingDuration = (messageText.length / typingSpeed) * 3000; // Calculate pause based on message length
-
+    const typingDuration = (messageText.length / typingSpeed) * (Math.random() * (3000 - 1000) + 1000); // Calculate pause based on message length
     // Show typing indicator for the calculated duration
     showTypingIndicator(agentName);
     setTimeout(() => {
@@ -243,7 +253,7 @@ function appendMessage(messageText, isAgent = false, agentName, avatar = null, i
         // Add the participant's message to the conversation history with their first name and conditionally include the badge name based on public condition
         conversationHistory.push({ role: `${firstName} ${localStorage.getItem('self_cond') === 'public' ? `(${badgeName})` : ''}`, content: messageText, isParticipant: true });
 
-        console.log('Participant message appended:', messageText);
+        // console.log('Participant message appended:', messageText);
 
     } else {
         // Retrieve the agent's badge from the agents object using the agentName and conditionally include it based on public condition
@@ -355,14 +365,22 @@ document.getElementById('raiseHandButton').addEventListener('click', function ()
     document.getElementById('sendMessageButton').style.display = 'block'; // Make the send button visible
     document.getElementById('messageInput').classList.add('showChat');
     document.getElementById('sendMessageButton').classList.add('showChat');
+    let raiseHandCount = parseInt(localStorage.getItem('raiseHandCount') || '0');
+    localStorage.setItem('raiseHandCount', raiseHandCount + 1);
 });
 
 // Event listener for the send message button
 sendMessageButton.addEventListener('click', () => {
-    console.log('Send button clicked');
+    // console.log('Send button clicked');
     const messageText = messageInput.value;
     const firstName = localStorage.getItem('firstName'); // Retrieve firstName from localStorage
     const badgeName = localStorage.getItem('badgeName'); // Retrieve badgeName from localStorage
+
+    // Increment message count and track total characters
+    let messageCount = parseInt(localStorage.getItem('messageCount') || '0');
+    let totalChars = parseInt(localStorage.getItem('totalChars') || '0');
+    localStorage.setItem('messageCount', messageCount + 1);
+    localStorage.setItem('totalChars', totalChars + messageText.length);
 
     // Simulate user typing similar to agent's typing mechanism
     appendMessageAfterTyping(messageText, false, `${badgeName} (${firstName})`); // Use appendMessageAfterTyping for user's message
@@ -389,18 +407,20 @@ sendMessageButton.addEventListener('click', () => {
             })
         })
             .then(response => {
-                console.log(response); // Add this line for debugging
-                if (response.headers.get("content-type")?.includes("application/json")) {
+                // console.log(response); // Add this line for debugging
+                if (response.status === 429) {
+                    window.location.href = 'end.html'; // Adjust the URL to your task completed page
+                } else if (response.headers.get("content-type")?.includes("application/json")) {
                     return response.json();
                 } else {
                     throw new Error('Received non-JSON response from the server');
                 }
             })
             .then(data => {
-                console.log('Response data:', data); // Debugging line to inspect the data object
+                // console.log('Response data:', data); // Debugging line to inspect the data object
                 if (data.shouldRedirect) {
-                    console.log('agents saying its complete');
-                    window.location.href = 'simulation_end.html';
+                    // console.log('agents saying its complete');
+                    window.location.href = 'end.html';
                 } else {
                     // Now remove the "typing..." message
                     hideTypingIndicator(`${badgeName} (${firstName})`);
@@ -525,7 +545,7 @@ function fetchResponses() {
         })
     })
         .then(response => {
-            console.log(response); // Add this line for debugging
+            // console.log(response); // Add this line for debugging
             if (response.headers.get("content-type")?.includes("application/json")) {
                 return response.json();
             } else {
@@ -533,7 +553,7 @@ function fetchResponses() {
             }
         })
         .then(data => {
-            console.log('Response data:', data); // Debugging line to inspect the data object
+            // console.log('Response data:', data); // Debugging line to inspect the data object
             if (data && data.responses) {
                 // Process responses
                 let taskCompletionAgents = 0;
@@ -546,8 +566,8 @@ function fetchResponses() {
                 });
                 // Check if the chat should end
                 const taskCompleteCheckbox = document.getElementById('taskCompleteCheckbox');
-                if (taskCompleteCheckbox && taskCompleteCheckbox.checked && taskCompletionAgents > 2) {
-                    window.location.href = '/simulation_end.html';
+                if (taskCompleteCheckbox && taskCompleteCheckbox.checked && taskCompletionAgents >= 1) {
+                    window.location.href = '/end.html';
                 } else {
                     // Call simulateChat again to keep the messages going
                     simulateChat();
@@ -648,17 +668,20 @@ function displayTeamMembers() {
     });
 
     // Add messages for each agent with different timings
-    let delay = 1000; // Initial delay in milliseconds
-    const delayIncrement = 1000; // Increment delay for each subsequent message
+    if (!localStorage.getItem(`agentsIntroduced_${conversationId}`)) {
+        let delay = 1000; // Initial delay in milliseconds
+        const delayIncrement = 1000; // Increment delay for each subsequent message
 
-    Object.values(agents).forEach(agent => {
-        setTimeout(() => {
-            const joinMessageText = `${agent.agentName} has joined the chat!`;
-            // Use appendMessage to add the join message to the chat window
-            appendMessage(joinMessageText, true, agent.agentName, agent.avatar, false, '', true);
-        }, delay);
-        delay += delayIncrement; // Increment delay for the next agent
-    });
+        Object.values(agents).forEach(agent => {
+            setTimeout(() => {
+                const joinMessageText = `${agent.agentName} has joined the chat!`;
+                appendMessage(joinMessageText, true, agent.agentName, agent.avatar, false, '', true);
+            }, delay);
+            delay += delayIncrement; // Increment delay for the next agent
+        });
+
+        localStorage.setItem(`agentsIntroduced_${conversationId}`, 'true');
+    }
 }
 ;
 
@@ -675,7 +698,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
         if (!document.body.classList.contains('dark-mode')) {
-            console.log('Dark mode is initially off');
+            // console.log('Dark mode is initially off');
         }
     } else {
         console.error('Checkbox element not found');
@@ -724,6 +747,9 @@ function markAgentTaskComplete(agentName) {
 }
 
 document.getElementById('taskCompleteCheckbox').addEventListener('change', function () {
-    console.log('Checkbox clicked. Checking conditions...');
+    // console.log('Checkbox clicked. Checking conditions...');
     checkAllTasksComplete();
+    if (agentsTaskCompleteCount < 1) { // Assuming there are 2 agents, adjust condition as necessary
+        // alert("Waiting for one other person to indicate task-complete");
+    }
 });

@@ -7,7 +7,8 @@ const avatarCarousel = document.getElementById('avatarCarousel'); // Ensure this
 // Function to handle avatar selection and store it in localStorage
 function selectAvatar(avatarFileName) {
     localStorage.setItem('selectedAvatar', `./${avatarFileName}`);
-    console.log(`Selected avatar file path: ./${avatarFileName}`); // Print the file path of the selected avatar
+    localStorage.setItem('avatarFile', `./${avatarFileName}`);
+    // console.log(`Selected avatar file path: ./${avatarFileName}`); // Print the file path of the selected avatar
 }
 
 // Function to dynamically load avatars, add event listeners for selection, and print all loaded avatars in the console
