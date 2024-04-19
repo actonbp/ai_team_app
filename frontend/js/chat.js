@@ -70,18 +70,16 @@ typingDelay = 5000
 
 const agentsOptions = {
     B: {
-        'James': { agentName: 'James', avatar: 'avatars/majority/avatar_1.png', isAgent: true, typingSpeed: 130, agentBadge: 'Master of Motivation', color: 'rgba(255, 215, 0, 0.5)', colorRGB: { r: 255, g: 215, b: 0 } },
-        'Sophia': { agentName: 'Sophia', avatar: 'avatars/majority/avatar_2.png', isAgent: true, typingSpeed: 150, agentBadge: 'Strategist Supreme', color: 'rgba(255, 105, 180, 0.5)', colorRGB: { r: 255, g: 105, b: 180 } },
-        'Ethan': { agentName: 'Ethan', avatar: 'avatars/majority/avatar_3.png', isAgent: true, typingSpeed: 170, agentBadge: 'Logic Luminary', color: 'rgba(30, 144, 255, 0.5)', colorRGB: { r: 30, g: 144, b: 255 } }
+        'James': { agentName: 'James', avatar: 'avatars/majority/avatar_1.png', isAgent: true, typingSpeed: 80, agentBadge: 'Master of Motivation', color: 'rgba(255, 215, 0, 0.5)', colorRGB: { r: 255, g: 215, b: 0 } },
+        'Sophia': { agentName: 'Sophia', avatar: 'avatars/majority/avatar_2.png', isAgent: true, typingSpeed: 90, agentBadge: 'Strategist Supreme', color: 'rgba(255, 105, 180, 0.5)', colorRGB: { r: 255, g: 105, b: 180 } },
+        'Ethan': { agentName: 'Ethan', avatar: 'avatars/majority/avatar_3.png', isAgent: true, typingSpeed: 100, agentBadge: 'Logic Luminary', color: 'rgba(30, 144, 255, 0.5)', colorRGB: { r: 30, g: 144, b: 255 } }
     },
     A: {
-        'Maurice': { agentName: 'Maurice', avatar: 'avatars/minority/avatar_10.png', isAgent: true, typingSpeed: 130, agentBadge: 'Master of Motivation', color: 'rgba(255, 215, 0, 0.5)', colorRGB: { r: 255, g: 215, b: 0 } },
-        'Ebony': { agentName: 'Ebony', avatar: 'avatars/minority/avatar_11.png', isAgent: true, typingSpeed: 150, agentBadge: 'Strategist Supreme', color: 'rgba(255, 105, 180, 0.5)', colorRGB: { r: 255, g: 105, b: 180 } },
-        'Trevon': { agentName: 'Trevon', avatar: 'avatars/minority/avatar_13.png', isAgent: true, typingSpeed: 270, agentBadge: 'Logic Luminary', color: 'rgba(30, 144, 255, 0.5)', colorRGB: { r: 30, g: 144, b: 255 } }
+        'Maurice': { agentName: 'Maurice', avatar: 'avatars/minority/avatar_10.png', isAgent: true, typingSpeed: 80, agentBadge: 'Master of Motivation', color: 'rgba(255, 215, 0, 0.5)', colorRGB: { r: 255, g: 215, b: 0 } },
+        'Ebony': { agentName: 'Ebony', avatar: 'avatars/minority/avatar_11.png', isAgent: true, typingSpeed: 90, agentBadge: 'Strategist Supreme', color: 'rgba(255, 105, 180, 0.5)', colorRGB: { r: 255, g: 105, b: 180 } },
+        'Trevon': { agentName: 'Trevon', avatar: 'avatars/minority/avatar_13.png', isAgent: true, typingSpeed: 100, agentBadge: 'Logic Luminary', color: 'rgba(30, 144, 255, 0.5)', colorRGB: { r: 30, g: 144, b: 255 } }
     }
 };
-// Corrected avatar paths to be consistent with the appendMessage function, added typingSpeed for each agent, and added agentBadge name to match @app.js
-// This function is called to initiate a new chat session
 
 document.addEventListener('DOMContentLoaded', function () {
     // Check for a valid session ID
@@ -178,6 +176,22 @@ function startNewChat() {
         displayTeamMembers(); // Ensure agents are set based on existing team_race
     }
 }
+
+
+// Initialize a variable to track the last response time
+let lastResponseTime = Date.now();
+
+// Function to update the last response time, call this whenever an agent responds
+function updateLastResponseTime() {
+    lastResponseTime = Date.now();
+}
+
+// Periodically check for inactivity
+const inactivityCheckInterval = setInterval(() => {
+    if (Date.now() - lastResponseTime > 60000) { // 60,000 milliseconds = 1 minute
+        fetchResponses(); // Attempt to fetch new responses
+    }
+}, 60000); // Check every minute
 
 function appendMessageAfterTyping(messageText, isAgent = false, agentName, avatar = null) {
     // Default typing speed for participants
@@ -461,13 +475,12 @@ function displayJoinAlert(message) {
 }
 
 let lastAgentIndex = null;
-
 function simulateChat() {
     clearInterval(chatInterval);
     const currentConversationId = localStorage.getItem('currentConversationId');
     const self_cond = localStorage.getItem('self_cond'); // Load self_cond from localStorage
 
-    if (self_cond === 'public') { // Ensure self_cond is checked against a string value
+    if (self_cond === 'public' || self_cond !== 'public') { // Check if self_cond is public or not
         if (conversationHistory.length === 0) {
             const participantBadgeName = localStorage.getItem('badgeName');
             
@@ -483,10 +496,18 @@ function simulateChat() {
             // Load agents and their avatars before the introductory message
             setTimeout(() => {}, 10000)
             // Construct the introduction message with the selected agent's details
-            const introductionMessage = {
-                role: randomAgent.agentName,
-                content: `Hey team, ${randomAgent.agentName} here! I see ${participantBadgeName} just joined the chat. Welcome to the team! Should we all first introduce ourselves and explain our badge name like the task directions said?`
-            };
+            let introductionMessage;
+            if (self_cond === 'public') {
+                introductionMessage = {
+                    role: randomAgent.agentName,
+                    content: `Hey team, ${randomAgent.agentName} here- I see ${participantBadgeName} just joined the chat. Welcome to the team.. Should we all first introduce ourselves and explain our badge name like the task directions said?BTW, u click the raise hand button to bring up the chat box..`
+                };
+            } else {
+                introductionMessage = {
+                    role: randomAgent.agentName,
+                    content: `Hey team, ${randomAgent.agentName} here- I see we are all here. Welcome.. Maybe we should all introduce ourselves and then jump into the task?BTW, u click the raise hand button to bring up the chat box..`
+                };
+            }
 
             // Add a delay before displaying the typing indicator for the intro message
             setTimeout(() => {
@@ -511,13 +532,27 @@ function simulateChat() {
                         .then(data => console.log('Message saved:', data))
                         .catch(error => console.error('Error saving message:', error));
 
-                    fetchResponses();
+                    // Set a timeout to automatically fetch responses after 30 seconds regardless of participant's response
+                    const autoFetchTimeout = setTimeout(() => {
+                        fetchResponses();
+                    }, 40000); // 30 seconds delay to proceed automatically
+
+                    // Listen for the participant's first message to fetch responses immediately but with a 5-second delay
+                    document.getElementById('sendButton').addEventListener('click', () => {
+                        clearTimeout(autoFetchTimeout); // Cancel the automatic fetch
+                        setTimeout(() => {
+                            fetchResponses(); // Fetch responses after a 5-second delay
+                        }, 5000); // 5 seconds delay to ensure the participant's message is read
+                    }, { once: true }); // Ensure this only triggers once
+
                 }, 10000); // Delay before showing the intro message
             }, 5000); // Delay before showing the typing indicator for the intro message
         } else {
+            // If there's already conversation history, fetch responses immediately without additional delay
             fetchResponses();
         }
     } else {
+        // If self_cond is not public or not, fetch responses immediately without additional delay
         fetchResponses();
     }
 }
@@ -564,6 +599,8 @@ function fetchResponses() {
                         taskCompletionAgents++;
                     }
                 });
+                // Call updateLastResponseTime here to reset the timer whenever an agent responds
+                updateLastResponseTime();
                 // Check if the chat should end
                 const taskCompleteCheckbox = document.getElementById('taskCompleteCheckbox');
                 if (taskCompleteCheckbox && taskCompleteCheckbox.checked && taskCompletionAgents >= 1) {
@@ -572,15 +609,18 @@ function fetchResponses() {
                     // Call simulateChat again to keep the messages going
                     simulateChat();
                 }
+            } else if (data.message && data.message === "No agents available to respond at this time.") {
+                console.error('No agents available:', data);
+                // Retry fetching agent responses after a delay
+                setTimeout(fetchResponses, 5000); // Retry after 5 seconds
             } else {
-                simulateChat(); // no responses, so runs again
+                console.error('Unexpected response structure:', data);
             }
         })
         .catch(error => {
             console.error('Error fetching data:', error);
         });
 }
-
 
 function updateChatTranscript(conversationHistory) {
     fetch('/save-message', {

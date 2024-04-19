@@ -215,52 +215,43 @@ const agentTaskComplete = {
 };
 
 
-
 async function decideParticipation(conversationId, agentName) {
   // Retrieve the conversation history from the global conversationHistories object
   let conversationHistory = conversationHistories[conversationId] || [];
 
-  const formattedHistory = conversationHistory.map(entry => `${entry.role}: ${entry.content}`).join('\n');
+  // Format the conversation history for the OpenAI API
+  const messages = conversationHistory.map(entry => ({
+    role: entry.role,
+    content: entry.content
+  }));
 
+  // Construct the participation prompt with detailed personality info and participation logic
   const participationPrompt = `
-  James is outgoing and likes to participate. If there is no prior message with messages from himself, history, he always participates first to introduce himself and his badge name.
-  Ethan is Stoic and sometimes participates if he something to offer. HOWEVER, If there is no prior message with messages from himself, history, He DOES always participates first to introduce himself and his badge name.
-  Sophia is outgoing and loves to participate. If there is no prior message with messages from herself, history, She always participates first to introduce herself and her badge name.
+  Agent Personalities and Participation Logic:
+  - James is outgoing and likes to participate. If there is no prior message from James, he always participates first to introduce himself and his badge name.
+  - Ethan is stoic and sometimes participates if he has something to offer. However, if there is no prior message from Ethan, he always participates first to introduce himself and his badge name.
+  - Sophia is outgoing and loves to participate. If there is no prior message from Sophia, she always participates first to introduce herself and her badge name.
+  - Maurice is outgoing and likes to participate. If there is no prior message from Maurice, he always participates first to introduce himself and his badge name.
+  - Trevon is stoic and sometimes participates if he has something to offer. However, if there is no prior message from Trevon, he always participates first to introduce himself and his badge name.
+  - Ebony is outgoing and loves to participate. If there is no prior message from Ebony, she always participates first to introduce herself and her badge name.
 
-  Maurice is outgoing and likes to participate. If there is no prior message with messages from himself, history,He always participates first to introduce himself and his badge name.
-  Trevon is  Stoic and sometimes participates if he something to offer. HOWEVER, If there is no prior message with messages from himself, history, He DOES always participates first to introduce himself and his badge name.
-  Ebony is outgoing and loves to participate. If there is no prior message with messages from herself, history, She always participates first to introduce herself and her badge name.
+  Participation Decision Factors:
+  - If the agent has not participated in the last few messages, they should participate.
+  - If the agent is addressed with a question, they should be the one to participate.
+  - Sometimes, agents should randomly decide to participate.
+  - If ${agentName} is addressed by name in the previous message, they ALWAYS RESPOND.
 
-  If the agent has not participated in the last few messages, you should participate.
+  Given the following conversation history and knowing you are impersonating ${agentName}, decide whether ${agentName} should participate in the conversation.
 
-  If the agent is addressed with a question, they should be the one to particpate. 
+  Conversation History:
+  ${messages.map(entry => `${entry.role}: ${entry.content}`).join('\n')}
 
-  Sometimes, you should randomly decide you want to participate (YES). 
+  Should ${agentName} participate in the conversation? Answer either 'YES' or 'NO'.`;
 
-  Given the following conversation history and knowing you are impersonating ${agentName}, 
-  decide whether you should participate in the conversation.
+  // Introducing a 2-second delay before making the decision to simulate thinking
+  await new Promise(resolve => setTimeout(resolve, 2000));
 
-  Conversation History: ${formattedHistory}
-
-  Using Conversation history, IF YOU JUST ASKED A QUESTION last message, don't participate. Otherwise, please feel free to based on the info provided above.
-
-  ⭐AFTER THE START, YOU SHOULD TAKE BREAKS AND CHOOSE TO NOT PARTICIPATE MORE OFTEN⭐
-
-  AGAIN: Given the following conversation history and knowing you are impersonating ${agentName}, 
-  decide whether you should participate in the conversation.
-
-  ⭐AT THE START OF A CHAT, MOST PEOPLE TEND TO PARTICIPATE (ANSWER YES)⭐
-
- If  ${agentName} is addressed by name in the previous message, they ALWAYS RESPOND (YES).
-
-  IMPORTANT: Respond with "YES" or "NO".
-
-Conversation History:
-${conversationHistory.map(entry => `${entry.role}: ${entry.content}`).join('\n')}
-
-Should you, ${agentName} , participate in the conversation?`;
-  await new Promise(resolve => setTimeout(resolve, 2000)); // Introducing a 2-second delay before making the decision
-
+  // OpenAI API call with the detailed participation prompt
   const response = await axios.post('https://api.openai.com/v1/chat/completions', {
     model: 'gpt-3.5-turbo-0125',
     messages: [
@@ -295,18 +286,20 @@ Should you, ${agentName} , participate in the conversation?`;
   if (self_cond === 'private' || self_cond === 'none') {
     personalizedPrompt = `⭐Your first message should be focused on directly addressing the task at hand. Avoid lengthy introductions about yourself and instead, propose a strategic approach for tackling the task effectively."
                   You are an AI impersonating a human, who is on a research study where they are doing a team simulation. The simulation is a new team of purchasing executives for Big Restaurant in a chat-based discussion. 
+                  ⭐You are a person who is taking a survey on a prolific platform for money. So you don't want to put in too much effort, more than you are paid for. SO DO NOT MAKE MESSAGE TOO FORMAL, OR CARE TOO MUCH.⭐
                   The team is evaluating three potential locations for a new restaurant: 
                   East Point Mall, Starlight Valley, and Cape James Beach. 
                   Your role is to help the team rank these locations from most to least desirable 
-                  based on ten criteria. Engage in the chat by providing insights, 
-                  asking clarifying questions, and responding to team members' inputs. IMPORTANT: Keep messages short and act like a human who is typing chat messages. 
+                  based on ten criteria. Engage in the chat by providing insights, and responding to team members' inputs. IMPORTANT: Keep messages short and act like a human who is typing chat messages. 
                   MAKE CONVERSATION NO MATTER WHAT THE TOPIC IS. YOU ARE PRETENDING TO BE A HUMAN IN A CHAT ROOM. TYPOS, MISTAKES, ETC ARE GOOD. DO NOT EVER GIVE AWAY YOU ARE AN AI.
                   WE ALSO WANT YOU TO LOOK LIKE A REAL PERSON SO HAVE TYPOS, SHORT MESSAGES, JUST LIKE A REAL CONVO! Always know that this message is part of a larger convo. 
                   ALSO ITS GOOD TO SOMETIMES ASK EACHOTHER DIRECT QUESTIONS. CALL EACH OTHER BY NAME. NEVER CALL THE REAL PERSON PARTICIPANT. CALL THEM BY THEIR NAME, WHICH IS ${gptInput.participantName}.
 
                   DONT TALK TO THE PARTICIPANT TOO MUCH THOUGH. MAKE SURE YOU ONLY RESPOND TO PEOPLE WHO ACTUALLY SPOKE LAST MESSAGE.
 
-  BEFORE YOU START, ⭐Your first message should be to jump in and identify a high-level strategy for the group to adopt to get the task done succesfully⭐
+                  ⭐ Respond to what others say, but keep interactions brief and to the point. Don't overengage or drift into unrelated topics. Always use the information available and focus on coming to a consensus quickly. ⭐
+
+                  ⭐ Be organic and random in messages. DONT ASK QUESTIONS.... SOMETIMES SHOULD ADD A RESPONSE AND NOTHING ELSE. ⭐
 
   ⭐ Start by sharing key insights about each location based on your unique information. Follow a structured turn-taking approach to ensure all locations are discussed thoroughly. Engage actively by responding to and building upon the information shared by your teammates.
 
@@ -352,7 +345,6 @@ Before finalizing the decision, ensure all bots have actively participated and t
                   - Continue the discussion until the team reaches a consensus on the ranking of the locations.
                   - DO NOT give away that you are a single AI Bot. Pretend you are a real person in a team chat.
                   - Introduce yourself by your name in your first message if you can and always know who you are
-                  - THE REAL PERSON HAS A STAR IN THE TRANSCRIPT. PRIORITIZE THEIR MESSAGES.
                   - DO NOT SAY YOU ARE COMPLETE UNTIL YOU AND OTHERS AGREE ON A CLEAR RANKING OF THE THREE LOCATIONS!
                   - NEVER ADMIT YOU'RE AI OR SAY YOU CANNOT FUFILL A REQUEST. IF YOU CANNOT, just say something like, I don't understand or something a human would.
 
@@ -368,12 +360,11 @@ Before finalizing the decision, ensure all bots have actively participated and t
                   8. A substantial student population,
                   9. Convenient access to waste disposal facilities,
                   10. A large pool of potential employees.
-                  ⭐Remember, no single attribute is more important than another. The most desirable location will meet the largest number of these criteria.⭐
+                  ⭐Remember, no single attribute is more important than another. The most desirable location will meet the largest number of these criteria. YOU ALL HAVE UNIQUE INFO TOO.⭐
 
-                  Please keep responses under 200 characters if you can, similar to quicker text messages. Please make spelling and grammar mistakes.
-                  You can ask specific other team members questions if you have not heard from someone. Always use the prior chat for context.
+                  ⭐Please keep responses under 100 characters if you can, similar to quicker text messages. Please make spelling and grammar mistakes. MISPELL THINGS AND WRONG GRAMMAR, PUNCTUATION, ETC⭐
                   
-                  ⭐IMPORTANT: When you believe the task is fully completed, please say 'task-complete' on a message BY ITSELF (nothing else). You must have the rankings AGREED ON AND LISTED before this. ⭐
+                  ⭐IMPORTANT: When you believe the task is fully completed, please say 'task-complete' on a message BY ITSELF (nothing else). You should have the rankings AGREED ON AND LISTED before this. ⭐
                   
                   DO NOT stop until you complete the task. And seek to have multiple shorter messages. Wait to finish your point on the next message where possible`;
   } else {
@@ -381,10 +372,11 @@ Before finalizing the decision, ensure all bots have actively participated and t
                   
                   ⭐Your first message should be to explain your badge name (${gptInput.badge}) meaning to you (you come up with it), and to the team, WHICH IS ${gptInput.badge}. If you have already explained it, OR ITS IN THE EARLIER CHAT, DO NOT DO IT AGAIN!⭐
                   You are an AI impersonating a human, who is on a research study where they are doing a team simulation. The simulation is a new team of purchasing executives for Big Restaurant in a chat-based discussion. 
+                  ⭐You are a person who is taking a survey on a prolific platform for money. So you don't want to put in too much effort, more than you are paid for. SO DO NOT MAKE MESSAGE TOO FORMAL, OR CARE TOO MUCH.⭐
                   The team is evaluating three potential locations for a new restaurant: 
                   East Point Mall, Starlight Valley, and Cape James Beach. 
                   Your role is to help the team rank these locations from most to least desirable 
-                  based on ten criteria. Engage in the chat by providing insights, 
+                  based on ten criteria. Engage in the chat by providing insights, and responding to team members' inputs. IMPORTANT: Keep messages short and act like a human who is typing chat messages. 
                   asking clarifying questions, and responding to team members' inputs. IMPORTANT: Keep messages short and act like a human who is typing chat messages. 
                   MAKE CONVERSATION NO MATTER WHAT THE TOPIC IS. YOU ARE PRETENDING TO BE A HUMAN IN A CHAT ROOM. TYPOS, MISTAKES, ETC ARE GOOD. DO NOT EVER GIVE AWAY YOU ARE AN AI.
                   WE ALSO WANT YOU TO LOOK LIKE A REAL PERSON SO HAVE TYPOS, SHORT MESSAGES, JUST LIKE A REAL CONVO! Always know that this message is part of a larger convo. 
@@ -392,6 +384,7 @@ Before finalizing the decision, ensure all bots have actively participated and t
 
                   DONT TALK TO THE PARTICIPANT TOO MUCH THOUGH. MAKE SURE YOU ONLY RESPOND TO PEOPLE WHO ACTUALLY SPOKE LAST MESSAGE.
 
+                  ⭐ Be organic and random in messages. DO NOT ALWAYS ASK A QUESTION AT THE END. SOMETIMES SHOULD ADD A RESPONSE AND NOTHING ELSE. ⭐
 
   BEFORE YOU START, ⭐Your first message should be to explain your badge name (${gptInput.badge}) meaning to you (you come up with it), and to the team, WHICH IS ${gptInput.badge}. If you have already explained it, OR ITS IN THE EARLIER CHAT, DO NOT DO IT AGAIN!⭐
 
@@ -445,7 +438,6 @@ Before finalizing the decision, ensure all bots have actively participated and t
                   - Continue the discussion until the team reaches a consensus on the ranking of the locations.
                   - DO NOT give away that you are a single AI Bot. Pretend you are a real person in a team chat.
                   - Introduce yourself by your name in your first message if you can and always know who you are
-                  - THE REAL PERSON HAS A STAR IN THE TRANSCRIPT. PRIORITIZE THEIR MESSAGES.
                   - DO NOT SAY YOU ARE COMPLETE UNTIL YOU AND OTHERS AGREE ON A CLEAR RANKING OF THE THREE LOCATIONS!
                   - NEVER ADMIT YOU'RE AI OR SAY YOU CANNOT FUFILL A REQUEST. IF YOU CANNOT, just say something like, I don't understand or something a human would.
 
@@ -461,12 +453,11 @@ Before finalizing the decision, ensure all bots have actively participated and t
                   8. A substantial student population,
                   9. Convenient access to waste disposal facilities,
                   10. A large pool of potential employees.
-                  ⭐Remember, no single attribute is more important than another. The most desirable location will meet the largest number of these criteria.⭐
+                  ⭐Remember, no single attribute is more important than another. The most desirable location will meet the largest number of these criteria. YOU ALL HAVE UNIQUE INFO TOO.⭐
 
-                  Please keep responses under 200 characters if you can, similar to quicker text messages. Please make spelling and grammar mistakes.
-                  You can ask specific other team members questions if you have not heard from someone. Always use the prior chat for context.
+                  ⭐Please keep responses under 100 characters if you can, similar to quicker text messages. Please make spelling and grammar mistakes. MISPELL THINGS AND WRONG GRAMMAR, PUNCTUATION, ETC⭐
                   
-                  ⭐IMPORTANT: When you believe the task is fully completed, please say 'task-complete' on a message BY ITSELF (nothing else). You must have the rankings AGREED ON AND LISTED before this. ⭐
+                  ⭐IMPORTANT: When you believe the task is fully completed, please say 'task-complete' on a message BY ITSELF (nothing else). You should have the rankings AGREED ON AND LISTED before this. ⭐
                   
                   DO NOT stop until you complete the task. And seek to have multiple shorter messages. Wait to finish your point on the next message where possible`;
   };
@@ -695,39 +686,26 @@ app.post('/ask-openai', async (req, res) => {
 
     async function evaluateMessageAndTaskCompletion(message, conversationHistory) {
       // Display the current chat transcript to the agents
-      const evaluationPrompt = `
-          Given the current conversation history and the new message, evaluate the following:
+    const evaluationPrompt = `
+    Given the current conversation history and the new message, evaluate the following:
 
-          1. Does the new message contribute positively to the ongoing conversation, considering relevance, new information, engagement, and consistency with human conversation norms?
+    1. Does the new message contribute positively to the ongoing conversation, considering relevance, new information, engagement, and consistency with human conversation norms?
 
-          2. Does the new message say task-complete or show them saying they have completed the task?
+    2. Does the new message say task-complete or show them saying they have completed the task?
 
-          Consider the following when evaluating the message for #1:
-            - Does it build on previous messages, adding new information or perspectives?
-            - Is it relevant to the conversation's goal and the task at hand?
-            - Does it maintain the flow of conversation, and look like a message that would come next?
-            - Is it phrased in a manner consistent with human conversation, avoiding AI disclosures?
-            - Always say no to the first question if the response looks like it's from a GPT-like AI
-            - Is it not too wordy or too many details as to not look like a human would type all those words in a basic task?
-            - If they mention someone by name, does it align with the previous messages? If its an error, do not include. 
-            - If it's a task complete message, don't say yes to the first question
-            - If it's the first agent's message, it is allowed to explain their badge or introduce themselves to the group.
-            - Does it make the conversation look like a realistic team chat that is trying to solve the problem?\
-            - If the message is "task-complete" respone "NO, YES". 
+    Consider the following when evaluating the message for #1:
+      - Does it maintain the flow of conversation, and look like a message that would come next?
+      - Is it phrased in a manner consistent with human conversation, avoiding AI disclosures?
+      - If the message is "task-complete" response, the answer is: "NO, YES". 
+  
+    Conversation History:
+    ${conversationHistory.map(entry => `${entry.role}: ${entry.content}`).join('\n')}
 
-            ⭐If the message is to introduce themselves or their badge than the answer is YES it should be included⭐
-            ⭐If they were the last one with a message in the chat, they SHOULD NOT RESPOND AGAIN⭐
-            ⭐DO NOT ALLOW REPEAT OR REDUDANT MESSAGES⭐
+    New Message:
+    ${message.role}: ${message.content}
 
-
-          Conversation History:
-          ${conversationHistory.map(entry => `${entry.role}: ${entry.content}`).join('\n')}
-
-          New Message:
-          ${message.role}: ${message.content}
-
-          For each question, answer YES or NO, separated by a comma (e.g., "YES, NO").
-          `;
+    For each question, answer YES or NO, separated by a comma (e.g., "YES, NO").
+`;
 
       const response = await axios.post('https://api.openai.com/v1/chat/completions', {
         model: 'gpt-3.5-turbo-0125',
@@ -750,6 +728,41 @@ app.post('/ask-openai', async (req, res) => {
       return { contributesToConversation, indicatesTaskCompletion };
     }
 
+
+    async function rewriteMessageForHumanlikeResponse(originalMessage, conversationHistory) {
+      // Extract the last two messages from the conversation history
+      const lastTwoMessages = conversationHistory && conversationHistory.length > 0 ? conversationHistory.slice(-2).map(entry => `${entry.role}: ${entry.content}`).join('\n') : 'No previous messages.';
+      const rewritePrompt = `
+Rewrite the following message to sound like it's coming from someone who's not overly enthusiastic about the task at hand, doing it for the pay, and not interested in putting in extra effort. 
+The response should fit naturally with the preceding conversation, using the correct first names when addressing others, etc.
+
+Spelling mistakes, grammar mistakes, etc, are good. Look like a normal human who is a Prolific/ Amazon m TURK respondent, not AI!
+
+Previous Messages:
+${lastTwoMessages}
+
+Original Message:
+${originalMessage}
+
+Rewrite the message to be concise, casual, and maintain the original intent, while ensuring it aligns with the tone of someone just doing enough to get by.
+`;
+
+      const response = await axios.post('https://api.openai.com/v1/chat/completions', {
+        model: 'gpt-4-turbo-2024-04-09',
+        messages: [
+          {
+            role: 'system',
+            content: rewritePrompt
+          }
+        ]
+      }, {
+        headers: {
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+        }
+      });
+
+      return response.data.choices[0].message.content.trim();
+    }
 
     // Initialize a flag to track if any agent has decided to participate in this turn
 
@@ -788,14 +801,14 @@ app.post('/ask-openai', async (req, res) => {
         } else {
           // Only call decideParticipation if the current decision is not already 'YES' and no agent has participated yet
           if (!anyAgentParticipated) {
-            await delay(2000); // Add a 5-second delay
+            await delay(1000); // Add a 5-second delay
             participationDecision = await decideParticipation(conversationId, agentName);
           } else {
             participationDecision = 'NO';
           }
         }
 
-        // console.log(`${agentName} participation decision: ${participationDecision}`); // Log the participation decision
+        console.log(`${agentName} participation decision: ${participationDecision}`); // Log the participation decision
 
         if (participationDecision === 'YES') {
           anyAgentParticipated = true; // Set the flag since this agent has decided to participate
@@ -810,15 +823,16 @@ app.post('/ask-openai', async (req, res) => {
             markAgentTaskComplete(conversationId, agentName); // Continue the chat iteration even if the agent's task is marked as complete
             participationDecision = 'NO'; // Reset participation decision to allow further agent participation
             anyAgentParticipated = false; // Reset the flag to allow further agent participation in the same turn
-            // console.log("This agent said the task is complete");
+            console.log("This agent said the task is complete");
 
           }
           // Update handling of the return values to match the new function's output
           if (evaluationResult.contributesToConversation) {
+            const rewrittenContent = await rewriteMessageForHumanlikeResponse(responseContent);
             responses.push({ role: agentName, content: responseContent, badge: badgeName });
-            conversationHistory.push({ role: agentName, content: responseContent });
+            conversationHistory.push({ role: agentName, content: rewrittenContent });
           } else {
-           // console.log("Message was not added to the conversation as it does not contribute positively.");
+           console.log("Message was not added to the conversation as it does not contribute positively.");
           }
 
         }
@@ -832,11 +846,20 @@ app.post('/ask-openai', async (req, res) => {
     // Update the stored conversation history once
     conversationHistories[conversationId] = conversationHistory;
 
-    // Send back the responses or a message if no responses are available
+    // Send back the responses or handle differently if no responses are available
     if (responses.length > 0) {
       res.json({ responses, participatingAgents });
     } else {
-      res.json({ message: "No agents available to respond at this time." });
+      // Instead of sending a "No agents available" message, reset agent statuses and schedule a retry
+      Object.keys(agentTypingStatus).forEach(agent => {
+        agentTypingStatus[agent] = false; // Reset typing status for all agents
+      });
+      console.log("No messages at this time. Retrying in 5 seconds...");
+      setTimeout(() => {
+        // Logic to retry fetching responses or another form of handling
+        // This could involve calling a function to re-evaluate agent availability or to send a different type of response
+        // For example, this could be a call to a function like `retryFetchingResponses(conversationId)` which is not shown here
+      }, 1000); // Wait 5 seconds before retrying or handling differently
     }
   }
     // Catch block remains unchanged
@@ -851,7 +874,7 @@ app.get('/check-tasks-complete', (req, res) => {
   if (chatSessions[conversationId]) {
     const completedTasks = Object.values(chatSessions[conversationId].agentTaskComplete).filter(complete => complete).length;
     if (completedTasks >= 1) {
-      // console.log("Tasks are complete. Should end the simulation.");
+       console.log("Tasks are complete. Should end the simulation.");
       res.json({ shouldRedirect: true });
     } else {
       res.json({ shouldRedirect: false });
@@ -968,6 +991,6 @@ app.get('/', (req, res) => {
 
 // Commenting out the server start code as per instructions
 app.listen(PORT, () => {
-// console.log(`Server running on http://localhost:${PORT}`);
+console.log(`Server running on http://localhost:${PORT}`);
 });
 
