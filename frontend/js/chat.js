@@ -59,8 +59,23 @@ function checkAllTasksComplete() {
         });
 }
 
+function adjustBubbleWidths() {
+    const bubbles = document.querySelectorAll('.chat-bubble');
+    bubbles.forEach(bubble => {
+        const text = bubble.innerText;
+        const lastWord = text.split(" ").pop();
+        const measureDiv = document.createElement('div');
+        measureDiv.style.display = 'inline-block';
+        measureDiv.innerText = lastWord;
+        document.body.appendChild(measureDiv);
+        const width = measureDiv.offsetWidth;
+        document.body.removeChild(measureDiv);
+        bubble.style.width = `${width}px`;
+    });
+}
+
 setTimeout(() => {
-    chatInterval = setInterval(checkAllTasksComplete, 5000); // Start checking if all tasks are complete every 10 seconds, beginning 3 minutes after page load
+    chatInterval = setInterval(checkAllTasksComplete, 50000); // Start checking if all tasks are complete every 10 seconds, beginning 3 minutes after page load
 }, 60000); // 180000 milliseconds = 3 minutes
 
 let agents = {};
@@ -70,14 +85,14 @@ typingDelay = 5000
 
 const agentsOptions = {
     B: {
-        'James': { agentName: 'James', avatar: 'avatars/majority/avatar_1.png', isAgent: true, typingSpeed: 80, agentBadge: 'Master of Motivation', color: 'rgba(255, 215, 0, 0.5)', colorRGB: { r: 255, g: 215, b: 0 } },
-        'Sophia': { agentName: 'Sophia', avatar: 'avatars/majority/avatar_2.png', isAgent: true, typingSpeed: 90, agentBadge: 'Strategist Supreme', color: 'rgba(255, 105, 180, 0.5)', colorRGB: { r: 255, g: 105, b: 180 } },
-        'Ethan': { agentName: 'Ethan', avatar: 'avatars/majority/avatar_3.png', isAgent: true, typingSpeed: 100, agentBadge: 'Logic Luminary', color: 'rgba(30, 144, 255, 0.5)', colorRGB: { r: 30, g: 144, b: 255 } }
+        'James': { agentName: 'James', avatar: 'avatars/majority/avatar_1.png', isAgent: true, typingSpeed: 130, agentBadge: 'Master of Motivation', color: 'rgba(255, 215, 0, 0.5)', colorRGB: { r: 255, g: 215, b: 0 } },
+        'Sophia': { agentName: 'Sophia', avatar: 'avatars/majority/avatar_2.png', isAgent: true, typingSpeed: 140, agentBadge: 'Strategist Supreme', color: 'rgba(255, 105, 180, 0.5)', colorRGB: { r: 255, g: 105, b: 180 } },
+        'Ethan': { agentName: 'Ethan', avatar: 'avatars/majority/avatar_3.png', isAgent: true, typingSpeed: 160, agentBadge: 'Logic Luminary', color: 'rgba(30, 144, 255, 0.5)', colorRGB: { r: 30, g: 144, b: 255 } }
     },
     A: {
-        'Maurice': { agentName: 'Maurice', avatar: 'avatars/minority/avatar_10.png', isAgent: true, typingSpeed: 80, agentBadge: 'Master of Motivation', color: 'rgba(255, 215, 0, 0.5)', colorRGB: { r: 255, g: 215, b: 0 } },
-        'Ebony': { agentName: 'Ebony', avatar: 'avatars/minority/avatar_11.png', isAgent: true, typingSpeed: 90, agentBadge: 'Strategist Supreme', color: 'rgba(255, 105, 180, 0.5)', colorRGB: { r: 255, g: 105, b: 180 } },
-        'Trevon': { agentName: 'Trevon', avatar: 'avatars/minority/avatar_13.png', isAgent: true, typingSpeed: 100, agentBadge: 'Logic Luminary', color: 'rgba(30, 144, 255, 0.5)', colorRGB: { r: 30, g: 144, b: 255 } }
+        'Maurice': { agentName: 'Maurice', avatar: 'avatars/minority/avatar_10.png', isAgent: true, typingSpeed: 130, agentBadge: 'Master of Motivation', color: 'rgba(255, 215, 0, 0.5)', colorRGB: { r: 255, g: 215, b: 0 } },
+        'Ebony': { agentName: 'Ebony', avatar: 'avatars/minority/avatar_11.png', isAgent: true, typingSpeed: 140, agentBadge: 'Strategist Supreme', color: 'rgba(255, 105, 180, 0.5)', colorRGB: { r: 255, g: 105, b: 180 } },
+        'Trevon': { agentName: 'Trevon', avatar: 'avatars/minority/avatar_13.png', isAgent: true, typingSpeed: 160, agentBadge: 'Logic Luminary', color: 'rgba(30, 144, 255, 0.5)', colorRGB: { r: 30, g: 144, b: 255 } }
     }
 };
 
@@ -102,7 +117,6 @@ document.addEventListener('DOMContentLoaded', function () {
         // console.log('Checkbox clicked. Checking conditions...');
         checkAllTasksComplete();
         if (agentsTaskCompleteCount < 1) { // Assuming there are 2 agents, adjust condition as necessary
-            alert("Waiting for one other person to indicate task-complete");
         }
         });
     }
@@ -188,16 +202,39 @@ function updateLastResponseTime() {
 
 // Periodically check for inactivity
 const inactivityCheckInterval = setInterval(() => {
-    if (Date.now() - lastResponseTime > 60000) { // 60,000 milliseconds = 1 minute
-        fetchResponses(); // Attempt to fetch new responses
+    if (Date.now() - lastResponseTime > 500000) { // 60,000 milliseconds = 1 minute
+        // fetchResponses(); // Attempt to fetch new responses
     }
 }, 60000); // Check every minute
 
-function appendMessageAfterTyping(messageText, isAgent = false, agentName, avatar = null) {
-    // Default typing speed for participants
-    let typingSpeed = 100;
+function showTypingIndicator(agentName) {
+    let typingIndicator = document.getElementById(`typing-${agentName}`);
+    if (!typingIndicator) {
+        typingIndicator = document.createElement('div');
+        typingIndicator.id = `typing-${agentName}`;
+        typingIndicator.innerText = `${agentName} is typing...`;
+        messageContainer.appendChild(typingIndicator);
+    }
+}
 
-    // If it's an agent's message, find the agent and use their typing speed
+function hideTypingIndicator(agentName) {
+    const typingIndicator = document.getElementById(`typing-${agentName}`);
+    if (typingIndicator) {
+        messageContainer.removeChild(typingIndicator);
+    }
+}
+
+async function simulateTypingAndDisplayMessage(agentName, message) {
+    showTypingIndicator(agentName);
+    const delay = Math.random() * (10000 - 2000) + 2000; // Random delay between 2 and 10 seconds
+    await new Promise(resolve => setTimeout(resolve, delay));
+    hideTypingIndicator(agentName);
+    appendMessage(message, true, agentName); // Ensure this function call matches how you currently display messages
+}
+
+function appendMessageAfterTyping(messageText, isAgent = false, agentName, avatar = null) {
+    const participant_split = localStorage.getItem('participant_split') === 'TRUE'; // Check if participant_split is set to TRUE
+    const maxLength = participant_split ? Math.floor(Math.random() * (250 - 200 + 1)) + 200 : Infinity; // Threshold for splitting messages, Infinity if not splitting
     if (isAgent && agentName) {
         const agent = Object.values(agents).find(agent => agent.agentName === agentName);
         if (agent) {
@@ -205,16 +242,77 @@ function appendMessageAfterTyping(messageText, isAgent = false, agentName, avata
         }
     }
 
-    const typingDuration = (messageText.length / typingSpeed) * (Math.random() * (3000 - 1000) + 1000); // Calculate pause based on message length
-    // Show typing indicator for the calculated duration
-    showTypingIndicator(agentName);
-    setTimeout(() => {
-        hideTypingIndicator(agentName); // Hide typing indicator when message is ready to appear
-        appendMessage(messageText, isAgent, agentName, avatar); // Append the message after the typing indicator ends, passing the avatar if available
-    }, typingDuration);
+    if (participant_split && messageText.length > maxLength) {
+        const parts = splitMessage(messageText, maxLength);
+        parts.forEach((part, index) => {
+            setTimeout(() => {
+                showTypingIndicator(agentName); // Show typing indicator before each part
+                const typingDuration = (part.length / typingSpeed) * (Math.random() * (3000 - 1000) + 1000);
+                setTimeout(() => {
+                    hideTypingIndicator(agentName); // Hide typing indicator after typing duration
+                    let messageWithNumber = part.text;
+                    //let messageWithNumber = parts.length > 1 ? `${index + 1}/${parts.length}: ${part.text}` : part.text;
+                    appendMessage(messageWithNumber, isAgent, agentName, avatar);                    
+                }, typingDuration);
+            }, index * (10000 + typingDuration)); // Adjust delay to include typing duration
+        });
+    } else {
+        showTypingIndicator(agentName); // Show typing indicator for non-split messages
+        const typingDuration = (messageText.length / typingSpeed) * (Math.random() * (3000 - 1000) + 1000);
+        setTimeout(() => {
+            hideTypingIndicator(agentName); // Hide typing indicator after typing duration
+            appendMessage(messageText, isAgent, agentName, avatar);
+        }, typingDuration);
+    }
 }
-
+function splitMessage(message, maxLength) {
+    let parts = [];
+    let totalChunks = 0; // Initialize total chunks counter
+    while (message.length > 0 && totalChunks < 3) { // Ensure no more than 3 messages
+        if (message.length <= maxLength) {
+            parts.push({text: message, pauseAfter: true});
+            break;
+        }
+        let splitIndex = message.substring(0, maxLength).lastIndexOf('. ') + 1; // Prefer splitting at the end of sentences
+        if (splitIndex <= 0) { // If no sentence end found, fallback to space
+            let splitPoints = ['.', '?', '!', ','].map(punct => message.substring(0, maxLength).lastIndexOf(punct));
+            let maxSplitPoint = Math.max(...splitPoints);
+            splitIndex = maxSplitPoint > 0 ? maxSplitPoint + 1 : message.substring(0, maxLength).lastIndexOf(' ') + 1;
+        }
+        if (splitIndex <= 0) { // If no space found, use maxLength
+            splitIndex = maxLength;
+        }
+        let chunk = message.substring(0, splitIndex).trim();
+        parts.push({text: chunk, pauseAfter: true});
+        message = message.substring(splitIndex).trim();
+        totalChunks++; // Increment total chunks counter
+    }
+    // If the message was too long and got cut off, ensure the last part indicates continuation
+    if (message.length > 0 && parts.length == 3) {
+        parts[2].text += '...'; // Indicate the message continues
+    }
+    return parts;
+}
 function appendMessage(messageText, isAgent = false, agentName, avatar = null, isParticipant = false, badgeName, isJoinMessage = false) {
+    const maxLength = Math.floor(Math.random() * (600 - 200 + 1)) + 200; // Define a max length for a message as a random number between 400 and 800
+    if (messageText.length > maxLength) {
+        const parts = splitMessage(messageText, maxLength);
+        parts.forEach((part, index) => {
+            setTimeout(() => {
+                showTypingIndicator(agentName); // Show typing indicator
+                const typingDuration = Math.floor(Math.random() * (10000 - 2000 + 1)) + 2000; // Typing delay as a random number between 2000 and 10000
+                setTimeout(() => {
+                    hideTypingIndicator(agentName); // Hide typing indicator
+                    let messageWithNumber = parts.length > 1 ? `${index + 1}/${parts.length}: ${part.text}` : part.text;
+                    // Directly call appendMessage for each part with the modified message text
+                    appendMessage(messageWithNumber, isAgent, agentName, avatar, isParticipant, badgeName, isJoinMessage);
+                }, typingDuration);
+            }, index * (Math.floor(Math.random() * (5000 - 1000 + 1)) + 1000)); // Random delay between message parts
+        });
+        return; // Exit the function after handling split messages
+    }
+
+    // Existing logic to append message without splitting remains unchanged
     const messageElement = document.createElement('div');
     messageElement.classList.add('message');
 
@@ -500,12 +598,12 @@ function simulateChat() {
             if (self_cond === 'public') {
                 introductionMessage = {
                     role: randomAgent.agentName,
-                    content: `Hey team, ${randomAgent.agentName} here- I see ${participantBadgeName} just joined the chat. Welcome to the team.. Should we all first introduce ourselves and explain our badge name like the task directions said?BTW, u click the raise hand button to bring up the chat box..`
+                    content: `Hey team, I see ${participantBadgeName} just joined the chat. Welcome to the team.. Should we all first introduce ourselves and explain our badge name like the task directions said?BTW, u click the raise hand button to bring up the chat box..`
                 };
             } else {
                 introductionMessage = {
                     role: randomAgent.agentName,
-                    content: `Hey team, ${randomAgent.agentName} here- I see we are all here. Welcome.. Maybe we should all introduce ourselves and then jump into the task?BTW, u click the raise hand button to bring up the chat box..`
+                    content: `Hey team, I see we are all here. Welcome.. Maybe we should all introduce ourselves and then jump into the task?BTW, u click the raise hand button to bring up the chat box..`
                 };
             }
 
@@ -538,12 +636,12 @@ function simulateChat() {
                     }, 40000); // 30 seconds delay to proceed automatically
 
                     // Listen for the participant's first message to fetch responses immediately but with a 5-second delay
-                    document.getElementById('sendButton').addEventListener('click', () => {
-                        clearTimeout(autoFetchTimeout); // Cancel the automatic fetch
-                        setTimeout(() => {
-                            fetchResponses(); // Fetch responses after a 5-second delay
-                        }, 5000); // 5 seconds delay to ensure the participant's message is read
-                    }, { once: true }); // Ensure this only triggers once
+                    //document.getElementById('sendButton').addEventListener('click', () => {
+                        //clearTimeout(autoFetchTimeout); // Cancel the automatic fetch
+                        //setTimeout(() => {
+                            //fetchResponses(); // Fetch responses after a 5-second delay
+                       // }, 5000); // 5 seconds delay to ensure the participant's message is read
+                   // }, { once: true }); // Ensure this only triggers once
 
                 }, 10000); // Delay before showing the intro message
             }, 5000); // Delay before showing the typing indicator for the intro message
@@ -609,8 +707,8 @@ function fetchResponses() {
                     // Call simulateChat again to keep the messages going
                     simulateChat();
                 }
-            } else if (data.message && data.message === "No agents available to respond at this time.") {
-                console.error('No agents available:', data);
+            } else if (data.message && data.message === "No messages on this round") {
+                console.error('Error', data);
                 // Retry fetching agent responses after a delay
                 setTimeout(fetchResponses, 5000); // Retry after 5 seconds
             } else {
@@ -618,7 +716,8 @@ function fetchResponses() {
             }
         })
         .catch(error => {
-            console.error('Error fetching data:', error);
+            console.error('Error fetching data (will retry):', error);
+            setTimeout(fetchResponses, 20000); // Retry fetching data after a 5-second delay
         });
 }
 
@@ -787,9 +886,141 @@ function markAgentTaskComplete(agentName) {
 }
 
 document.getElementById('taskCompleteCheckbox').addEventListener('change', function () {
-    // console.log('Checkbox clicked. Checking conditions...');
-    checkAllTasksComplete();
-    if (agentsTaskCompleteCount < 1) { // Assuming there are 2 agents, adjust condition as necessary
-        // alert("Waiting for one other person to indicate task-complete");
+    if (this.checked) { // Check if the checkbox is checked
+        // console.log('Checkbox checked. Checking conditions...');
+        checkAllTasksComplete();
+        if (agentsTaskCompleteCount < 1) { // Assuming there are 2 agents, adjust condition as necessary
+            alert("Waiting for one other person to indicate task-complete");
+        }
     }
 });
+let messageCountsByConversation = {};
+
+function appendMessage(messageText, isAgent = false, agentName, avatar = null, isParticipant = false, badgeName, isJoinMessage = false) {
+    const conversationId = localStorage.getItem('currentConversationId');
+    if (!messageCountsByConversation[conversationId]) {
+        messageCountsByConversation[conversationId] = { lastMessage: "", lastMessageCount: 0 };
+    }
+
+    let conversationData = messageCountsByConversation[conversationId];
+
+    if (messageText === conversationData.lastMessage) {
+        conversationData.lastMessageCount++;
+    } else {
+        conversationData.lastMessage = messageText;
+        conversationData.lastMessageCount = 1;
+    }
+
+    if (conversationData.lastMessageCount <= 2) { // Limit to 2 repetitions before splitting
+        const maxLength = 400
+        //const maxLength = Math.floor(Math.random() * (400 - 100 + 1)) + 100; // Define a max length for a message as a random number between 200 and 500
+        if (messageText.length > maxLength) {
+            const parts = splitMessage(messageText, maxLength);
+            parts.forEach((part, index) => {
+                setTimeout(() => {
+                    showTypingIndicator(agentName); // Show typing indicator
+                    const typingDuration = Math.floor(Math.random() * (10000 - 2000 + 1)) + 2000; // Typing delay
+                    setTimeout(() => {
+                        hideTypingIndicator(agentName); // Hide typing indicator
+                        appendMessage(part.text, isAgent, agentName, avatar, isParticipant, badgeName, isJoinMessage);
+                    }, typingDuration);
+                }, index * (Math.floor(Math.random() * (7000 - 3000 + 1)) + 3000)); // Increase delay between messages
+            });
+            return; // Exit the function after handling split messages
+        }
+
+        // Existing logic to append message without splitting remains unchanged
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message');
+
+        const avatarElement = document.createElement('img');
+        avatarElement.classList.add('avatar');
+        let agent;
+        if (isAgent) {
+            agent = agents[agentName]; // Simplified agent retrieval from the agents object
+            messageElement.classList.add(`agent-${agentName}`);
+            if (agent) {
+                messageElement.style.backgroundColor = `rgba(${agent.colorRGB.r}, ${agent.colorRGB.g}, ${agent.colorRGB.b}, 0.25)`;
+                messageElement.style.borderColor = agent.color;
+            }
+            messageElement.style.borderWidth = "2px";
+            messageElement.style.borderStyle = "solid";
+        } else {
+            messageElement.classList.add('participant');
+            messageElement.style.border = "2px solid #ff0000";
+            messageElement.style.borderRadius = "20px";
+            messageElement.style.padding = "10px";
+        }
+
+        // Determine the avatar image source based on the agent's name or if it's the participant
+        let avatarSrc;
+        if (isAgent) {
+            avatarSrc = avatar ? avatar : 'default_agent_avatar.png'; // Use the passed avatar URL if available, otherwise fallback to a default
+        } else {
+            avatarSrc = localStorage.getItem('selectedAvatar'); // Use the participant's selected avatar
+            messageElement.style.backgroundColor = 'rgba(255, 0, 0, 0.25)'; // Lighter red whitish opacity hue
+        }
+        avatarElement.src = avatarSrc;
+
+        const textElement = document.createElement('div');
+        textElement.classList.add('text');
+        if (isJoinMessage) {
+            // Create a simple text element for join messages
+            const joinTextElement = document.createElement('div');
+            joinTextElement.innerText = messageText;
+            joinTextElement.style.color = 'gray';
+            joinTextElement.classList.add('join-message-plain'); // Ensure this class does not add bubble-like styles
+            messageContainer.appendChild(joinTextElement); // Append directly to the message container
+            return; // Skip the rest of the function to avoid adding bubble styling
+        }
+
+        const participantBadgeName = localStorage.getItem('badgeName');
+        // Predefined introduction message from Agent 1 (James) including the participant's badge name
+        if (!isAgent) {
+            // Prepend the first name to the participant's message and conditionally include the badge name based on public condition
+            textElement.innerText = `${firstName} ${localStorage.getItem('self_cond') === 'public' ? `(${participantBadgeName})` : ''}: ${messageText}`;
+            // Add the participant's message to the conversation history with their first name and conditionally include the badge name based on public condition
+            conversationHistory.push({ role: `${firstName} ${localStorage.getItem('self_cond') === 'public' ? `(${badgeName})` : ''}`, content: messageText, isParticipant: true });
+
+            // console.log('Participant message appended:', messageText);
+
+        } else {
+            // Retrieve the agent's badge from the agents object using the agentName and conditionally include it based on public condition
+            const agentBadge = agent ? agent.agentBadge : 'Unknown'; // Retrieve the agent's badge
+            textElement.innerText = `${agentName} ${localStorage.getItem('self_cond') === 'public' ? `(${agentBadge})` : ''}: ${messageText}`;
+            // If the message is from an agent, add it to the conversation history with the agent's name and conditionally include the badge based on public condition
+            conversationHistory.push({ role: `${agentName} ${localStorage.getItem('self_cond') === 'public' ? `(${agentBadge})` : ''}`, content: messageText, isParticipant: false });
+        }
+        messageElement.appendChild(avatarElement);
+        messageElement.appendChild(textElement);
+        messageContainer.append(messageElement);
+
+        adjustBubbleWidths();
+
+        messageContainer.scrollTop = messageContainer.scrollHeight; // Scrolls to the bottom
+
+        // New code to save the message after it's appended
+        fetch('/save-message', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                conversationId: localStorage.getItem('currentConversationId'),
+                message: {
+                    role: isAgent ? agentName : `${badgeName} (${firstName})`,
+                    content: messageText
+                }
+            })
+        });
+
+        // Save the updated conversation history in localStorage
+        localStorage.setItem(`conversationHistory_${conversationId}`, JSON.stringify(conversationHistory));
+
+        return messageElement;
+    }
+}
+            joinTextElement.style.color = 'gray';
+            const joinTextElement = document.createElement('div');
+            avatarSrc = localStorage.getItem('selectedAvatar'); // Use the participant's selected avatar
+

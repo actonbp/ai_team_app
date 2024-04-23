@@ -68,13 +68,16 @@ body {
 
 /* Message bubble styling */
 .message {
+    
     background-color: #e1f3fb;
     /* Light blue background for the message bubble */
-    border-radius: 15px;
+    border-radius: 5px;
     /* Rounded corners */
-    padding: 10px;
-    margin-bottom: 10px;
-    max-width: 60%;
+    padding: 2px;
+    margin-bottom: 2px;
+    max-width: 90%;
+    word-wrap: break-word;
+    display: inline-block;
     word-wrap: break-word;
 }
 

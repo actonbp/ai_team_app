@@ -28,6 +28,72 @@ body {
     /* Add horizontal padding */
 }
 
+/* Custom Checkbox Style */
+.custom-checkbox {
+    display: block;
+    position: relative;
+    padding-left: 35px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    font-size: 22px;
+    user-select: none;
+}
+
+.custom-checkbox input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 25px;
+    width: 25px;
+    background-color: #eee;
+    transition: background-color 0.3s ease;
+}
+
+.custom-checkbox input:checked~.checkmark {
+    background-color: #2196F3;
+    animation: bounce 0.3s;
+}
+
+@keyframes bounce {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.2);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+
+.checkbox-container {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.submit-btn {
+    display: block;
+    margin: 20px auto;
+    padding: 10px 20px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
 form {
     background: white;
     padding: 10px;
@@ -202,6 +268,35 @@ font-size: 16px;
 
 .unique-information th, .unique-information td {
     padding: 5px;
+}
+
+/* Example adjustments */
+.message,
+.chat-message {
+    font-size: 12px;
+    /* Smaller text */
+}
+
+.message img,
+.chat-message img {
+    max-width: 40px;
+    /* Smaller images */
+    height: auto;
+}
+
+.chat-bubble,
+.message-bubble {
+    padding: 5px 10px;
+    /* Smaller bubbles */
+    margin-bottom: 8px;
+    /* Less space between messages */
+}
+
+#chatWindow {
+    padding: 10px;
+    /* Less padding around chat content */
+    max-height: 600px;
+    /* Adjust based on your layout */
 }
 
 .chat-area {
@@ -506,7 +601,7 @@ font-size: 16px;
     border-radius: 15px;
     margin-bottom: 10px;
     color: white;
-    max-width: 80%;
+    max-width: 100%;
     word-wrap: break-word;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
     background-color: rgba(255, 255, 255, 0.9); /* Adjusted transparency */
@@ -593,7 +688,7 @@ font-size: 16px;
     border-radius: 5px;
     color: black;
     display: inline-block;
-    max-width: 80%; /* Ensure text does not exceed 80% width */
+    max-width: 99%; /* Ensure text does not exceed 80% width */
 }
 
 .message {

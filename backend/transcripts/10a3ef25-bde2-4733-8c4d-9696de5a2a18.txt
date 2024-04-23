@@ -1,0 +1,20 @@
+Sophia: Sophia is typing...
+Sophia: Hey team, Sophia here- I see Cool GUy just joined the chat. Welcome to the team.. Should we all first introduce ourselves and explain our badge name like the task directions said?BTW, u click the raise hand button to bring up the chat box..
+Ethan: East Point Mall: mostly good, but no for tourists and maintenance. 
+Starlight Valley: lacks students/workforce.
+Cape James: all good, high traffic, low upkeep, lots tourists. 
+Ethan
+Sophia: Hey Ethan, got it on Cape James. East Point Mall issues noted too. Hunch or actual data on the maintenance costs? SSD 
+
+Sophia
+Ethan: Sophia, not just a hunch. Got actual points against East Point for maintenance. It’s a solid no on low upkeep costs.
+Ethan: Cape James best so far. EP vs SV? EP better - 5 Yes. SV just 2 Yes. 
+
+Ethan
+James: Agreed, Ethan. Also, East Point has the edge with accessibility and workforce. Not great for size and tourists tho. Seems Cape James still leads. Thoughts, Bryan?
+Sophia: Cape James still wins. East Point ok, less tourists tho. Starlight Valley needs more buzz. Thoughts, James?
+James: Bryan, Cape James does stand out with the tourists and competition points, but lack of parking and waste disposal could be tricky. East Point scores solid with the workforce and foot traffic. Think East Point could edge over Starlight Valley given its higher "Yes" count?
+Sophia: James, East Point > Starlight. Got more workforce, foot traffic. Cape James top but bad parking + waste issues. East Point > SV.
+
+- East Point: workforce +, foot traffic +
+- Cape James: tourist +, parking -, waste -

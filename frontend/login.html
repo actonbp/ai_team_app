@@ -86,8 +86,9 @@
                 A self-reflective title is a title you give yourself that expresses important information about who you are as a person. In the workplace, self-reflective titles give individuals the freedom to personalize a title that reflects their most important roles and identities in the organization. For example, Berkshire Hathaway’s event organizer is known as its “director of chaos,” Yahoo! spokesperson Heidi Burgett calls herself the “Yahoo! evangelist,” a receptionist at Matrix Group introduces herself as a “director of first impressions,” and IBM employees have titles such as “data detective” and “creative technologist.” A nurse who gives allergy shots to children calls herself “quick shot” and a physician who deals with infectious diseases calls himself “germ slayer.” Quicken Loans’ marketing and sales employees hold titles of “energy focuser” and “revenue raiser,” and at The Motley Fool, employees’ titles include “people & culture poet” and “chief rabble rouser of the highest order.”
             </p>
             <p class="title-guidelines">
-                With this information in mind, think of a personal title that reflects your identities or roles you typically fulfill when working in a team. While you are encouraged to choose an authentic title, it is important to note that using profanity or language that could be insulting to others in your title is prohibited; violators may face serious consequences.
-            </p>
+                <p style="color: red; font-weight: bold !important;">
+                    With this information in mind, think of a personal title that reflects your identities or roles you typically fulfill when working in a team. While you are encouraged to choose an authentic title, it is important to note that using profanity or language that could be insulting to others in your title is prohibited; violators may face serious consequences.
+                </p>
         </div>
         <center>
         <div class="self-reflective-title-section-2" style="display: none;">
@@ -103,13 +104,12 @@
                         “energy focuser” and “revenue raiser,” and at The Motley Fool, employees’ titles include “people & culture poet” and
                         “chief rabble rouser of the highest order.”
         </p>
-        <form id="title-thought-form">
-        Think about a personal title that reflects your identities or roles you typically fulfill when working in a
-        team. This is a moment for self-reflection.
-        
-        I have thought about my self-reflective title.
-        <button type="submit">Confirm</button>
-        </form>
+        <!-- Custom Checkbox -->
+    <input type="checkbox" id="titleConfirmationCheckbox" name="titleConfirmation"
+        style="transform: scale(2); cursor: pointer;">
+    <label for="titleConfirmationCheckbox" style="font-size: 1.5em; cursor: pointer; color: red;">I have thought about my
+        title/badge</label>
+    </div>
         </center>
                 <!-- Additional Task Directions Section -->
                 <div class="task-completion-section">
@@ -136,5 +136,55 @@
         <script src="js/login.js"></script>
         <script src="js/darkMode.js"></script>
     </main>
+    <!-- Add this modal structure at the end of your body tag -->
+    <div id="confirmationModal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <p>Thank you for considering your title. You can now proceed.</p>
+      </div>
+    </div>
+
+    <style>
+      /* Add some styles for the modal */
+      .modal { display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgb(0,0,0); background-color: rgba(0,0,0,0.4); }
+      .modal-content { background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%; }
+      .close { color: #aaa; float: right; font-size: 28px; font-weight: bold; }
+      .close:hover, .close:focus { color: black; text-decoration: none; cursor: pointer; }
+      /* Custom Checkbox Style */
+      .custom-checkbox {
+        display: block;
+        position: relative;
+        padding-left: 35px;
+        margin-bottom: 12px;
+        cursor: pointer;
+        font-size: 22px;
+        user-select: none;
+      }
+      .custom-checkbox input {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+        height: 0;
+        width: 0;
+      }
+      .checkmark {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 25px;
+        width: 25px;
+        background-color: #eee;
+        transition: background-color 0.3s ease;
+      }
+      .custom-checkbox input:checked ~ .checkmark {
+        background-color: #2196F3;
+        animation: bounce 0.3s;
+      }
+      @keyframes bounce {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.2); }
+        100% { transform: scale(1); }
+      }
+    </style>
 </body>
 </html>

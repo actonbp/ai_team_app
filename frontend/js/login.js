@@ -94,25 +94,63 @@ document.addEventListener('DOMContentLoaded', () => {
             cell.classList.add('styled-cell');
         });
     }
+    // Display the .self-reflective-title-section-2 based on self_cond value and force acknowledgment
+    if (selfCond === 'private' || selfCond === 'public') {
+        const titleSection2 = document.querySelector('.self-reflective-title-section-2');
+        titleSection2.style.display = 'block';
 
-    // Display the .self-reflective-title-section-2 based on self_cond value
-    if (selfCond === 'private') {
-        document.querySelector('.self-reflective-title-section-2').style.display = 'block';
+        // Disable page advancement button initially
+        const advanceButton = document.getElementById('advanceButton');
+        advanceButton.disabled = true;
+
+        // Transform the acknowledgment process into a checkbox confirmation
+        const acknowledgmentCheckbox = document.getElementById('acknowledgmentCheckbox');
+        acknowledgmentCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                // Show the modal
+                const modal = document.getElementById('confirmationModal');
+                modal.style.display = "block";
+
+                // Get the <span> element that closes the modal
+                const span = document.getElementsByClassName("close")[0];
+
+                // When the user clicks on <span> (x), close the modal
+                span.onclick = function() {
+                    modal.style.display = "none";
+                }
+
+                // When the user clicks anywhere outside of the modal, close it
+                window.onclick = function(event) {
+                    if (event.target == modal) {
+                        modal.style.display = "none";
+                    }
+                }
+            } else {
+                // Keep the advance button disabled if the checkbox is unchecked
+                advanceButton.disabled = true;
+            }
+        });
+
+        document.getElementById('titleConfirmationCheckbox').addEventListener('change', function () {
+            if (this.checked) {
+                alert('Thank you for confirming your badge/title. Please explain what your title or badge means at the beginning of the chat.');
+            }
+        });
     }
-
-    // Add event listener for the form submission if needed
-    document.getElementById('title-thought-form').addEventListener('submit', function(event) {
-        event.preventDefault();
-        // Handle the confirmation of thinking about the title
-        alert('Title thought confirmed.');
-    });
 });
 
 loginForm.addEventListener('submit', (e) => {
     e.preventDefault();
+    const selfCond = localStorage.getItem('self_cond');
+    if (selfCond === 'private' || selfCond === 'public') {
+        const titleConfirmed = document.getElementById('titleConfirmationCheckbox').checked;
+        if (!titleConfirmed) {
+            alert('Please think about your self-reflective title and check the box before proceeding.');
+            return;
+        }
+    }
     const firstName = firstNameInput.value.trim();
     const selectedAvatar = localStorage.getItem('selectedAvatar');
-    const selfCond = localStorage.getItem('self_cond');
     let badgeName = '';
 
     // Only require badgeName if self_cond is 'public'

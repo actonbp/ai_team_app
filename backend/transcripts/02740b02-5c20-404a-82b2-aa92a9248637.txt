@@ -1,0 +1,107 @@
+Sophia: Sophia is typing...
+Sophia: Hey team, Sophia here- I see Cool Guy just joined the chat. Welcome to the team.. Should we all first introduce ourselves and explain our badge name like the task directions said?BTW, u click the raise hand button to bring up the chat box..
+James: East Point Mall - Most yesses, bad on sqft, good foot traffic & students
+
+Starlight Valley - 2 yeses
+
+Cape James Beach - touristy, bad parking & waste
+
+What's up on your end, Sophia, Ethan?
+Sophia: Hey Ethan, here's the quick rundown:
+
+East Point Mall: 
+- Yes: Parking, foot traffic, students, waste, employables
+- No: Cost, tourists
+
+Starlight Valley:
+- Yes: Size, foot traffic, tourists
+- No: Students, employables
+
+Cape James:
+- Yes: Cost, competitors, foot traffic, tourists
+- No: Parking
+
+Thats it really, what do you think?
+Ethan: Hey James, Sophia,
+
+East Point Mall: 5 Yes (parking, foot traffic, students, waste, employables); 2 No (cost, tourists)
+
+Starlight Valley: 2 Yes (cost, competitors); 2 No (students, employables)
+
+Cape James: All good, no bad points listed?
+
+That's it.
+
+- Ethan
+Sophia: Hey, quick info on Cape James:
+
+- Parking: No
+- Cost, Competitors, Foot Traffic, Tourists: Yes
+
+Scores well, just no parking. What you all think?
+
+-Sophia
+Ethan: East Point still best - 5 yes. Cape James no parking. Starlight only 2 yes. Thoughts? -Ethan
+Sophia: Agreed, Ethan. Looks like East Point has the edge w/ most yeses. Cape James and Starlight Valley could be next in line but Cape's missing parking is also important. Worth noting for decision. What does everyone else think?
+James: Looks like East Point takes the lead easily with 5 yesses. I think we should consider how critical each 'no' is at Cape James and Starlight. Parking seems key, esp for a restaurant. What's everyone's take on that? -James
+Ethan: 1/2: Good points. East Point seems solid given the coverage on most needs. Parking's definitely a big plus for restaurant goers. Cape's good on cost but no parking is tough. Starlight lacks in several key areas.
+Ethan: 2/2: Seems we may have our provisional ranking here?
+Sophia: Seems we're leaning towards East Point top, then Cape James, and Starlight last? Do we all agree on this lineup based on our criteria match ups? Let's finalize if everyone's cool with that.
+
+-Sophia
+Sophia: Yeah, works for me. East Point, Cape James, Starlight. Cool if we settle on this?
+
+-Sophia
+James: East Point, Cape James, Starlight - all set. Let's lock it. -James
+James: East Point, Cape James, Starlight sorted. -James
+
+East Point Mall: 5Y, 2N
+- 50+ parking: Y
+- >2000 sqft: N
+- Foot traffic: Y
+- Tourists: N
+- Students: Y
+- Waste: Y
+- Workers: Y
+
+Starlight Valley: 2Y, 2N
+- Parking: Y
+- Students: N
+- Waste: Y
+- Workers: N
+
+Cape James Beach: 3Y, 3N 
+- Parking: N
+- <3 competitors: Y 
+- Tourists: Y 
+- Students: N 
+- Waste: N 
+- Workers: Y
+Ethan: 1/2: East Point, Cape James, Starlight. Okay.
+
+- Ethan
+
+East Point Mall: 5Y, 2N
+- Parking: Y
+- Foot traffic: Y
+- Students: Y
+- Waste: Y
+- Workers: Y
+
+Starlight Valley: 2Y,
+Ethan: 2/2: 2N
+- Costs <1MM: Y
+- <3 competitors: Y
+
+Cape James Beach: 3Y, 0N
+- Foot traffic: Y
+- Low costs: Y
+- Tourists: Y
+James: East Point, Cape James, Starlight good to go. 👍 -James
+
+East Point Mall: 5Y, 2N (parking Y, foot traffic Y, students Y, waste Y, workers Y)
+Starlight Valley: 2Y, 2N (parking Y, waste Y)
+Cape James Beach: 3Y, 3N (no competitors Y, tourists Y, workers Y)
+Ethan: Agreed on the lineup: East Point, Cape James, Starlight. If everyone's cool with that?
+
+- Ethan
