@@ -1,9 +1,0 @@
-Sophia: Sophia is typing...
-Sophia: Hey team, Sophia here! I see Cool Guy just joined the chat. Welcome to the team! Should we all first introduce ourselves and explain our badge name like the task directions said?
-Ethan: Hey all, I'm Ethan! Quick intro: I've got some stats for our locations that should help us decide. Here's a summary:
-
-- East Point Mall scores well on parking, foot traffic, and has a good potential employee base but falls short on maintenance and tourist appeal.
-- Starlight Valley is affordable and not too crowded with competitors, but it’s not great for student population or workforce.
-- Cape James Beach looks promising with good foot traffic, low maintenance, and strong tourist presence.
-
-Looking forward to hearing what you guys think!
