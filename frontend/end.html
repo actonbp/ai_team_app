@@ -1,17 +1,19 @@
 <div class="thank-you-container" style="background-color: #f9f9f9; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); text-align: center; margin: auto; width: 80%;">
     <h2 style="color: var(--primary-color);">Thank You for Your Participation!</h2>
-    <p>Your insights and contributions have been invaluable to our simulation. We appreciate the time and effort you've dedicated to this exercise.</p>
+    <p>Your insights and contributions have been invaluable to our task. We appreciate the time and effort you've dedicated to this exercise.</p>
     <p>Please copy the unique code below and paste it into the Qualtrics survey you have open in another window to confirm you've completed the task:</p>
     <p id="uniqueCode" style="font-weight: bold; padding: 10px; background-color: #fff; border-radius: 5px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);"></p>
     <script>
         function generateUniqueCode() {
-            const code = 'FDW965gsf';
-            // const code = Math.floor(10000000 + Math.random() * 90000000).toString(); // Generates a random 8 digit number
+            const code = 'X9R2F6T8';
             document.getElementById('uniqueCode').innerText = code;
             localStorage.setItem('finish_code', code); // Store the generated code in localStorage
         }
         window.onload = generateUniqueCode;
     </script>
     <script src="js/end.js"></script>
-    <p>Please ensure you paste this code into the appropriate field in the Qualtrics survey to complete the process.</p>
+    <p>Please ensure you paste this code into the appropriate field in the Qualtrics survey to complete the process. You only have a small number of post-task questions to finish. 
+    
+        ABOVE **IS NOT** the PROLIFIC Code. You will recieve that when you finish the qualtrics survey.
+    </p>
 </div>

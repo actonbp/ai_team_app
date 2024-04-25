@@ -483,13 +483,14 @@ font-size: 16px;
         .team-member-info h4 {
             font-size: 1em;
             font-weight: bold;
-            margin-bottom: 5px;
+            margin-bottom: 2px;
+            color: black;
             /* Space between name and badge title */
         }
     
         .team-member-info p {
-            font-size: 0.9em;
-            color: #555;
+            font-size: 1.1em;
+            color: black;
         }
     
         .participant-details {
@@ -507,6 +508,8 @@ font-size: 16px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             padding: 20px;
             border-radius: 10px;
+            font-weight: 900;
+            font-size: larger;
         }
     
         #raiseHandButton {
@@ -897,12 +900,12 @@ html {
     font-weight: bold;
     margin-bottom: 5px;
     color: black; /* Ensures text color is black for all team member names */
+    font-size: larger;
+    font-weight: 900;
+            /* Maximum boldness */
+        /* Increase font size for better visibility */            /* Maximum boldness */
 }
 
-.team-member-info p {
-    font-size: 0.9em;
-    color: #555;
-}
 
 .your-information {
     background-color: #140f0f;
@@ -910,11 +913,13 @@ html {
     padding: 20px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
     margin-bottom: 20px;
+    font-weight: 900;
 }
 
 .team-members-section h2 {
     text-align: center;
     margin-bottom: 20px;
+    font-weight: 900;
 }
 .my-info {
     background-color: rgba(255, 0, 0, 0.20); /* Light red background with transparency */
@@ -923,6 +928,8 @@ html {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     padding: 20px;
     border-radius: 10px;
+    font-weight: 900;
+    color: black
 }
 
 .dark-mode {
@@ -1394,6 +1401,10 @@ form input:focus, form button:hover {
 }
 
 .avatar-item:hover {
+    transform: scale(1.5); /* More noticeable scale */
+    transition: transform 0.2s ease;
+}
+
     transform: scale(1.5); /* More noticeable scale */
     transition: transform 0.2s ease;
 }
