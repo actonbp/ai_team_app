@@ -84,14 +84,14 @@ typingDelay = 2000
 
 const agentsOptions = {
     B: {
-        'James': { agentName: 'James', avatar: 'avatars/majority/avatar_1.png', isAgent: true, typingSpeed: 100, agentBadge: 'Master of Motivation', color: 'rgba(255, 215, 0, 0.5)', colorRGB: { r: 255, g: 215, b: 0 } },
-        'Sophia': { agentName: 'Sophia', avatar: 'avatars/majority/avatar_2.png', isAgent: true, typingSpeed: 120, agentBadge: 'Strategist Supreme', color: 'rgba(255, 105, 180, 0.5)', colorRGB: { r: 255, g: 105, b: 180 } },
-        'Ethan': { agentName: 'Ethan', avatar: 'avatars/majority/avatar_3.png', isAgent: true, typingSpeed: 140, agentBadge: 'Logic Luminary', color: 'rgba(30, 144, 255, 0.5)', colorRGB: { r: 30, g: 144, b: 255 } }
+        'James': { agentName: 'James', avatar: 'avatars/majority/avatar_1.png', isAgent: true, typingSpeed: 150, agentBadge: 'Master of Motivation', color: 'rgba(255, 215, 0, 0.5)', colorRGB: { r: 255, g: 215, b: 0 } },
+        'Sophia': { agentName: 'Sophia', avatar: 'avatars/majority/avatar_2.png', isAgent: true, typingSpeed: 170, agentBadge: 'Strategist Supreme', color: 'rgba(255, 105, 180, 0.5)', colorRGB: { r: 255, g: 105, b: 180 } },
+        'Ethan': { agentName: 'Ethan', avatar: 'avatars/majority/avatar_3.png', isAgent: true, typingSpeed: 190, agentBadge: 'Logic Luminary', color: 'rgba(30, 144, 255, 0.5)', colorRGB: { r: 30, g: 144, b: 255 } }
     },
     A: {
-        'Maurice': { agentName: 'Maurice', avatar: 'avatars/minority/avatar_10.png', isAgent: true, typingSpeed: 100, agentBadge: 'Master of Motivation', color: 'rgba(255, 215, 0, 0.5)', colorRGB: { r: 255, g: 215, b: 0 } },
-        'Ebony': { agentName: 'Ebony', avatar: 'avatars/minority/avatar_11.png', isAgent: true, typingSpeed: 120, agentBadge: 'Strategist Supreme', color: 'rgba(255, 105, 180, 0.5)', colorRGB: { r: 255, g: 105, b: 180 } },
-        'Trevon': { agentName: 'Trevon', avatar: 'avatars/minority/avatar_13.png', isAgent: true, typingSpeed: 140, agentBadge: 'Logic Luminary', color: 'rgba(30, 144, 255, 0.5)', colorRGB: { r: 30, g: 144, b: 255 } }
+        'Maurice': { agentName: 'Maurice', avatar: 'avatars/minority/avatar_10.png', isAgent: true, typingSpeed: 150, agentBadge: 'Master of Motivation', color: 'rgba(255, 215, 0, 0.5)', colorRGB: { r: 255, g: 215, b: 0 } },
+        'Ebony': { agentName: 'Ebony', avatar: 'avatars/minority/avatar_11.png', isAgent: true, typingSpeed: 170, agentBadge: 'Strategist Supreme', color: 'rgba(255, 105, 180, 0.5)', colorRGB: { r: 255, g: 105, b: 180 } },
+        'Trevon': { agentName: 'Trevon', avatar: 'avatars/minority/avatar_13.png', isAgent: true, typingSpeed: 190, agentBadge: 'Logic Luminary', color: 'rgba(30, 144, 255, 0.5)', colorRGB: { r: 30, g: 144, b: 255 } }
     }
 };
 
@@ -633,7 +633,7 @@ function simulateChat() {
                     }, 45000); // 45 seconds delay to proceed automatically
 
                 }, 10000); // Delay before showing the intro message
-            }, 5000); // Delay before showing the typing indicator for the intro message
+            }, 10000); // Delay before showing the typing indicator for the intro message
         } else {
             // If there's already conversation history, fetch responses immediately without additional delay
             fetchResponses();

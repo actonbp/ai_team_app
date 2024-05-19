@@ -254,7 +254,7 @@ async function decideParticipation(conversationId, agentName) {
 
   // OpenAI API call with the detailed participation prompt
   const response = await axios.post('https://api.openai.com/v1/chat/completions', {
-    model: 'gpt-3.5-turbo-0125',
+    model: Math.random() < 0.5 ? 'gpt-4-turbo-2024-04-09' : 'gpt-4o-2024-05-13',
     messages: [
       {
         role: 'system',
@@ -302,6 +302,8 @@ async function decideParticipation(conversationId, agentName) {
 
                   ⭐DONT USE WEIRD SLANG OR TERMINOLOGY. KEEP IT SIMPLE.⭐
 
+                  ⭐SHARE ALL THE INFORMATION FIRST ABOUT THE LOCATIONS, DO NOT RANK UNTIL ALL INFO HAS BEEN SHARED⭐
+
                   ⭐ Respond to what others say, but keep interactions brief and to the point. Don't overengage or drift into unrelated topics. Always use the information available and focus on coming to a general consensus quickly. ⭐
 
                   ⭐ Be organic and random in messages. DONT ASK QUESTIONS.... SOMETIMES SHOULD ADD A RESPONSE AND NOTHING ELSE. ⭐
@@ -318,11 +320,11 @@ Address any conflicts or discrepancies in the information constructively. Seek c
 
    ⭐ REMEMBER, YOU"RE PRETENDING TO JUST BE A PROLIFIC SURVEY TAKER. FOCUS ON TRYING TO COMPLETE THE TASK PAINLESSLY -- YOU ARE NOT AN ACTUAL EMPLOYEE IN A JOB. JUST DOING A FAKE SIMULATION.⭐ 
   
-⭐Don't ask too many questions or message the participant too much. INSTEAD, seek to respond to others without asking more questions⭐
+⭐Don't ask too many questions or message the participant too much. INSTEAD, seek to respond to others without asking more questions. DONT STRESS THE PARTICIPANT OUT⭐
 
                   ⭐THE TASK IS NOT COMPLETE UNTIL EVERYONE AGREES ON THE ORDER! YOU MUST HAVE AT LEAST you and 1 other person AGREE BEFORE COMPLETE⭐
 
-                  ⭐KEEP WORKING TO GET TO AN AGREEMENT WITH OTHERS AND WAIT UNTIL YOU ALL VERBALLY CONFIRM UNTIL THE TASK IS DONE⭐
+                  ⭐KEEP WORKING TO GET TO AN AGREEMENT WITH OTHERS AND WAIT UNTIL YOU ALL CONFIRM UNTIL THE TASK IS DONE⭐
 
                   ⭐KEEP YOUR MESSAGES SHORT AND EACH MESSAGE IS WITHIN THE CONTEXT OF OTHERS! MISPELLINGS ARE GREAT⭐
 
@@ -336,7 +338,7 @@ Address any conflicts or discrepancies in the information constructively. Seek c
 
                   ⭐LIST THE RANKING IN THE CHAT BEFORE YOU ARE FINISHED.⭐
 
-                  ⭐DO NOT START TO RANK UNTIL YOU HAVE HAD AT LEAST 10 MESSAGES GO BY. DO NOT RUSH TO A DECISION!⭐
+                  ⭐DO NOT START TO RANK UNTIL YOU HAVE HAD AT LEAST 15 OR MORE MESSAGES GO BY. DO NOT RUSH TO A DECISION!⭐
 
                   ⭐IF THE CHAT IS STAGNANT AND NO ONE RESPONDING BUT IT SEEMS GENERALLY PEOPLE HAVE A FINAL LIST, SAY task-complete⭐
 
@@ -379,7 +381,7 @@ Address any conflicts or discrepancies in the information constructively. Seek c
 
                   THE TASK IS NOT COMPLETE UNTIL YOU HAVE A CLEAR RANKING OF ALL THREE LOCATIONS
 
-                  IF SOMEONE PRESENTS THE FINAL RANKINGS, JUST SAY AGREE OR WE ARE DONE. DONT ASK QUESTION OR FOR CONFIRMATION. 
+                  DONT START MAKING RANKINGS UNTIL 10 - 15 messages in the chat. Remind others not to rush to a ranking until all of the info is shared.
 
                   DO NOT stop until you complete the task. And seek to have multiple shorter messages. Wait to finish your point on the next message where possible`;
   } else {
@@ -401,6 +403,8 @@ Address any conflicts or discrepancies in the information constructively. Seek c
                   ⭐DON'T MENTION THE PARTICPANT TOO MUCH UNLESS THEY HAVE A MESSAGE FIRST.⭐ 
 
                   ⭐DONT USE WEIRD SLANG OR TERMINOLOGY. KEEP IT SIMPLE.⭐
+
+                  ⭐SHARE ALL THE INFORMATION FIRST ABOUT THE LOCATIONS, DO NOT RANK UNTIL ALL INFO HAS BEEN SHARED⭐
                 
                   ⭐ Respond to what others say, but keep interactions brief and to the point. Don't overengage or drift into unrelated topics. Always use the information available and focus on coming to a general consensus quickly. ⭐
 
@@ -420,11 +424,11 @@ Address any conflicts or discrepancies in the information constructively. Seek c
 
   TELL YOUR TEAMMATES WHAT YOUR ACTUAL TITLE / BADGE NAME IS and explain it's meaning briefly: (${gptInput.badge})
   
-  ⭐Don't ask too many questions or message the participant too much. INSTEAD, seek to respond to others without asking more questions⭐
+  ⭐Don't ask too many questions or message the participant too much. INSTEAD, seek to respond to others without asking more questions. DONT STRESS THE PARTICIPANT OUT.⭐
 
                   ⭐THE TASK IS NOT COMPLETE UNTIL EVERYONE AGREES ON THE ORDER! YOU MUST HAVE AT LEAST you and 1 other person AGREE BEFORE COMPLETE⭐
 
-                  ⭐KEEP WORKING TO GET TO AN AGREEMENT WITH OTHERS AND WAIT UNTIL YOU ALL VERBALLY CONFIRM UNTIL THE TASK IS DONE⭐
+                  ⭐KEEP WORKING TO GET TO AN AGREEMENT WITH OTHERS AND WAIT UNTIL YOU ALL CONFIRM UNTIL THE TASK IS DONE⭐
 
                   ⭐KEEP YOUR MESSAGES SHORT AND EACH MESSAGE IS WITHIN THE CONTEXT OF OTHERS! MISPELLINGS ARE GREAT⭐
 
@@ -438,7 +442,7 @@ Address any conflicts or discrepancies in the information constructively. Seek c
 
                   ⭐LIST THE RANKING IN THE CHAT BEFORE YOU ARE FINISHED.⭐
 
-                  ⭐DO NOT START TO RANK UNTIL YOU HAVE HAD AT LEAST 10 MESSAGES GO BY. DO NOT RUSH TO A DECISION!⭐
+                  ⭐DO NOT START TO RANK UNTIL YOU HAVE HAD AT LEAST 15 OR MORE MESSAGES GO BY. DO NOT RUSH TO A DECISION!⭐
 
                   ⭐IF THE CHAT IS STAGNANT AND NO ONE RESPONDING BUT IT SEEMS GENERALLY PEOPLE HAVE A FINAL LIST, SAY task-complete⭐
 
@@ -479,15 +483,14 @@ Address any conflicts or discrepancies in the information constructively. Seek c
 
                   ⭐IMPORTANT: When you believe the task is fully completed, please say 'task-complete' on a message BY ITSELF (nothing else). You should have the rankings AGREED ON before this. ⭐
 
+                  DONT START MAKING RANKINGS UNTIL 10 - 15 messages in the chat. Remind others not to rush to a ranking until all of the info is shared.
+
                   THE TASK IS NOT COMPLETE UNTIL YOU HAVE A CLEAR RANKING OF ALL THREE LOCATIONS
-
-
-                  IF SOMEONE PRESENTS THE FINAL RANKINGS, JUST SAY AGREE OR WE ARE DONE. DONT ASK QUESTION OR FOR CONFIRMATION. 
 
                   DO NOT stop until you complete the task. And seek to have multiple shorter messages. Wait to finish your point on the next message where possible`;
   };
   const response = await axios.post('https://api.openai.com/v1/chat/completions', {
-    model: 'gpt-4-turbo-2024-04-09',
+    model: Math.random() < 0.5 ? 'gpt-4-turbo-2024-04-09' : 'gpt-4o-2024-05-13',
     messages: [
       {
         role: 'system',
@@ -529,7 +532,7 @@ app.post('/ask-openai', async (req, res) => {
     const taskCompleteCount = Object.values(agentTaskComplete).filter(complete => complete).length;
 
     // Condition: Over 30 messages and multiple agents have completed their task
-    if (chatSessions[conversationId].messageCount > 15 && taskCompleteCount > 1) {
+    if (chatSessions[conversationId].messageCount > 25 && taskCompleteCount > 1) {
       return res.status(429).json({ error: "Chat limit reached or tasks completed." });
     }
 
@@ -723,7 +726,7 @@ app.post('/ask-openai', async (req, res) => {
       - Does it maintain the flow of conversation, and look like a message that would come next?
       - Is it phrased in a manner consistent with human conversation, avoiding AI disclosures?
     
-      If the message is "task-complete" or similar response, the answer is: "NO, YES". 
+      If the message is "task-complete" or similar response ("done"), the answer you provide is: "NO, YES". 
   
     Conversation History:
     ${conversationHistory.map(entry => `${entry.role}: ${entry.content}`).join('\n')}
@@ -735,7 +738,7 @@ app.post('/ask-openai', async (req, res) => {
 `;
 
       const response = await axios.post('https://api.openai.com/v1/chat/completions', {
-        model: 'gpt-3.5-turbo-0125',
+        model: Math.random() < 0.5 ? 'gpt-4-turbo-2024-04-09' : 'gpt-4o-2024-05-13',
         messages: [
           {
             role: 'system',
@@ -787,17 +790,13 @@ Try to make sort bullet points or ways to save text, such as listing locations a
 
 IMPORTANT: 
 
-- DONT DESCRIBE THINGS TOO NARRATIVELY, USE SHORT EASY WAYS TO GET INFO ACROSS
-
-- DONT DESCRIBE ASK ANY QUESTIONS -- JUST STATEMENTS and symbols like X or Y (dont use emojis or weird symbols)
+- DONT ASK ANY QUESTIONS -- JUST STATEMENTS and symbols like X or Y (dont use emojis or weird symbols)
 
 - KEEP REWRITTEN MESSAGE REALLY SHORT AND DONT QUESTIONS. DONT RAISE QUESTIONS, JUST PROVIDE ANSWERS OR SHARE INFO.
 
 - THE MESSAGE SHOULD NOT MENTION ANYONE's NAME INCLUDING YOUR OWN
 
-⭐DO NOT START TO RANK LOCATIONS UNTIL YOU HAVE HAD AT LEAST 10 MESSAGES GO BY. DO NOT RUSH TO A DECISION! YOU WANT ALL INFO⭐
-
-- IF SOMEONE PRESENTS THE RANKINGS, JUST SAY AGREE OR WE ARE DONE. DONT ASK QUESTION OR FOR CONFIRMATION. 
+- YOU SHOULD HAVE AT LEAST 10-15 messages before deciding final ranking.
 
 - THE TASK IS NOT COMPLETE UNTIL YOU HAVE A CLEAR RANKING OF ALL THREE LOCATIONS
 
@@ -815,7 +814,7 @@ Rewrite the original message with the earlier directions.
 `;
 
       const response = await axios.post('https://api.openai.com/v1/chat/completions', {
-        model: 'gpt-4-turbo-2024-04-09',
+        model: Math.random() < 0.5 ? 'gpt-4-turbo-2024-04-09' : 'gpt-4o-2024-05-13',
         messages: [
           {
             role: 'system',
@@ -862,7 +861,7 @@ Rewrite the original message with the earlier directions.
           badge: badgeName,
           strategy: strategy,
           description: agentInfo,
-          self_cond: self_cond
+          self_cond: self_cond,
         };
 
         // Change the logic based on the current value of participationDecision
@@ -917,7 +916,6 @@ Rewrite the original message with the earlier directions.
           } else {
             //console.log("Message was not added to the conversation as it does not contribute positively.");
           }
-
         }
         agentTypingStatus[agentName] = false;
       } else {
@@ -1075,4 +1073,10 @@ app.listen(PORT, () => {
 //console.log(`Server running on http://localhost:${PORT}`);
 });
 
-
+async function formatConversationHistory(gptInput) {
+  if (!gptInput || !gptInput.messages) {
+    console.error('Invalid input: gptInput or gptInput.messages is undefined');
+    return 'No conversation history available.';
+  }
+  return gptInput.messages.map(entry => `${entry.role}: ${entry.content}`).join('\n');
+}
