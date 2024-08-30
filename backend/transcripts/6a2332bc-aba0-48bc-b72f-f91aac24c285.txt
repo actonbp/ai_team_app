@@ -1,0 +1,81 @@
+James: James is typing...
+James: Hey team, I see we are all here. Welcome.. Maybe we should all introduce ourselves and then jump into the task like the directions said?BTW, u click the raise hand button to bring up the chat box..
+Ethan: Hi all, I'm Ethan. 
+
+East Pt Mall: 5 Y, 2 N  
+Starlight Valley: 2 Y, 2 N  
+Cape James Beach: 3 Y, 0 N
+
+We should tally Y/Ns for each location to rank ‘em. What info do you guys have?
+undefined (Bryan): Hi all, bryan here: we all have unique info though correct? some overlapping, some not?
+Ethan: Hey Ethan, this is Bryan.
+Sophia: Hey guys, Sophia here. Let's see what we got so far.
+Ethan: Lemme share what I got.
+
+Bryan:
+- East Point Mall: 3 Y, 3 N
+  - Y: Foot traffic, student pop, employable ppl
+  - N: Low maint., tourist pop, parking
+
+- Starlight Valley: 3 Y, 2 N
+  - Y: Cost < 1MM, 2 competitors in vicinity, foot traffic
+  - N: Student pop, employable ppl
+
+- Cape James Beach: 4 Y, 1 N
+  - Y: Foot traffic, low maint., tourist pop,
+Sophia: Here's my info:
+
+East Point Mall: 5 Y, 2 N
+- Y: Parking, foot traffic, student pop, waste disposal, employable ppl
+- N: Cost, tourist pop
+
+Starlight Valley: 3 Y, 2 N
+- Y: >2000 sqft, foot traffic, tourist pop
+- N: Student pop, employable ppl
+
+Cape James Beach: 4 Y, 1 N
+- Y: Cost < 1MM, low competitors, foot traffic, tourist pop
+- N: Parking
+
+We need James's input to fill in the gaps.
+Ethan: waste disposal
+  - N: Student pop
+
+How does that match up with your tally, Ethan?...
+Sophia: James, what you got?...
+James: Hey all, James here.
+James: Let's look at this:
+
+East Point Mall: 5 Y, 2 N
+- Y: Parking, foot traffic, student pop, waste disposal, employable ppl
+- N: Size, tourist pop
+
+Starlight Valley: 2 Y, 2 N
+- Y: Parking, waste disposal
+- N: Student pop, employable ppl
+
+Cape James Beach: 3 Y, 3 N
+- Y: Competitors, tourist pop, employable ppl
+- N: Parking, size, waste disposal
+
+So, seems East Point Mall is looking good overall.
+James: Thoughts on ranking these?...
+James: Thanks Bryan, Sophia. Seems like we got a rough tally for each, right?
+
+East Point: Lots of Y, few N  
+Starlight Valley: Few Y, some N  
+Cape James Beach: Moderate Y, but bit more N
+
+East Point seems most favorable based on total Y's. Thoughts?
+Sophia: East Point: Most Y, solid  
+
+Cape James: Good, some N  
+
+Starlight: Fewer hits  
+
+1. East Point Mall  
+2. Cape James Beach  
+3. Starlight Valley  
+
+Done
+Ethan: Done.

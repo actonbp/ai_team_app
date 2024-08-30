@@ -1,0 +1,77 @@
+Trevon: Trevon is typing...
+Trevon: Hey team, I see we are all here. Welcome.. Maybe we should all introduce ourselves and then jump into the task like the directions said?BTW, u click the raise hand button to bring up the chat box..
+Ebony: Hey guys, I'm Ebony. Let’s start by listing what we know about each location. Here's what I've got:
+
+East Point Mall: 5Y, 2N
+Starlight Valley: 3Y, 2N
+Cape James Beach: 4Y, 1N
+
+Let's share our yes/no for each criteria to get a complete picture. Maurice, Trevon, what's your info?
+Maurice: Hey Ebony. Maurice here. So my info is:
+
+- East Point Mall: 5Y (Parking, Foot traffic, Students, Waste disposal, Employable) + 2N (Size, Tourists)
+- Starlight Valley: 2Y (Parking, Waste disposal) + 2N (Students, Employable)
+- Cape James Beach: 3Y (Competitors, Tourists, Employable) + 3N (Parking, Students, Waste disposal)
+
+Trevon, what you got?
+Ebony: Cape James= strong Tourist/Foot traffic, weak Parking/Waste.  
+Starlight Valley= weaker overall.  
+East Point= solid Parking/Foot traffic, Employable, Waste disposal.
+
+Trevon, your info?
+Trevon: Sup guys, Trevon here. My info is:
+
+East Point Mall: 5Y (Parking, Foot traffic, Students, Waste disposal, Employable) + 2N (Maintenance, Tourists)   
+Starlight Valley: 2Y (Cost, Competitors) + 2N (Students, Employable)  
+Cape James Beach: 3Y (Foot traffic, Maintenance, Tourists) + 0N
+
+Bryan, any unique info?
+Ebony: Bryan, once you can jump in with your insights, we should be able to start piecing together a solid ranking based on everything we've shared so far.
+undefined (Bryan): What do you guys think?
+Ebony: Hey Bryan. Based on what we have, my info says East Point Mall: 5Y/2N, Starlight Valley: 3Y/2N, Cape James Beach: 4Y/1N. Anyone else got more details?
+Ebony: East Point Mall: good, parking, foot traffic, students, waste disposal, employees ✔️  
+Cape James Beach: okay, tourists, cost, foot traffic ✔️  
+Bryan, anything else?
+Ebony: East Point: ✔️ parking, foot traffic, employability. Starlight: weak employment. Cape James: parking, waste disposal 🚫.
+Trevon: East Point: 
+  - ✔️ parking, ✔️ traffic, ✔️ students, ✔️ waste, ✔️ employable, 🚫 tourists, 🚫 maintenance.
+
+Starlight: 
+  - ✔️ cost, 🚫 students, ✔️ competition, 🚫 employable.
+
+Cape James: 
+  - ✔️ traffic, ✔️ maintenance, ✔️ tourists.
+
+All: Ready to rank when you are.
+Ebony: Looks like East Point Mall is leading with good basics: parking, foot traffic, employables. Cape James is strong on tourist appeal tho. Thoughts?
+Maurice: Yeah, looks like East Point has a lot of practical perks. Cape James might grab more tourists though. Should we start thinking rankings?
+Ebony: Yeah, I agree, East Point Mall seems like it hits more criteria. Cape James has strong tourist appeal but weak on essentials like parking and waste disposal. 🎯
+
+What about making the ranking:
+
+1. East Point Mall
+2. Cape James Beach
+3. Starlight Valley
+
+Maurice, Trevon, Bryan? Thoughts?
+Trevon: Hey Bryan, Trevon here. 🤔 I'm leaning toward:
+
+1. East Point Mall
+2. Cape James Beach
+3. Starlight Valley
+
+Agree with everyone so far? Maurice, Ebony?
+Maurice: Yeah, I think that ranking makes sense. East Point has more yeses for basics. Cape James is cool for tourists but lacks essentials. Trevon, Ebony, Bryan agree?
+
+1. East Point Mall
+2. Cape James Beach
+3. Starlight Valley
+
+task-complete?
+Ebony: Got it. All lean:
+
+1. East Point Mall
+2. Cape James Beach
+3. Starlight Valley
+
+Done.

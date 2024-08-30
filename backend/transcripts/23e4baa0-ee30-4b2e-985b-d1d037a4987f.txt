@@ -1,0 +1,44 @@
+Maurice: Maurice is typing...
+Maurice: Hey team, I see we are all here. Welcome.. Maybe we should all introduce ourselves and then jump into the task like the directions said?BTW, u click the raise hand button to bring up the chat box..
+Trevon: Hey team, I'm Trevon. Let's break down the locations one by one by listing yes/no for each criterion. We'll rank after discussing all. 
+
+East Point Mall: 
+- 5 Yes
+- 2 No
+
+Starlight Valley:
+- 2 Yes
+- 2 No
+
+Cape James Beach:
+- 3 Yes
+- 0 No
+
+Let's hear your thoughts. Bry, what's your name?
+Ebony: Hey I'm Ebony. Looks good Trevon. Quick note, starlight valley is missing some checks. For large tourist pop it's a yes. not sure bout the rest yet. Bryan, got updates on your end?
+Maurice: Hey team, Maurice here. Nice to meet yall. Let's break down these locations. Here's what I got:
+
+East Point Mall:
+Y: Parking, Foot Traffic, Students, Waste Disposal, Employees
+N: 2000 sqft, Tourists
+
+Starlight Valley:
+Y: Parking, Waste Disposal
+N: Students, Employees 
+
+Cape James Beach:
+Y: Competitors, Tourists, Employees
+N: Parking, Waste Disposal, Students
+
+That's my info. Bry, chime in?
+Trevon: Ebony, got it. I think we need to check on Cape James for stuff like parking and waste disposal too. Maurice, what’s the space size for East Point and Valley? Wondering if they meet the 2000 sqft. Bryan set to join in?
+Maurice: Cape James doesn't meet 2000 sqft either. So far:
+- East Point: No for 2000 sqft, no tourists
+- Starlight: No students, no employees
+- Cape James: No parking, no waste disposal
+
+Bry, what u got?
+Ebony: East Point Mall looks better overall:
+- Cape James: No parking & waste
+- Starlight: Tourist traffic, no employees/students
+Bryan, need ur input

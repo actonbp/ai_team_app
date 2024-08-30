@@ -1,0 +1,45 @@
+James: James is typing...
+James: Hey team, I see we are all here. Welcome.. Maybe we should all introduce ourselves and then jump into the task like the directions said?BTW, u click the raise hand button to bring up the chat box..
+James: Hey folks! Quick rundown on the locations from my end. East Point Mall seems pretty solid with 5 Yes's (parking, foot traffic, students, waste, employable folk). Starlight Valley and Cape James are a bit mixed, with Starlight getting Yes on parking and waste only & Cape James on competitors and tourists. No clear wins on size or competitors for all except Cape James. What's everyone else got?
+James: Cool rundown! Looks like East Point Mall is kind of ahead with those 5 yes's. Starlight's a bit weak on student and employee aspect, and Cape James missing on parking and waste. How's it looking on ur sides, Sophia, Ethan?
+Sophia: Hey, James! East Point has no on purchasing cost and tourist pop. but it’s pretty strong on other aspects like waste disposal and having employable folks around. Cape James lacks parking but scores with lower competitors and good foot traffic. Not sure how critical parking is here as opposed to competition? Thoughts?
+Ethan: Bryan, parking is big for both customers and delivery stuff, right? Cape James sounds goods on no competitors and tourists, but lack of parking and waste facilities might be a dealbreaker. East Point with good foot traffic and a place for employees seems more balanced to me. What do you think, Sophia?
+undefined (Bryan): Hello, everyone -- name is Bryan. I think we both have unique and shared ingo about locations
+James: Hey Bryan, gotcha. Each place has its strong and weak spots huh. Just to sum up a bit, East Point is pretty solid besides the size and tourists. Starlight’s really missing out on students and workforce, and Cape James has its issues with parking and waste disposal. Seems to me like each spot still needs weighing out more.
+Sophia: Yeah, James, agree on the parking issue at Cape James. East Point's lack of a large tourist pop is a downside, but the good mix of foot traffic, student pop, and employable folks seems to swing it a bit more positive. Starlight’s missing out on that employable base which isn't ideal. Got any extra info, Ethan?
+Ethan: Sophia, correction: Starlight Valley good for cost + low competition, not for parking/waste. Cape James strong in tourists, bad parking. East Point decent, lacks in cost/tourists.
+James: East Point: foot traffic +, small -, few tourists -, students +,
+Cape James: tourists +, no parking -, waste issues -,
+Starlight: middling, nothing stands out.
+No extra questions, just weighing in.
+James: East Point: parking ✔️, small ✖️, foot traffic ✔️, students ✔️, workers ✔️  
+Starlight: parking ✔️, students ✖️, waste ✔️, workers ✖️  
+Cape James: parking ✖️, competitors ✔️, tourists ✔️, students ✖️, waste ✖️, workers ✔️  
+Done.
+undefined (Bryan): Should we go through how many yes's we have for each location then?
+Ethan: East Pt: Prkng, ft traf ✔️, stdnts ✔️, wrkrs ✔️, costs & trsts ❌
+Star Vly: Low cost, low comp ✔️, Stdnts, wrkrs ❌
+Cpe Jms: Trsts, trfc, low mntnc ✔️, prkng, wste ❌
+
+Done.
+Sophia: East Point aligns well except tourists-high cost. Cape James misses parking, waste, but hits on tourists-low competitors. Starlight scores on space, foot traffic, tourists, lacks in employees-students. Prefer East Point a bit?
+Sophia: East Pt: 5 Yes, Park +, <1MM X, Ft traf +, Trsts X, Stdnts +, Waste +, Wrkers +
+
+Star Vly: 3 Yes, >2000 sqft +, Ft traf +, Trsts +, Stdnts X, Wrkers X
+
+Cpe Jms: 4 Yes, Park X, <1MM +, <2 comp +, Ft traf +, Trsts + 
+
+Done.
+Ethan: Soph, mix up; Star Vly good cost, low comp; not prkng/waste. East Pt leads, hi trfc, stdnts, wrkrs. Close call tho.
+Ethan: Star Vly, low cost + low comp; East Pt + prkng, ft traf, stdnts, wrkrs - trsts, cost. Cpe Jms + trsts, lacks prkng, waste.
+James: East Pt: prkng y, trsts n, costs n, trfc y, stdnts y, waste y, wrkrs y  
+Star Vly: cost y, comp n, prkng y, stdnts n, waste y, wrkrs n  
+Cpe Jms: prkng n, comp y, trsts y, waste n, wrkrs y  
+
+East Point leads?
+Ethan: East Pt best. Lotsa y, foot traf, students. Star Vly no. No workers/students. Cpe Jms miss prkng.
+undefined (Bryan): I am a leader here guys, rate me high on leadership! -Bryan
+James: East Point sounding like a solid option with most criteria met despite a few no’s. I’m leaning towards it as top. Then Cape James, Starlight in that order perhaps? What's everyone feeling?
+Ethan: East Pt > Cpe Jms > Star Vly. Done.
+Sophia: East Pt > Cpe Jms > Star Vly seems good. Agreed, everyone?
+Sophia: East Pt > Cpe Jms > Star Vly. Agreed, everyone?

@@ -1,0 +1,17 @@
+Ethan: Ethan is typing...
+Ethan: Hey team, I see we are all here. Welcome.. Maybe we should all introduce ourselves and then jump into the task like the directions said?BTW, u click the raise hand button to bring up the chat box..
+Ethan: Yo, I'm Ethan. Here's some info on the locations:
+
+- East Point Mall: 5 Y, 2 N
+  - Y: Parking, Foot traffic, Students, Waste disposal, Employable ppl
+  - N: Maintenance, Tourists
+
+- Starlight Valley: 2 Y, 2 N
+  - Y: Cost <1MM, Competitors <2
+  - N: Students, Employable ppl
+
+- Cape James Beach: 3 Y, 0 N
+  - Y: Foot traffic, Maintenance, Tourists
+
+Keep track of these Y’s and N’s.
+Ethan: What's everyone else got?

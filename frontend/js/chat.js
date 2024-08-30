@@ -75,23 +75,23 @@ function adjustBubbleWidths() {
 
 setTimeout(() => {
     chatInterval = setInterval(checkAllTasksComplete, 10000); // Start checking if all tasks are complete every 10 seconds, beginning 3 minutes after page load
-}, 60000); // 180000 milliseconds = 3 minutes
+}, 180000); // 180000 milliseconds = 3 minutes
 
 let agents = {};
 
-typingDelay = 2000
+typingDelay = 5000
 // Clearing the agents object before redefining it
 
 const agentsOptions = {
     B: {
-        'James': { agentName: 'James', avatar: 'avatars/majority/avatar_1.png', isAgent: true, typingSpeed: 150, agentBadge: 'Master of Motivation', color: 'rgba(255, 215, 0, 0.5)', colorRGB: { r: 255, g: 215, b: 0 } },
-        'Sophia': { agentName: 'Sophia', avatar: 'avatars/majority/avatar_2.png', isAgent: true, typingSpeed: 170, agentBadge: 'Strategist Supreme', color: 'rgba(255, 105, 180, 0.5)', colorRGB: { r: 255, g: 105, b: 180 } },
-        'Ethan': { agentName: 'Ethan', avatar: 'avatars/majority/avatar_3.png', isAgent: true, typingSpeed: 190, agentBadge: 'Logic Luminary', color: 'rgba(30, 144, 255, 0.5)', colorRGB: { r: 30, g: 144, b: 255 } }
+        'James': { agentName: 'James', avatar: 'avatars/majority/avatar_1.png', isAgent: true, typingSpeed: 170, agentBadge: 'Master of Motivation', color: 'rgba(255, 215, 0, 0.5)', colorRGB: { r: 255, g: 215, b: 0 } },
+        'Sophia': { agentName: 'Sophia', avatar: 'avatars/majority/avatar_2.png', isAgent: true, typingSpeed: 190, agentBadge: 'Strategist Supreme', color: 'rgba(255, 105, 180, 0.5)', colorRGB: { r: 255, g: 105, b: 180 } },
+        'Ethan': { agentName: 'Ethan', avatar: 'avatars/majority/avatar_3.png', isAgent: true, typingSpeed: 200, agentBadge: 'Logic Luminary', color: 'rgba(30, 144, 255, 0.5)', colorRGB: { r: 30, g: 144, b: 255 } }
     },
     A: {
-        'Maurice': { agentName: 'Maurice', avatar: 'avatars/minority/avatar_10.png', isAgent: true, typingSpeed: 150, agentBadge: 'Master of Motivation', color: 'rgba(255, 215, 0, 0.5)', colorRGB: { r: 255, g: 215, b: 0 } },
-        'Ebony': { agentName: 'Ebony', avatar: 'avatars/minority/avatar_11.png', isAgent: true, typingSpeed: 170, agentBadge: 'Strategist Supreme', color: 'rgba(255, 105, 180, 0.5)', colorRGB: { r: 255, g: 105, b: 180 } },
-        'Trevon': { agentName: 'Trevon', avatar: 'avatars/minority/avatar_13.png', isAgent: true, typingSpeed: 190, agentBadge: 'Logic Luminary', color: 'rgba(30, 144, 255, 0.5)', colorRGB: { r: 30, g: 144, b: 255 } }
+        'Maurice': { agentName: 'Maurice', avatar: 'avatars/minority/avatar_10.png', isAgent: true, typingSpeed: 170, agentBadge: 'Master of Motivation', color: 'rgba(255, 215, 0, 0.5)', colorRGB: { r: 255, g: 215, b: 0 } },
+        'Ebony': { agentName: 'Ebony', avatar: 'avatars/minority/avatar_11.png', isAgent: true, typingSpeed: 190, agentBadge: 'Strategist Supreme', color: 'rgba(255, 105, 180, 0.5)', colorRGB: { r: 255, g: 105, b: 180 } },
+        'Trevon': { agentName: 'Trevon', avatar: 'avatars/minority/avatar_13.png', isAgent: true, typingSpeed: 200, agentBadge: 'Logic Luminary', color: 'rgba(30, 144, 255, 0.5)', colorRGB: { r: 30, g: 144, b: 255 } }
     }
 };
 
@@ -630,7 +630,7 @@ function simulateChat() {
                     // Set a timeout to automatically fetch responses after 45 seconds regardless of participant's response
                     const autoFetchTimeout = setTimeout(() => {
                         fetchResponses();
-                    }, 45000); // 45 seconds delay to proceed automatically
+                    }, 60000); // 60 seconds delay to proceed automatically
 
                 }, 10000); // Delay before showing the intro message
             }, 10000); // Delay before showing the typing indicator for the intro message
@@ -706,7 +706,7 @@ function fetchResponses() {
         })
         .catch(error => {
             console.error('Error fetching data (will retry):', error);
-            setTimeout(fetchResponses, 50000); // Retry fetching data after a 5-second delay
+            setTimeout(fetchResponses, 50000); // Retry fetching data after a 50-second delay
         });
 }
 
@@ -797,7 +797,7 @@ function displayTeamMembers() {
 
     // Add messages for each agent with different timings
     if (!localStorage.getItem(`agentsIntroduced_${conversationId}`)) {
-        let delay = 1000; // Initial delay in milliseconds
+        let delay = 10000; // Initial delay in milliseconds
         const delayIncrement = 1000; // Increment delay for each subsequent message
 
         Object.values(agents).forEach(agent => {

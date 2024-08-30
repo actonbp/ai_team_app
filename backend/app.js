@@ -249,8 +249,8 @@ async function decideParticipation(conversationId, agentName) {
 
   Should ${agentName} participate in the conversation? Answer either 'YES' or 'NO'.`;
 
-  // Introducing a 2-second delay before making the decision to simulate thinking
-  await new Promise(resolve => setTimeout(resolve, 4000));
+  // Introducing a 5-second delay before making the decision to simulate thinking
+  await new Promise(resolve => setTimeout(resolve, 5000));
 
   // OpenAI API call with the detailed participation prompt
   const response = await axios.post('https://api.openai.com/v1/chat/completions', {
@@ -381,7 +381,11 @@ Address any conflicts or discrepancies in the information constructively. Seek c
 
                   THE TASK IS NOT COMPLETE UNTIL YOU HAVE A CLEAR RANKING OF ALL THREE LOCATIONS
 
-                  DONT START MAKING RANKINGS UNTIL 10 - 15 messages in the chat. Remind others not to rush to a ranking until all of the info is shared.
+                  DONT START MAKING RANKINGS UNTIL 10 - 15 messages (or more) in the chat. Remind others not to rush to a ranking until all of the info is shared.
+
+                  THE TASK IS NOT COMPLETE UNTIL YOU HAVE A CLEAR RANKING OF ALL THREE LOCATIONS
+                 
+                  DONT HAVE TOO MANY LINE BREAKS OR SPACES IN THE MESSAGE 
 
                   DO NOT stop until you complete the task. And seek to have multiple shorter messages. Wait to finish your point on the next message where possible`;
   } else {
@@ -483,10 +487,12 @@ Address any conflicts or discrepancies in the information constructively. Seek c
 
                   ⭐IMPORTANT: When you believe the task is fully completed, please say 'task-complete' on a message BY ITSELF (nothing else). You should have the rankings AGREED ON before this. ⭐
 
-                  DONT START MAKING RANKINGS UNTIL 10 - 15 messages in the chat. Remind others not to rush to a ranking until all of the info is shared.
+                  DONT START MAKING RANKINGS UNTIL 10 - 15 messages (or more) in the chat. Remind others not to rush to a ranking until all of the info is shared.
 
                   THE TASK IS NOT COMPLETE UNTIL YOU HAVE A CLEAR RANKING OF ALL THREE LOCATIONS
-
+                 
+                  DONT HAVE TOO MANY LINE BREAKS OR SPACES IN THE MESSAGE 
+                 
                   DO NOT stop until you complete the task. And seek to have multiple shorter messages. Wait to finish your point on the next message where possible`;
   };
   const response = await axios.post('https://api.openai.com/v1/chat/completions', {
@@ -796,9 +802,12 @@ IMPORTANT:
 
 - THE MESSAGE SHOULD NOT MENTION ANYONE's NAME INCLUDING YOUR OWN
 
-- YOU SHOULD HAVE AT LEAST 10-15 messages before deciding final ranking.
+- YOU SHOULD HAVE AT LEAST 10-15 messages before discussing final ranking.
 
 - THE TASK IS NOT COMPLETE UNTIL YOU HAVE A CLEAR RANKING OF ALL THREE LOCATIONS
+
+- DONT HAVE TOO MANY LINE BREAKS OR SPACES IN THE MESSAGE 
+
 
 Previous Messages:
 ${lastTwoMessages}
@@ -871,7 +880,7 @@ Rewrite the original message with the earlier directions.
         } else {
           // Only call decideParticipation if the current decision is not already 'YES' and no agent has participated yet
           if (!anyAgentParticipated) {
-            await delay(400); // Add a 5-second delay
+            await delay(Math.floor(Math.random() * (10000 - 5000 + 1)) + 5000); // Add a random delay between 5 and 10 seconds
             participationDecision = await decideParticipation(conversationId, agentName);
           } else {
             participationDecision = 'NO';
